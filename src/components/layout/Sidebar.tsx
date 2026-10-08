@@ -6,20 +6,24 @@ import {
   Users,
   Building2,
   Trophy,
-  ListOrdered,
+  FolderKanban,
   UserCheck,
+  ClipboardList,
+  Activity,
+  Radio,
   FileCheck2,
   Medal,
-  Award,
+  Megaphone,
+  History,
   FileSpreadsheet,
-  Bell,
   Settings,
+  Bell,
   User,
   LogOut,
-  Radio,
+  Award,
   ChevronRight,
   ShieldCheck,
-  Key
+  KeyRound
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -39,35 +43,40 @@ interface NavItem {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { currentPage, currentRole, navigate, logout, notifications } = useApp();
+  const { currentPage, currentRole, navigate, logout, notifications, assignments, participants } = useApp();
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const pendingJudgeCount = assignments.filter((a) => a.status === 'ASSIGNED' || a.status === 'IN_PROGRESS').length;
 
+  // STRICT ADMINISTRATION NAVIGATION (17 Items)
   const adminNavItems: NavItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: 'LIVE' },
-    { id: 'roles', label: 'User Roles & Events', icon: ShieldCheck, count: '8 Users', highlight: true },
-    { id: 'events', label: 'Events', icon: Calendar },
-    { id: 'participants', label: 'Participants', icon: Users, count: '1,248' },
-    { id: 'schools', label: 'Schools', icon: Building2, count: '42' },
-    { id: 'competitions', label: 'Competitions', icon: Trophy, count: '12' },
-    { id: 'rubrics', label: 'Rubric Builder', icon: ListOrdered },
-    { id: 'judges', label: 'Judges Roster', icon: UserCheck, count: '28' },
-    { id: 'scoring', label: 'Scoring Panel', icon: FileCheck2, highlight: true },
-    { id: 'leaderboard', label: 'Live Leaderboard', icon: Medal, live: true },
-    { id: 'results', label: 'Official Results', icon: Award },
+    { id: 'dashboard', label: 'Admin Dashboard', icon: LayoutDashboard, badge: 'LIVE' },
+    { id: 'event-overview', label: 'Event Overview', icon: Calendar },
+    { id: 'schools', label: 'Schools', icon: Building2, count: '48' },
+    { id: 'participants', label: 'Participants', icon: Users, count: '1,440' },
+    { id: 'finalists', label: 'Finalists (12/School)', icon: Award, highlight: true },
+    { id: 'categories', label: 'Categories (6)', icon: Trophy, count: '6' },
+    { id: 'projects', label: 'Projects (24)', icon: FolderKanban, count: '24' },
+    { id: 'judges', label: 'Judges Roster', icon: UserCheck, count: '36' },
+    { id: 'assignments', label: 'Judge Assignments', icon: ClipboardList, highlight: true },
+    { id: 'scoring-monitor', label: 'Scoring Monitor', icon: Activity, live: true },
+    { id: 'live-control', label: 'Live Event Control', icon: Radio, badge: 'ARENA' },
+    { id: 'score-review', label: 'Score Review & Audit', icon: FileCheck2 },
+    { id: 'results', label: 'Results & Leaderboard', icon: Medal },
+    { id: 'announcements', label: 'Announcements', icon: Megaphone },
+    { id: 'activity-log', label: 'Activity Log', icon: History },
     { id: 'reports', label: 'Reports & Export', icon: FileSpreadsheet },
-    { id: 'notifications', label: 'Notifications', icon: Bell, notifBadge: unreadCount },
     { id: 'settings', label: 'Settings', icon: Settings }
   ];
 
+  // STRICT JUDGE NAVIGATION (6 Items)
   const judgeNavItems: NavItem[] = [
-    { id: 'judge-dashboard', label: 'My Dashboard', icon: LayoutDashboard },
-    { id: 'roles', label: 'My Event Assignment', icon: ShieldCheck },
-    { id: 'competitions', label: 'My Competitions', icon: Trophy },
-    { id: 'scoring', label: 'Scoring Panel', icon: FileCheck2, highlight: true },
-    { id: 'leaderboard', label: 'Live Leaderboard', icon: Medal, live: true },
+    { id: 'judge-dashboard', label: 'Judge Dashboard', icon: LayoutDashboard },
+    { id: 'judge-assignments', label: 'My Assignments', icon: ClipboardList, count: `${pendingJudgeCount} Active` },
+    { id: 'scoring', label: 'Live Evaluations', icon: FileCheck2, highlight: true, live: true },
+    { id: 'judge-completed', label: 'Completed Evaluations', icon: Award },
     { id: 'notifications', label: 'Notifications', icon: Bell, notifBadge: unreadCount },
-    { id: 'profile', label: 'My Profile', icon: User }
+    { id: 'profile', label: 'Juror Profile', icon: User }
   ];
 
   const navItems: NavItem[] = currentRole === 'judge' ? judgeNavItems : adminNavItems;
@@ -84,34 +93,61 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-white border-r border-[#D8EBE7] flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-white border-r border-[#E2E8F0] flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Top Brand Area in Sidebar */}
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#03A695] to-[#0B2545] flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-teal-500/15">
-              <span className="text-[#FD5E01]">T</span>T
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0057B8] to-[#003B7A] flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-blue-500/15">
+              <span className="text-[#F36C21]">T</span>T
             </div>
             <div>
-              <h2 className="text-sm font-extrabold text-[#0B2545] tracking-tight leading-none">
+              <h2 className="text-sm font-extrabold text-slate-900 tracking-tight leading-none">
                 TECHNO TALENT
               </h2>
-              <p className="text-[10px] font-bold text-[#FD5E01] uppercase tracking-wider mt-0.5">
+              <p className="text-[10px] font-bold text-[#F36C21] uppercase tracking-wider mt-0.5">
                 FEAST 2026
               </p>
             </div>
           </div>
-          <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
-            v1.0
+          <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#0057B8] border border-blue-200 text-[10px] font-bold uppercase">
+            {currentRole === 'admin' ? 'ADMIN' : 'JUDGE'}
           </span>
         </div>
 
+        {/* Role Badge Indicator */}
+        <div className="px-3 pt-3">
+          <div
+            className={`p-2.5 rounded-2xl flex items-center gap-2.5 text-xs border ${
+              currentRole === 'admin'
+                ? 'bg-[#EAF3FF] border-blue-200 text-[#003B7A]'
+                : 'bg-[#FFF3EC] border-orange-200 text-[#C2410C]'
+            }`}
+          >
+            <div
+              className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-white shrink-0 ${
+                currentRole === 'admin' ? 'bg-[#0057B8]' : 'bg-[#F36C21]'
+              }`}
+            >
+              {currentRole === 'admin' ? <ShieldCheck className="w-4 h-4" /> : <KeyRound className="w-4 h-4" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-extrabold text-[11px] truncate">
+                {currentRole === 'admin' ? 'ADMINISTRATION' : 'JUDGE ROLE'}
+              </p>
+              <p className="text-[10px] text-slate-500 truncate">
+                {currentRole === 'admin' ? 'Central Event Controller' : 'Marks Entry & Evaluation'}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Navigation Items */}
-        <div className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
-          <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            {currentRole === 'judge' ? 'Judge Workspace' : 'Main Menu'}
+        <div className="flex-1 px-3 py-3 space-y-1 overflow-y-auto custom-scrollbar">
+          <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            {currentRole === 'judge' ? 'Judge Portal Menu' : 'Event Control Menu'}
           </div>
 
           {navItems.map((item) => {
@@ -123,94 +159,83 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 key={item.id}
                 onClick={() => {
                   navigate(item.id);
-                  if (window.innerWidth < 1024) onClose();
+                  onClose();
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 group cursor-pointer ${
                   isActive
-                    ? 'bg-[#E6F7F5] text-[#03A695] shadow-xs font-bold'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-[#0057B8] text-white shadow-xs font-bold'
+                    : item.highlight
+                    ? 'text-slate-800 hover:bg-slate-100 hover:text-slate-900 font-semibold'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <Icon
-                    className={`w-4 h-4 transition-colors ${
+                    className={`w-4 h-4 shrink-0 transition-colors ${
                       isActive
-                        ? 'text-[#03A695]'
+                        ? 'text-white'
                         : item.highlight
-                        ? 'text-[#FD5E01]'
+                        ? 'text-[#F36C21]'
                         : 'text-slate-400 group-hover:text-slate-700'
                     }`}
                   />
-                  <span>{item.label}</span>
+                  <span className="truncate">{item.label}</span>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   {item.badge && (
-                    <span className="px-1.5 py-0.5 rounded bg-[#FD5E01] text-white text-[9px] font-extrabold uppercase">
+                    <span
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : 'bg-orange-100 text-[#F36C21]'
+                      }`}
+                    >
                       {item.badge}
                     </span>
                   )}
-                  {item.live && (
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                  )}
-                  {item.notifBadge && item.notifBadge > 0 ? (
-                    <span className="px-1.5 py-0.2 rounded-full bg-[#FD5E01] text-white text-[10px] font-bold">
-                      {item.notifBadge}
-                    </span>
-                  ) : null}
-                  {item.count && !item.badge && (
-                    <span className="text-[10px] font-medium text-slate-400">
+
+                  {item.count && (
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded-md ${
+                        isActive
+                          ? 'bg-white/20 text-white font-bold'
+                          : 'bg-slate-100 text-slate-500 font-medium'
+                      }`}
+                    >
                       {item.count}
                     </span>
                   )}
-                  {isActive && (
-                    <span className="w-1.5 h-4 rounded-full bg-[#FD5E01]" />
-                  )}
+
+                  {item.notifBadge && item.notifBadge > 0 ? (
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#F36C21] text-white animate-pulse">
+                      {item.notifBadge}
+                    </span>
+                  ) : null}
+
+                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-white/70" />}
                 </div>
               </button>
             );
           })}
-
-          {/* Quick Arena Scoreboard shortcut */}
-          <div className="pt-3 border-t border-slate-100 my-2">
-            <button
-              onClick={() => {
-                navigate('live');
-                if (window.innerWidth < 1024) onClose();
-              }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-gradient-to-r from-teal-50/50 to-blue-50/50 border border-teal-100 hover:border-teal-300 transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-2.5">
-                <Radio className="w-4 h-4 text-[#FD5E01] animate-pulse" />
-                <span>Stadium Display</span>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-          </div>
         </div>
 
-        {/* Bottom Profile / Quick Info Card */}
-        <div className="p-3 border-t border-slate-100 bg-[#F7FCFB]">
-          <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-[#D8EBE7] shadow-xs">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-              <div className="min-w-0">
-                <p className="text-[11px] font-bold text-slate-900 truncate">
-                  TechnoSchool Network
-                </p>
-                <p className="text-[10px] text-emerald-700 font-semibold truncate">
-                  ● Realtime Connected
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={logout}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-              title="Sign Out"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
+        {/* Bottom Slogan & Sign Out */}
+        <div className="p-3 border-t border-slate-100 space-y-2">
+          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-[10px] text-slate-600 text-center leading-tight">
+            <span className="font-bold text-[#0057B8] block">OFFICIAL MOTTO:</span>
+            <span className="text-slate-700 font-semibold italic">
+              "BUILD THE TECHNOLOGY — NOT THE ENVIRONMENT"
+            </span>
           </div>
+
+          <button
+            onClick={logout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition-colors cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
     </>

@@ -276,7 +276,7 @@ export const CompetitionDetailPage: React.FC = () => {
   const compJudges = judges.filter((j) => j.competitionId === comp.id);
 
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'participants' | 'judges' | 'rubric' | 'leaderboard'
+    'overview' | 'projects' | 'participants' | 'judges' | 'rubric' | 'leaderboard'
   >('overview');
 
   return (
@@ -323,6 +323,7 @@ export const CompetitionDetailPage: React.FC = () => {
       <div className="bg-white rounded-2xl border border-slate-200/80 p-1.5 flex items-center gap-1 overflow-x-auto shadow-xs">
         {[
           { id: 'overview', label: 'Arena Overview' },
+          { id: 'projects', label: `Official Projects (${comp.projects?.length || 4})` },
           { id: 'participants', label: `Participants (${compParticipants.length})` },
           { id: 'judges', label: `Assigned Judges (${compJudges.length})` },
           { id: 'rubric', label: `Scoring Rubric (100 pts)` },
@@ -366,12 +367,31 @@ export const CompetitionDetailPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Allowed Software Tools */}
+            {comp.allowedTools && comp.allowedTools.length > 0 && (
+              <div className="pt-4 border-t border-slate-100">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  Official Software & Tools Permitted (from TTF Booklet)
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {comp.allowedTools.map((tool) => (
+                    <span
+                      key={tool}
+                      className="px-3 py-1 rounded-xl bg-blue-50 text-[#0057B8] font-bold text-xs border border-blue-100"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="pt-4 border-t border-slate-100">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                Arena Rules & Constraints
+                Arena Rules & Constraints (Official PDF Rule)
               </h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Participants must report to {comp.venueHall} 15 minutes before their assigned demo slot. Each evaluation allows up to {comp.timeLimit} of interactive showcase followed by a judge cross-examination period.
+                <strong>“BUILD THE TECHNOLOGY — NOT THE ENVIRONMENT”</strong>: Focus on working engineering prototypes, algorithms, and real-time interaction. Participants must report to {comp.venueHall} 15 minutes before their assigned demo slot. Time limit: {comp.timeLimit}.
               </p>
             </div>
           </div>
@@ -394,6 +414,47 @@ export const CompetitionDetailPage: React.FC = () => {
             >
               View Competition Leaderboard →
             </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full text-xs font-bold"
+              onClick={() => setActiveTab('projects')}
+            >
+              Inspect 4 Category Projects →
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Projects Tab */}
+      {activeTab === 'projects' && (
+        <div className="bg-white p-6 lg:p-8 rounded-3xl border border-slate-200/80 shadow-card space-y-6">
+          <div>
+            <h3 className="text-lg font-black text-slate-900">
+              Official TTF 2026 Category Projects
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Exact project challenges defined in the official TTF 2026 Booklet for {comp.gradeEligibility}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {comp.projects?.map((prj, i) => (
+              <div
+                key={prj.id}
+                className="p-5 rounded-2xl bg-[#F6F9FD] border border-slate-200/80 hover:border-blue-300 transition-all space-y-2"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-lg bg-[#0057B8] text-white text-xs font-extrabold flex items-center justify-center shrink-0">
+                    {i + 1}
+                  </span>
+                  <h4 className="font-extrabold text-slate-900 text-sm">{prj.title}</h4>
+                </div>
+                <p className="text-xs text-slate-600 pl-9 leading-relaxed">{prj.description}</p>
+              </div>
+            )) || (
+              <p className="text-xs text-slate-500 italic">No specific sub-projects assigned.</p>
+            )}
           </div>
         </div>
       )}

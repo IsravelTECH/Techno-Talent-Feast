@@ -24,7 +24,7 @@ export const ManagerDemoBar: React.FC = () => {
     { label: 'Judges Roster', page: 'judges', role: 'admin' as const },
     { label: 'Judge Scoring (Live)', page: 'scoring', role: 'judge' as const },
     { label: 'Live Leaderboard', page: 'leaderboard', role: 'admin' as const },
-    { label: 'Public Display (/live)', page: 'live', role: 'viewer' as const },
+    { label: 'Event Overview', page: 'events', role: 'admin' as const },
     { label: 'Official Results', page: 'results', role: 'admin' as const }
   ];
 
@@ -102,18 +102,6 @@ export const ManagerDemoBar: React.FC = () => {
             >
               <UserCheck className="w-3 h-3" />
               <span>Judge</span>
-            </button>
-            <button
-              onClick={() => loginAs('viewer')}
-              className={`px-2.5 py-0.5 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
-                currentRole === 'viewer'
-                  ? 'bg-emerald-500 text-white shadow-xs font-bold'
-                  : 'text-teal-200 hover:text-white'
-              }`}
-              title="Switch to Public LED Arena display"
-            >
-              <Eye className="w-3 h-3" />
-              <span>/live</span>
             </button>
           </div>
 

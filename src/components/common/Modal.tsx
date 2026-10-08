@@ -7,6 +7,7 @@ interface ModalProps {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl';
 }
 
@@ -16,6 +17,7 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   subtitle,
   children,
+  footer,
   maxWidth = 'lg'
 }) => {
   useEffect(() => {
@@ -71,6 +73,13 @@ export const Modal: React.FC<ModalProps> = ({
 
         {/* Content */}
         <div className="p-6 overflow-y-auto flex-1">{children}</div>
+
+        {/* Footer */}
+        {footer && (
+          <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50/80 flex items-center justify-end">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

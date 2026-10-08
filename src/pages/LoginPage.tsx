@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { loginAs } = useApp();
+  const { loginAs, navigate } = useApp();
   const [email, setEmail] = useState('admin@technoschool.in');
   const [password, setPassword] = useState('••••••••••••');
   const [rememberMe, setRememberMe] = useState(true);
@@ -211,22 +211,22 @@ export const LoginPage: React.FC = () => {
                 </button>
 
                 <button
-                  onClick={() => loginAs('participant')}
-                  className="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-left transition-all group cursor-pointer"
+                  onClick={() => loginAs('judge')}
+                  className="p-3 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-50 text-left transition-all group cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-slate-700 text-white flex items-center justify-center">
-                      <Users className="w-3.5 h-3.5" />
+                    <div className="w-6 h-6 rounded-lg bg-[#0057B8] text-white flex items-center justify-center">
+                      <UserCheck className="w-3.5 h-3.5" />
                     </div>
                     <span className="text-xs font-bold text-slate-800">
-                      Participant Arun
+                      Juror Tariq
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-600 mt-1">Result & Score Card</p>
+                  <p className="text-[11px] text-slate-600 mt-1">Smart City & IoT Track</p>
                 </button>
 
                 <button
-                  onClick={() => loginAs('viewer')}
+                  onClick={() => navigate('live')}
                   className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-50 text-left transition-all group cursor-pointer"
                 >
                   <div className="flex items-center gap-2">

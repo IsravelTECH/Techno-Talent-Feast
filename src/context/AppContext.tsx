@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import confetti from 'canvas-confetti';
 import {
   User,
@@ -7,13 +7,19 @@ import {
   School,
   Competition,
   Rubric,
+  RubricCriterion,
   Participant,
+  Judge,
   JudgeAssignment,
   ScoringActivity,
   LeaderboardItem,
   NotificationItem,
   AuditLogItem,
-  EvaluationStatus
+  AnnouncementItem,
+  EventStage,
+  ScoreboardVisibility,
+  EvaluationStatus,
+  CompetitionProject
 } from '../types';
 import {
   INITIAL_EVENT,
@@ -23,9 +29,11 @@ import {
   MOCK_RUBRICS,
   INITIAL_PARTICIPANTS,
   MOCK_JUDGES,
+  MOCK_ASSIGNMENTS,
   INITIAL_SCORING_ACTIVITIES,
   INITIAL_LEADERBOARD,
   INITIAL_NOTIFICATIONS,
+  INITIAL_ANNOUNCEMENTS,
   MOCK_AUDIT_LOGS
 } from '../data/mockData';
 
@@ -44,14 +52,21 @@ interface AppContextType {
   selectedCompetitionId: string;
   selectedParticipantId: string;
   selectedSchoolId: string;
+  selectedProjectNumber: number;
+  
   participants: Participant[];
   schools: School[];
   competitions: Competition[];
+  projects: CompetitionProject[];
+  selectedProject: CompetitionProject | null;
+  setSelectedProject: (project: CompetitionProject | null) => void;
   rubrics: Record<string, Rubric>;
-  judges: JudgeAssignment[];
+  judges: Judge[];
+  assignments: JudgeAssignment[];
   leaderboard: LeaderboardItem[];
   scoringActivities: ScoringActivity[];
   notifications: NotificationItem[];
+  announcements: AnnouncementItem[];
   auditLogs: AuditLogItem[];
   
   // Scoring state
@@ -61,7 +76,7 @@ interface AppContextType {
   scoringScenarioRun: boolean;
 
   // Actions
-  navigate: (page: string, params?: { compId?: string; partId?: string; schoolId?: string }) => void;
+  navigate: (page: string, params?: { compId?: string; partId?: string; schoolId?: string; projectNum?: number }) => void;
   loginAs: (role: UserRole) => void;
   logout: () => void;
   setCriterionScore: (criterionId: string, score: number) => void;
@@ -70,14 +85,40 @@ interface AppContextType {
   submitEvaluation: () => void;
   resetActiveScore: () => void;
   loadParticipantForScoring: (participantId: string) => void;
-  addToast: (toast: Omit<ToastItem, 'id'>) => void;
+  
+  // Administration actions
+  createJudgeAssignment: (params: {
+    judgeId: string;
+    categoryNumber: number;
+    projectNumber: number;
+    participantId: string;
+    hall: string;
+    slot: string;
+  }) => { success: boolean; message: string };
+  assignJudgeToParticipant: (judgeId: string, participantId: string, projectId?: string) => { success: boolean; message: string };
+  removeJudgeAssignment: (assignmentId: string) => void;
+  verifyParticipantScore: (participantId: string) => void;
+  verifyScoreByAdmin: (participantId: string) => void;
+  reopenParticipantEvaluation: (participantId: string) => void;
+  reopenEvaluation: (participantId: string, reason?: string) => void;
+  publishResultsOfficially: () => void;
+  publishCompetitionResults: (competitionId?: string) => void;
+  updateRubricCriterion: (rubricId: string, criterionId: string, fieldOrUpdates: any, value?: any) => void;
+  addRubricCriterion: (rubricId: string, criterion?: any) => void;
+  deleteRubricCriterion: (rubricId: string, criterionId: string) => void;
+  scoreboardVisibility: ScoreboardVisibility;
+  setScoreboardVisibilityMode: (visibility: ScoreboardVisibility) => void;
+  setScoreboardVisibility: (visibility: ScoreboardVisibility) => void;
+  setEventStageMode: (stage: EventStage) => void;
+  setEventStage: (stage: EventStage) => void;
+  addAnnouncement: (announcement: any) => void;
+  createAnnouncement: (announcement: { title: string; message: string; priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'; targetAudience?: 'ALL' | 'JUDGES' | 'ADMINISTRATION' }) => void;
+  
+  // UI helpers
+  addToast: (toastOrMessage: any, toastType?: 'success' | 'info' | 'warning' | 'error') => void;
   removeToast: (id: string) => void;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsRead: () => void;
-  updateRubricCriterion: (rubricId: string, criterionId: string, field: string, value: any) => void;
-  addRubricCriterion: (rubricId: string) => void;
-  deleteRubricCriterion: (rubricId: string, criterionId: string) => void;
-  publishCompetitionResults: (compId: string) => void;
   triggerManagerScenario: () => void;
 }
 
@@ -88,39 +129,61 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentRole, setCurrentRole] = useState<UserRole>('admin');
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
   const [selectedEvent, setSelectedEvent] = useState<TTFEvent>(INITIAL_EVENT);
-  const [selectedCompetitionId, setSelectedCompetitionId] = useState<string>('comp-01');
-  const [selectedParticipantId, setSelectedParticipantId] = useState<string>('part-01'); // Arun Kumar
+  const [selectedCompetitionId, setSelectedCompetitionId] = useState<string>('cat-6');
+  const [selectedParticipantId, setSelectedParticipantId] = useState<string>('part-01'); // Arun Kumar & Team
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('sch-01');
+  const [selectedProjectNumber, setSelectedProjectNumber] = useState<number>(1);
 
   const [participants, setParticipants] = useState<Participant[]>(INITIAL_PARTICIPANTS);
   const [schools, setSchools] = useState<School[]>(MOCK_SCHOOLS);
   const [competitions, setCompetitions] = useState<Competition[]>(MOCK_COMPETITIONS);
   const [rubrics, setRubrics] = useState<Record<string, Rubric>>(MOCK_RUBRICS);
-  const [judges, setJudges] = useState<JudgeAssignment[]>(MOCK_JUDGES);
+  const [judges, setJudges] = useState<Judge[]>(MOCK_JUDGES);
+  const [assignments, setAssignments] = useState<JudgeAssignment[]>(MOCK_ASSIGNMENTS);
   const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>(INITIAL_LEADERBOARD);
   const [scoringActivities, setScoringActivities] = useState<ScoringActivity[]>(INITIAL_SCORING_ACTIVITIES);
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(INITIAL_ANNOUNCEMENTS);
   const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>(MOCK_AUDIT_LOGS);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  // Active Scoring state for Arun Kumar (Robotics Championship)
-  // Preset with standard demo scenario: Innovation: 18, Tech: 19, Creativity: 17, Pres: 20, Exec: 18
+  // Flat list of 24 projects
+  const allProjects = competitions.flatMap((c) => c.projects || []);
+  const [selectedProject, setSelectedProject] = useState<CompetitionProject | null>(allProjects[0] || null);
+
+  // Active Scoring state for Arun Kumar & Team (Category 6: Innovation Challenge)
+  // Preset with official 100% 5-criterion TTF rubric: Tech: 28/30, Innov: 23/25, Design: 19/20, Demo: 14/15, Doc: 9/10 = 93/100
   const [activeCriterionScores, setActiveCriterionScores] = useState<Record<string, number>>({
-    'crit-01': 18,
-    'crit-02': 19,
-    'crit-03': 17,
-    'crit-04': 20,
-    'crit-05': 18
+    'crit-tech': 28,
+    'crit-innov': 23,
+    'crit-design': 19,
+    'crit-demo': 14,
+    'crit-doc': 9
   });
   const [activeScoreComments, setActiveScoreComments] = useState<string>(
-    'Outstanding hexapod locomotion and reliable obstacle clearance. Clear technical articulation and excellent LoRa telemetry demo.'
+    'Outstanding hexapod locomotion and reliable obstacle clearance. Clear technical defense and excellent LoRa telemetry live demonstration.'
   );
   const [isDraftSaved, setIsDraftSaved] = useState<boolean>(false);
   const [scoringScenarioRun, setScoringScenarioRun] = useState<boolean>(false);
 
-  const addToast = (toast: Omit<ToastItem, 'id'>) => {
+  const addToast = (toastOrMessage: any, toastType?: 'success' | 'info' | 'warning' | 'error') => {
     const id = 'toast-' + Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { ...toast, id }]);
+    if (typeof toastOrMessage === 'string') {
+      setToasts((prev) => [
+        ...prev,
+        { id, title: toastType === 'error' ? 'Error' : toastType === 'warning' ? 'Alert' : 'Notice', message: toastOrMessage, type: toastType || 'info' }
+      ]);
+    } else if (toastOrMessage && typeof toastOrMessage === 'object') {
+      setToasts((prev) => [
+        ...prev,
+        {
+          id,
+          title: toastOrMessage.title || (toastOrMessage.type === 'error' ? 'Error' : 'Notice'),
+          message: toastOrMessage.message || '',
+          type: toastOrMessage.type || 'info'
+        }
+      ]);
+    }
     setTimeout(() => {
       removeToast(id);
     }, 4500);
@@ -130,24 +193,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const navigate = (page: string, params?: { compId?: string; partId?: string; schoolId?: string }) => {
+  const navigate = (page: string, params?: { compId?: string; partId?: string; schoolId?: string; projectNum?: number }) => {
     if (params?.compId) setSelectedCompetitionId(params.compId);
     if (params?.partId) {
       setSelectedParticipantId(params.partId);
       loadParticipantForScoring(params.partId);
     }
     if (params?.schoolId) setSelectedSchoolId(params.schoolId);
-
-    // Special route check for /live
-    if (page === 'live') {
-      setCurrentPage('live');
-      return;
-    }
+    if (params?.projectNum) setSelectedProjectNumber(params.projectNum);
 
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // ONLY TWO USER ROLES
   const loginAs = (role: UserRole) => {
     setCurrentRole(role);
     if (role === 'admin') {
@@ -155,29 +214,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentPage('dashboard');
       addToast({
         type: 'info',
-        title: 'Logged in as Super Admin',
-        message: 'Welcome back, Dr. S. Ranganathan. Full event administration enabled.'
+        title: 'Logged in as Administration',
+        message: 'Welcome back, James Techno. Full event control & oversight enabled.'
       });
-    } else if (role === 'judge') {
+    } else {
       setCurrentUser(MOCK_USERS.judgePriya);
       setCurrentPage('judge-dashboard');
       addToast({
         type: 'info',
         title: 'Logged in as Judge',
-        message: 'Welcome Priya Sharma. Robotics Championship evaluation loaded.'
+        message: 'Welcome Dr. Priya Sharma. Active category evaluation loaded.'
       });
-    } else if (role === 'participant') {
-      setCurrentUser(MOCK_USERS.participantArun);
-      setSelectedParticipantId('part-01');
-      setCurrentPage('participant-detail');
-      addToast({
-        type: 'info',
-        title: 'Participant Portal',
-        message: 'Welcome Arun Kumar (ABC Matriculation School).'
-      });
-    } else if (role === 'viewer') {
-      setCurrentUser(MOCK_USERS.viewer);
-      setCurrentPage('live');
     }
   };
 
@@ -186,7 +233,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addToast({
       type: 'info',
       title: 'Logged Out',
-      message: 'You have been safely logged out.'
+      message: 'You have been safely signed out.'
     });
   };
 
@@ -200,22 +247,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const loadParticipantForScoring = (participantId: string) => {
     setSelectedParticipantId(participantId);
-    if (participantId === 'part-01') {
+    const target = participants.find((p) => p.id === participantId);
+    if (target?.criterionScores) {
+      setActiveCriterionScores(target.criterionScores);
+      setActiveScoreComments(target.judgeRemarks || '');
+    } else if (participantId === 'part-01') {
       setActiveCriterionScores({
-        'crit-01': 18,
-        'crit-02': 19,
-        'crit-03': 17,
-        'crit-04': 20,
-        'crit-05': 18
+        'crit-tech': 28,
+        'crit-innov': 23,
+        'crit-design': 19,
+        'crit-demo': 14,
+        'crit-doc': 9
       });
+      setActiveScoreComments('Outstanding hexapod locomotion and reliable obstacle clearance. Clear technical defense and excellent LoRa telemetry live demonstration.');
     } else {
       setActiveCriterionScores({
-        'crit-01': 16,
-        'crit-02': 17,
-        'crit-03': 18,
-        'crit-04': 18,
-        'crit-05': 17
+        'crit-tech': 25,
+        'crit-innov': 21,
+        'crit-design': 17,
+        'crit-demo': 13,
+        'crit-doc': 8
       });
+      setActiveScoreComments('Good functional prototype. Recommend refining wire management and stress-testing under longer battery runs.');
     }
   };
 
@@ -224,16 +277,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addToast({
       type: 'info',
       title: 'Draft Saved Locally',
-      message: 'Participant scores preserved. You can resume evaluation anytime.'
+      message: 'Evaluation marks preserved. You can resume scoring anytime.'
     });
   };
 
   const submitEvaluation = () => {
     const activeComp = competitions.find((c) => c.id === selectedCompetitionId) || competitions[0];
-    const rubric = rubrics[activeComp.rubricId] || rubrics['rub-robotics'];
+    const rubric = rubrics[activeComp.rubricId] || rubrics['rub-ttf-cat6'] || Object.values(rubrics)[0];
     
     // Calculate total score
-    const totalScore = Object.values(activeCriterionScores).reduce((a, b) => a + b, 0);
+    const totalScore = Object.values(activeCriterionScores).reduce((a, b) => a + Number(b || 0), 0);
     const maxScore = rubric.maxScore || 100;
     const percentage = Math.round((totalScore / maxScore) * 100);
 
@@ -246,7 +299,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           status: 'SUBMITTED' as EvaluationStatus,
           finalScore: totalScore,
           percentage: percentage,
-          rank: percentage >= 95 ? 1 : percentage >= 90 ? 2 : 3
+          rank: percentage >= 95 ? 1 : percentage >= 90 ? 2 : 3,
+          submissionTimestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          criterionScores: { ...activeCriterionScores },
+          judgeRemarks: activeScoreComments
         };
       }
       return p;
@@ -263,7 +319,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               ...item,
               score: totalScore,
               percentage: percentage,
-              status: 'EVALUATED',
+              status: 'EVALUATED' as const,
               recentChange: 'up' as const
             }
           : item
@@ -277,13 +333,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         photo: currentPart.photo,
         schoolName: currentPart.schoolName,
         competitionName: currentPart.competitionName,
-        category: currentPart.category,
+        categoryNumber: currentPart.categoryNumber,
+        categoryName: currentPart.categoryName,
+        projectTitle: currentPart.projectTitle,
+        teamName: currentPart.teamName,
+        teamMembers: currentPart.teamMembers,
+        isGroupProject: currentPart.isGroupProject,
+        teamSize: currentPart.teamSize,
         grade: currentPart.grade,
         score: totalScore,
         maxScore: maxScore,
         percentage: percentage,
         status: 'EVALUATED',
-        award: percentage >= 92 ? 'Winner Distinction' : 'Top Finisher',
+        award: percentage >= 94 ? 'Rank 1 Gold' : percentage >= 90 ? 'Rank 2 Silver' : 'Rank 3 Bronze',
         recentChange: 'up'
       };
       updatedLeaderboard.push(newItem);
@@ -300,10 +362,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 3. Add to live scoring activity
     const newActivity: ScoringActivity = {
       id: 'act-' + Date.now(),
-      judgeName: currentUser.role === 'judge' ? currentUser.name : 'Priya Sharma',
+      judgeName: currentUser.name,
       judgeAvatar: currentUser.avatar,
       action: 'submitted official score for',
-      participantName: currentPart.name,
+      participantName: currentPart.teamName || currentPart.name,
       competitionName: activeComp.name,
       score: totalScore,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -314,13 +376,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 4. Add Notification
     const newNotif: NotificationItem = {
       id: 'notif-' + Date.now(),
-      title: 'Score Submitted & Verified',
-      message: `Judge ${newActivity.judgeName} submitted ${totalScore}/${maxScore} (${percentage}%) for ${currentPart.name}.`,
+      title: 'Score Submitted & Recorded',
+      message: `Juror ${newActivity.judgeName} submitted ${totalScore}/${maxScore} (${percentage}%) for ${currentPart.teamName || currentPart.name}.`,
       timestamp: 'Just now',
       timeAgo: '1m',
       type: 'score',
       isRead: false,
-      actionLink: 'leaderboard'
+      actionLink: 'score-review'
     };
     setNotifications([newNotif, ...notifications]);
 
@@ -337,17 +399,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       )
     );
 
-    // 6. Update Judge assignment count
-    setJudges((prev) =>
-      prev.map((j) =>
-        j.judgeId === 'jdg-01'
-          ? {
-              ...j,
-              completedCount: j.completedCount + 1,
-              pendingCount: Math.max(0, j.pendingCount - 1),
-              lastActivity: 'Scored just now'
-            }
-          : j
+    // 6. Update Assignment status
+    setAssignments((prev) =>
+      prev.map((a) =>
+        a.participantId === selectedParticipantId
+          ? { ...a, status: 'SUBMITTED', score: totalScore }
+          : a
       )
     );
 
@@ -355,11 +412,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newAudit: AuditLogItem = {
       id: 'aud-' + Date.now(),
       userName: currentUser.name,
-      userRole: currentUser.role.toUpperCase(),
+      userRole: currentUser.role === 'admin' ? 'ADMIN' : 'JUDGE',
       action: 'Score Submission',
-      details: `Submitted evaluation score of ${totalScore}/${maxScore} (${percentage}%) for participant ${currentPart.name} (${currentPart.participantId}) in ${activeComp.name}`,
+      details: `Submitted evaluation score of ${totalScore}/${maxScore} (${percentage}%) for ${currentPart.teamName || currentPart.name} (${currentPart.participantId}) in ${activeComp.name}`,
+      participantName: currentPart.teamName || currentPart.name,
+      previousValue: 'Draft Saved',
+      newValue: `Submitted: ${totalScore}/100`,
       timestamp: new Date().toLocaleTimeString(),
-      ipAddress: '192.168.1.104'
+      ipAddress: '10.240.1.104'
     };
     setAuditLogs([newAudit, ...auditLogs]);
 
@@ -380,26 +440,163 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addToast({
       type: 'success',
       title: 'Evaluation Submitted Successfully!',
-      message: `Score of ${totalScore}/${maxScore} (${percentage}%) locked for ${currentPart.name}. Leaderboard updated.`
+      message: `Score of ${totalScore}/${maxScore} (${percentage}%) locked for ${currentPart.name}. Standings updated.`
     });
   };
 
   const resetActiveScore = () => {
     setActiveCriterionScores({
-      'crit-01': 0,
-      'crit-02': 0,
-      'crit-03': 0,
-      'crit-04': 0,
-      'crit-05': 0
+      'crit-tech': 0,
+      'crit-innov': 0,
+      'crit-design': 0,
+      'crit-demo': 0,
+      'crit-doc': 0
     });
     setActiveScoreComments('');
     setIsDraftSaved(false);
   };
 
-  const markNotificationAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+  // Administration: Create Judge Assignment with Conflict Validation
+  const createJudgeAssignment = (params: {
+    judgeId: string;
+    categoryNumber: number;
+    projectNumber: number;
+    participantId: string;
+    hall: string;
+    slot: string;
+  }): { success: boolean; message: string } => {
+    const judge = judges.find((j) => j.id === params.judgeId);
+    const participant = participants.find((p) => p.id === params.participantId);
+    const competition = competitions.find((c) => c.categoryNumber === params.categoryNumber);
+    const project = competition?.projects.find((pr) => pr.projectNumber === params.projectNumber);
+
+    if (!judge || !participant || !competition || !project) {
+      return { success: false, message: 'Invalid assignment parameters.' };
+    }
+
+    // Validation: Check for duplicate assignment
+    const alreadyAssigned = assignments.some(
+      (a) => a.judgeId === params.judgeId && a.participantId === params.participantId
     );
+    if (alreadyAssigned) {
+      return { success: false, message: `Juror ${judge.name} is already assigned to ${participant.name}.` };
+    }
+
+    const newAssignment: JudgeAssignment = {
+      id: 'asgn-' + Date.now(),
+      judgeId: judge.id,
+      judgeName: judge.name,
+      categoryNumber: competition.categoryNumber,
+      categoryName: competition.challengeTitle,
+      projectNumber: project.projectNumber,
+      projectTitle: project.title,
+      participantId: participant.id,
+      participantName: participant.teamName || participant.name,
+      schoolName: participant.schoolName,
+      hall: params.hall || competition.venueHall,
+      slot: params.slot || '11:00 AM - 11:20 AM',
+      status: 'ASSIGNED',
+      assignedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setAssignments([newAssignment, ...assignments]);
+
+    // Audit log
+    const newAudit: AuditLogItem = {
+      id: 'aud-' + Date.now(),
+      userName: currentUser.name,
+      userRole: 'ADMIN',
+      action: 'Judge Assignment Created',
+      details: `Assigned juror ${judge.name} to ${participant.teamName || participant.name} for ${project.title}`,
+      timestamp: new Date().toLocaleTimeString(),
+      ipAddress: '10.240.1.10'
+    };
+    setAuditLogs([newAudit, ...auditLogs]);
+
+    addToast({
+      type: 'success',
+      title: 'Assignment Created Successfully',
+      message: `${judge.name} assigned to evaluate ${participant.name} in ${project.title}.`
+    });
+
+    return { success: true, message: 'Assignment created successfully.' };
+  };
+
+  const removeJudgeAssignment = (assignmentId: string) => {
+    setAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
+    addToast({
+      type: 'info',
+      title: 'Assignment Removed',
+      message: 'Juror assignment has been unlinked.'
+    });
+  };
+
+  const verifyParticipantScore = (participantId: string) => {
+    setParticipants((prev) =>
+      prev.map((p) => (p.id === participantId ? { ...p, status: 'VERIFIED' as EvaluationStatus } : p))
+    );
+    addToast({
+      type: 'success',
+      title: 'Score Verified by Admin',
+      message: 'Participant score is verified and ready for official publishing.'
+    });
+  };
+
+  const reopenParticipantEvaluation = (participantId: string) => {
+    setParticipants((prev) =>
+      prev.map((p) => (p.id === participantId ? { ...p, status: 'IN_PROGRESS' as EvaluationStatus } : p))
+    );
+    addToast({
+      type: 'warning',
+      title: 'Evaluation Reopened',
+      message: 'Juror can now make adjustments to the scoring sheet.'
+    });
+  };
+
+  const publishResultsOfficially = () => {
+    setSelectedEvent((prev) => ({ ...prev, stage: 'RESULTS_PUBLISHED', scoreboardVisibility: 'PUBLISHED' }));
+    setCompetitions((prev) => prev.map((c) => ({ ...c, status: 'COMPLETED' })));
+    addToast({
+      type: 'success',
+      title: 'Official Results Published',
+      message: 'Techno Talent Feast 2026 championship results are now officially published.'
+    });
+  };
+
+  const setScoreboardVisibilityMode = (visibility: ScoreboardVisibility) => {
+    setSelectedEvent((prev) => ({ ...prev, scoreboardVisibility: visibility }));
+    addToast({
+      type: 'info',
+      title: 'Scoreboard Visibility Updated',
+      message: `Scoreboard visibility set to: ${visibility}.`
+    });
+  };
+
+  const setEventStageMode = (stage: EventStage) => {
+    setSelectedEvent((prev) => ({ ...prev, stage }));
+    addToast({
+      type: 'info',
+      title: 'Event Stage Updated',
+      message: `Championship stage advanced to: ${stage}.`
+    });
+  };
+
+  const addAnnouncement = (announcement: Omit<AnnouncementItem, 'id' | 'createdAt'>) => {
+    const newAnn: AnnouncementItem = {
+      ...announcement,
+      id: 'ann-' + Date.now(),
+      createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', 4 Nov 2026'
+    };
+    setAnnouncements([newAnn, ...announcements]);
+    addToast({
+      type: 'success',
+      title: 'Announcement Broadcasted',
+      message: `Published: "${announcement.title}" to ${announcement.target}.`
+    });
+  };
+
+  const markNotificationAsRead = (id: string) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
   };
 
   const markAllNotificationsRead = () => {
@@ -411,51 +608,106 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const updateRubricCriterion = (rubricId: string, criterionId: string, field: string, value: any) => {
+  const triggerManagerScenario = () => {
+    setSelectedCompetitionId('cat-6');
+    setSelectedParticipantId('part-01');
+    setActiveCriterionScores({
+      'crit-tech': 28,
+      'crit-innov': 23,
+      'crit-design': 19,
+      'crit-demo': 14,
+      'crit-doc': 9
+    });
+    setActiveScoreComments('Exemplary robotics engineering, robust hexapod chassis, flawless obstacle navigation and articulate live technical defense.');
+    setCurrentPage('scoring');
+    addToast({
+      type: 'info',
+      title: 'Manager Demo Scenario Loaded',
+      message: 'Arun Kumar & Team (Category 6) official criteria populated: 28/30, 23/25, 19/20, 14/15, 9/10 -> Total: 93/100 (93%).'
+    });
+  };
+
+  const assignJudgeToParticipant = (judgeId: string, participantId: string, projectId?: string) => {
+    const judge = judges.find((j) => j.id === judgeId);
+    const participant = participants.find((p) => p.id === participantId);
+    if (!judge || !participant) {
+      return { success: false, message: 'Invalid juror or participant.' };
+    }
+    const comp = competitions.find((c) => c.id === participant.competitionId || c.categoryNumber === participant.categoryNumber);
+    const proj = comp?.projects.find((p) => p.id === projectId || p.projectNumber === participant.projectNumber) || comp?.projects[0];
+    
+    return createJudgeAssignment({
+      judgeId,
+      categoryNumber: comp?.categoryNumber || participant.categoryNumber || 1,
+      projectNumber: proj?.projectNumber || participant.projectNumber || 1,
+      participantId,
+      hall: comp?.venueHall || 'EIBFS Arena Hall A',
+      slot: '10:30 AM - 11:00 AM'
+    });
+  };
+
+  const verifyScoreByAdmin = (participantId: string) => {
+    verifyParticipantScore(participantId);
+  };
+
+  const reopenEvaluation = (participantId: string, reason?: string) => {
+    reopenParticipantEvaluation(participantId);
+  };
+
+  const createAnnouncement = (ann: { title: string; message: string; priority?: any; targetAudience?: any }) => {
+    addAnnouncement({
+      title: ann.title,
+      message: ann.message,
+      priority: ann.priority || 'HIGH',
+      target: ann.targetAudience || 'ALL'
+    });
+  };
+
+  const publishCompetitionResults = (competitionId?: string) => {
+    publishResultsOfficially();
+  };
+
+  const updateRubricCriterion = (rubricId: string, criterionId: string, fieldOrUpdates: any, value?: any) => {
     setRubrics((prev) => {
       const rubric = prev[rubricId];
       if (!rubric) return prev;
-      const updatedCriteria = rubric.criteria.map((crit) =>
-        crit.id === criterionId ? { ...crit, [field]: value } : crit
-      );
+      const updatedCriteria = rubric.criteria.map((c) => {
+        if (c.id === criterionId) {
+          if (typeof fieldOrUpdates === 'string') {
+            return { ...c, [fieldOrUpdates]: value };
+          } else {
+            return { ...c, ...fieldOrUpdates };
+          }
+        }
+        return c;
+      });
       return {
         ...prev,
-        [rubricId]: {
-          ...rubric,
-          criteria: updatedCriteria,
-          maxScore: updatedCriteria.reduce((sum, c) => sum + Number(c.maxMarks || 0), 0)
-        }
+        [rubricId]: { ...rubric, criteria: updatedCriteria }
       };
     });
   };
 
-  const addRubricCriterion = (rubricId: string) => {
+  const addRubricCriterion = (rubricId: string, criterion?: any) => {
     setRubrics((prev) => {
       const rubric = prev[rubricId];
       if (!rubric) return prev;
-      const newCrit = {
-        id: 'crit-' + Date.now(),
-        name: 'New Evaluation Parameter',
-        description: 'Specify evaluation benchmark for judges.',
-        maxMarks: 20,
-        weight: 1,
-        order: rubric.criteria.length + 1,
-        isMandatory: true
+      const newCriterion: RubricCriterion = criterion || {
+        id: `crit-${Date.now()}`,
+        name: 'New Evaluation Criterion',
+        description: 'Specify grading rules and expectations for this criterion.',
+        maxMarks: 10,
+        weightage: 10
       };
-      const updatedCriteria = [...rubric.criteria, newCrit];
       return {
         ...prev,
-        [rubricId]: {
-          ...rubric,
-          criteria: updatedCriteria,
-          maxScore: updatedCriteria.reduce((sum, c) => sum + Number(c.maxMarks || 0), 0)
-        }
+        [rubricId]: { ...rubric, criteria: [...rubric.criteria, newCriterion] }
       };
     });
     addToast({
       type: 'success',
-      title: 'Rubric Updated',
-      message: 'New evaluation criterion appended to rubric.'
+      title: 'Criterion Added',
+      message: 'New criterion added to rubric.'
     });
   };
 
@@ -463,51 +715,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRubrics((prev) => {
       const rubric = prev[rubricId];
       if (!rubric) return prev;
-      const updatedCriteria = rubric.criteria.filter((c) => c.id !== criterionId);
       return {
         ...prev,
-        [rubricId]: {
-          ...rubric,
-          criteria: updatedCriteria,
-          maxScore: updatedCriteria.reduce((sum, c) => sum + Number(c.maxMarks || 0), 0)
-        }
+        [rubricId]: { ...rubric, criteria: rubric.criteria.filter((c) => c.id !== criterionId) }
       };
     });
     addToast({
       type: 'info',
       title: 'Criterion Removed',
-      message: 'Criterion removed and maximum score recalculated.'
-    });
-  };
-
-  const publishCompetitionResults = (compId: string) => {
-    setCompetitions((prev) =>
-      prev.map((c) => (c.id === compId ? { ...c, status: 'COMPLETED' } : c))
-    );
-    addToast({
-      type: 'success',
-      title: 'Results Published Officially',
-      message: 'Final results are now publicly visible on the live scoreboard and participant portals.'
-    });
-  };
-
-  const triggerManagerScenario = () => {
-    // Exact requested scenario: Arun Kumar, Robotics, 18, 19, 17, 20, 18 => 92
-    setSelectedCompetitionId('comp-01');
-    setSelectedParticipantId('part-01');
-    setActiveCriterionScores({
-      'crit-01': 18,
-      'crit-02': 19,
-      'crit-03': 17,
-      'crit-04': 20,
-      'crit-05': 18
-    });
-    setActiveScoreComments('Exemplary robotics engineering, robust chassis and agile PID motor tuning.');
-    setCurrentPage('scoring');
-    addToast({
-      type: 'info',
-      title: 'Manager Demo Scenario Loaded',
-      message: 'Arun Kumar (Robotics) criteria populated: 18, 19, 17, 20, 18 -> Total: 92/100 (92%).'
+      message: 'Criterion removed from rubric.'
     });
   };
 
@@ -521,14 +737,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         selectedCompetitionId,
         selectedParticipantId,
         selectedSchoolId,
+        selectedProjectNumber,
         participants,
         schools,
         competitions,
+        projects: allProjects,
+        selectedProject,
+        setSelectedProject,
         rubrics,
         judges,
+        assignments,
         leaderboard,
         scoringActivities,
         notifications,
+        announcements,
         auditLogs,
         activeCriterionScores,
         activeScoreComments,
@@ -543,14 +765,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         submitEvaluation,
         resetActiveScore,
         loadParticipantForScoring,
+        createJudgeAssignment,
+        assignJudgeToParticipant,
+        removeJudgeAssignment,
+        verifyParticipantScore,
+        verifyScoreByAdmin,
+        reopenParticipantEvaluation,
+        reopenEvaluation,
+        publishResultsOfficially,
+        publishCompetitionResults,
+        updateRubricCriterion,
+        addRubricCriterion,
+        deleteRubricCriterion,
+        scoreboardVisibility: selectedEvent.scoreboardVisibility,
+        setScoreboardVisibilityMode,
+        setScoreboardVisibility: setScoreboardVisibilityMode,
+        setEventStageMode,
+        setEventStage: setEventStageMode,
+        addAnnouncement,
+        createAnnouncement,
         addToast,
         removeToast,
         markNotificationAsRead,
         markAllNotificationsRead,
-        updateRubricCriterion,
-        addRubricCriterion,
-        deleteRubricCriterion,
-        publishCompetitionResults,
         triggerManagerScenario
       }}
     >
@@ -587,7 +824,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-slate-400 hover:text-slate-600 text-xs p-1"
+              className="text-slate-400 hover:text-slate-600 text-xs p-1 cursor-pointer"
             >
               ✕
             </button>

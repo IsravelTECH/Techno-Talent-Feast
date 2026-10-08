@@ -1,0 +1,496 @@
+Proudly presents to you
+Grand Finale
+4th November 2026
+U
+A
+E
+
+-- 1 of 16 --
+
+ABOUT THE COMPETITION
+The TechnoSchool ICT & Robotics Competition 2026 is a two‑stage competition designed
+for students from Grades 1 to 12.
+The competition provides students with opportunities to develop their skills in꞉
+ ICT
+ Coding
+ Robotics
+ Artificial Intelligence
+ Cybersecurity
+ Innovation
+Students will first participate through their respective schools. The school will conduct the
+preliminary evaluation and identify the students who will represent the school at the Grand
+Finale.
+The competition will be conducted in two stages꞉
+STAGE 1 — SCHOOL‑LEVEL COMPETITION
+Students participate in the preliminary competition through their school.
+Teachers/school coordinators will꞉
+1. Register participating students.
+2. Guide students on the assigned competition topics.
+3. Conduct or coordinate the school‑level evaluation.
+4. Identify the top‑performing students in each category.
+5. Submit the selected finalists to TechnoSchool.
+STAGE 2 — GRAND FINALE
+The selected students will represent their school at the TechnoSchool ICT & Robotics
+Competition Grand Finale.
+Each school will be represented by꞉
+COMPETITION PROCESS
+
+-- 2 of 16 --
+
+2 STUDENTS FROM EACH CATEGORY
+With 6 categories꞉
+6 CATEGORIES × 2 STUDENTS = 12 FINALISTS PER SCHOOL
+The Grand Finale will feature live challenges and practical technology‑based activities.
+COMPETITION CATEGORIES
+CATEGORY 1 ‑ Grade 1 & 2 CATEGORY 2 ‑ Grade 3 & 4 CATEGORY 3 ‑ Grade 5 & 6
+CATEGORY 4 ‑ Grade 7 & 8 CATEGORY 5 ‑ Grade 9 & 10
+ I Connect
+ Devising
+ Apart
+ Sketch
+ El Nino
+ Football Zone
+ Zero Plastic
+ (A)mazing
+ Cape
+ Pop Out
+ Micro City
+ AI and Health
+ Will do it Today
+ Run Boy Run
+ My Vote
+ Banking
+ Smart City Connect
+ Health & Wellness
+Tracker
+ AI‑Powered Waste
+sorting
+ AI learning Assistant
+CATEGORY 6 ‑ Grade 11 & 12
+ Autonomous search &
+rescue robot
+ Autonomous delivery
+robot
+ Smart energy
+management
+ Smart city solution
+Fee of 75 AED is charged per student for participation.
+STUDENT PARTICIPATION FEE
+IMPORTANT — NOT ALL REGISTERED STUDENTS ATTEND THE FINALE
+The competition is designed to provide wide participation at the school level, while only
+the strongest students progress to the Grand Finale.
+For example꞉
+School registers 100 students
+Students participate in the school‑level competition
+↓
+School evaluates the students
+
+-- 3 of 16 --
+
+↓
+Top students are selected
+↓
+2 students from each category qualify
+↓
+12 students represent the school at the Grand Finale
+This allows schools to involve a large number of students while maintaining a focused and
+manageable Grand Finale
+PROJECT 1 ꞉ I Connect
+Task 1
+Task 2
+Choose only one project from the category given. Upon selecting a project, complete all the
+tasks mentioned in the selected project.
+ Look around, choose one device that is connected to internet.
+ Once you have chosen the part of a computer, open MS Paint or Tux Paint or Canva or Google
+Slides and recreate the selected device using the drawing software.
+ Save your drawing in any of the following image formats (JPG, PNG)
+ If you chose to do in Tux Paint, then take a screenshot of your drawing and paste it in MS Word.
+ Open Google Docs or Canva or Google Slides or MS Word and insert the recreated image and
+type a brief description about the device you drew.
+ Submit the project for the evaluation.
+CATEGORY 1 ‑ GRADES 1 and 2
+ICT CHALLENGE
+COMPETITION PROJECT DETAILS ‑ CATEGORY WISE
+
+-- 4 of 16 --
+
+PROJECT 2 ꞉ Devising
+Task 1
+Task 2
+ Take a look at the devices, choose any two.
+ Open MS Paint or Tux Paint or Canva or Google Slides and draw the devices you chose.
+ Save your drawing in any of the following image formats (JPEG, PNG, JPG)
+ If you chose to do in Tux Paint, then take a screenshot of your drawing and paste it in MS Word.
+ Open Google Docs or Canva or Google Slides or MS Word and insert the recreated images and
+type a brief description of each device. Submit the softcopy for the evaluation.
+PROJECT 3 ꞉ APART
+Task 1
+Task 2
+ Choose any one part of the computer of your choice.
+ Once you have chosen the part of a computer, open MS Paint or Tux Paint or Canva or Google
+Slides and recreate the objects using the drawing software.
+ Save your drawing in any of the listed image formats (JPEG, JPG, PNG).
+ If the selected software is Tux Paint then take a screenshot and paste it in MS Word.
+ Open Google Docs or Canva or Google Slides or MS Word and insert the recreated image and
+type a brief description about the image you drew.
+ Submit the project for the evaluation.
+PROJECT 4 ꞉ SKETCH
+Task 1
+Task 2
+ Take a look at the vehicles,
+choose any two.
+ Open MS Paint or Tux Paint or Canva or Google Slides and recreate the vehicles you chose.
+ Save your drawing in any of the listed image formats (JPEG, JPG, PNG).
+ If the selected software is Tux Paint then take a screenshot and paste it in MS Word.
+ Open Google Docs or Canva or Google Slides or MS Word and insert the recreated images and
+type a brief description about the images you drew. You have to hand the softcopy of the file for
+the evaluation.
+
+-- 5 of 16 --
+
+PROJECT 1 ꞉ El Nino
+ Code a temperature converter using Python (Thonny).
+ The program should get the temperature in Celsius and convert the
+entered temperature into either Fahrenheit or Kelvin.
+ The temperature options to choose from are Fahrenheit, Kelvin.
+ The written program should be copied on to either Google Docs or
+Canva or Google Slides or MS Word.
+ The screenshot of your worked output should be submitted along for evaluation.
+PROJECT 2 ꞉ Football Zone
+ Did you follow the FIFA World Cup football 2026.
+ Create a background and code for a sprite/sprites in Scratch to
+recreate the football finals for 30 seconds (Minimum).
+ Optional - You can code to animate either the goal keeper
+blocking the ball or the striker scoring a goal.
+ Use the appropriate jersey color and country flag of the
+countries that played finals.
+ Submit the Scratch project for evaluation.
+CATEGORY 2 ‑ GRADES 3 and 4
+CODING CHALLENGE
+PROJECT 3 ꞉ Zero Plastic
+Create a collage on plastic alternatives in school and the
+classroom. Look around you, identify practical solutions, and
+create a collage based on your ideas. Use creative clipart / masking
+effect / frames / borders to make your collage more attractive.
+ You can use any one of the following software to exhibit the
+creativity in a collage.
+ TUX Paint or MS PowerPoint or Canva or GIMP or Photoshop or
+ShapeCollage.
+ If the selected software is TUX Paint, then take a screenshot of the work done and paste in MS
+Paint, save the file as image. Send the image file for evaluation.
+In case of the other software, the source file should be submitted for evaluation.
+PROJECT 4 ꞉ (A)MAZING
+ Design a maze map in the form of the word “TECHNO” in RoboMind.
+ The start of the maze map should be on the left of the letter “T” and finishing point of the maze
+should be on the right of the letter “O”.
+ Once you have created the maze map in RoboMind, write a program for the Robo to navigate
+through maze automatically.
+ Submit the working RoboMind file and the created .map file for evaluation.
+
+-- 6 of 16 --
+
+PROJECT 2 ꞉ Pop out
+Pop out is a project done in Photoshop.
+In this project, you are expected to transform a standard two-
+dimensional photo into an eye-catching, three-dimensional "pop-out"
+illusion. Students will take a subject (such as an athlete, an animal, or a
+vehicle) and edit it so it appears to be breaking out of a physical photo
+frame or a smart-phone screen. The output of the created image
+manipulation should give a captivating 3D look.
+ Take a look at the image for reference.
+ The final output should be in any of the image formats listed here.
+(JPEG, GIF, PNG, TIFF or BMP).
+ For evaluation, both the final output image and the working file should be submitted.
+The concept of pixilated art is interesting and eye catching. To see pixel art in MS
+Excel is an entirely different level of imagination.
+ In this project the student is expected to create a pixel art in MS Excel.
+ There are numerous famous super-heroes.
+ Of all the super-heroes, select one and source an HD picture of the super-hero.
+ Then recreate the picture you have selected as pixel art in MS Excel.
+ Submit the reference picture and the created pixel art (Excel file) for evaluation.
+PROJECT 1 ꞉ Cape
+CATEGORY 3 ‑ GRADES 5 and 6
+CREATIVE TECHNOLOGY CHALLENGE
+PROJECT 4 ꞉ AI and Health
+We are using AI and technology in everyday life. In this project, students are expected to
+narrow down the incorporation of technology in Digital Mental Health.
+ Information you gathered could be either positive or otherwise.
+ Draft three policies that could use AI and technology in Digital Mental Health.
+With the information in hand, create a Blog or Vlog using the content you have written in one
+of the software listed. Web Form Builder Lite or HTML or HTML + CSS or Front Page 2003.
+Save the project in the software you chose to work. Submit the output file along with
+working file for evaluation.
+PROJECT 3 ꞉ Micro City
+Imagine a small version of a city block and translate your imagination.
+ Design and create a small version of a city block in either Google
+SketchUp or LEGO Digital Designer or Tinkercad or Blender.
+ Save the file in the software you used and submit for evaluation.
+
+-- 7 of 16 --
+
+CATEGORY 4 ‑ GRADES 7 and 8
+ARTIFICIAL INTELLIGENCE CHALLENGE
+PROJECT 1 ꞉ Will do it today
+Create a To-do-list in Visual Basic or Python or Java Script in browser. The
+goal of this project is to create a digital To-do-list where you can type in
+tasks, see them on a list, and cross them off when you are finished. It helps
+you practice basic coding logic like handling button-click events, storing
+data and deleting the completed tasks.
+ The width of the To-do-list should be 8 inches. There are no restrictions
+in the height of the To-do-list.
+ Both the working file and exported To-do-list file should be submitted for
+evaluation.
+PROJECT 2 ꞉ Run Boy Run
+Collect or create the following requirements in Scratch.
+ Main character travels across a world full of blocks,
+pipes, and traps to rescue End of the game. He/she
+jumps on enemies, obstacles and collects
+mushrooms to grow bigger and stronger.
+ The game should be created in Scratch.
+ The game can be created as a single player game.
+ The entire game should be submitted for evaluation.
+If the sent game is incomplete or partial, then the
+project will not be evaluated.
+PROJECT 4 ꞉ Banking
+Create a Mini Bank Account Simulator program in C++ that mimics a real-world automated teller
+machine (ATM) dashboard or a digital savings ledger.
+ The application initializes a secure mock bank account with a starting cash balance.
+ It then presents the user with an interactive terminal menu where they can securely deposit
+money, withdraw funds, check their current balance, or exit the system.
+ The program handles real-time updates to the account balance.
+ Submit the project in the appropriate format for evaluation.
+PROJECT 3 ꞉ My Vote
+The Interactive Web Poll is a digital voting system designed
+to replace paper ballots in a classroom setting. It lets users
+cast their vote on an important topic directly inside a web
+browser.
+ Create the poll in PHP or HTML5.
+ Select a topic to create the vote.
+ The working file and the exported page should be submitted for evaluation.
+Poll
+
+-- 8 of 16 --
+
+CATEGORY 5 ‑ GRADES 9 and 10
+DIGITAL SOLUTIONS CHALLENGE
+PROJECT 1 ꞉ SMART CITY CONNECT
+Develop a mobile application that provides a digital solution for a smart-city environment.
+ Identify a problem faced by residents, students or visitors in a modern city.
+ Design an application that provides a practical solution such as transport assistance, public-
+service information, emergency assistance or community reporting.
+ Create multiple screens with a clear and professional user interface.
+ Include suitable interactive features such as forms, maps, notifications, search or data display.•
+Test the application with different user scenarios and improve its usability.
+ Prepare a short presentation explaining the problem, proposed solution and application
+workflow.
+ Submit the source/project file, working application and project presentation for evaluation.
+PROJECT 2 ꞉ HEALTH & WELLNESS TRACKER
+Develop a mobile application that helps users monitor and improve their daily well-being.
+ Design an application for tracking activities such as sleep, exercise, water intake, screen time or
+daily goals.
+ Allow users to enter and store their information.
+ Display the collected information using charts, progress indicators or dashboards.
+ Implement a simple goal or achievement system.• Design the application with an intuitive and
+professional interface.
+ Test the application using different user scenarios.
+ Submit the working application, source/project file and project documentation for evaluation.
+PROJECT 3 ꞉ AI‑POWERED WASTE SORTING
+Design an AI system that can identify and classify different types of waste.
+ Develop categories such as plastic, paper, metal, glass and other waste.
+ Prepare a dataset and train an AI classification model.• Test the model using objects that were
+not included in the training dataset.
+ Display the predicted category and confidence/result.
+ Explain how the system could be integrated into an automated waste management system.
+ Discuss limitations such as incorrect classification and dataset bias.
+ Submit the trained model, testing results, documentation and demonstration for evaluation.
+PROJECT 4 ꞉ AI LEARNING ASSISTANT
+Develop an AI-powered learning assistant designed to support students.
+ Select an educational area such as mathematics, science, languages or general knowledge.
+ Design an AI system that can answer questions, provide explanations or generate practice
+questions.
+ Include appropriate safeguards to encourage responsible and reliable use of AI.
+
+-- 9 of 16 --
+
+ Test the system using different types of questions.• Evaluate the accuracy and usefulness of the
+responses.
+ Explain how AI can support teachers and students without replacing human judgement.
+ Submit the working AI system, documentation and demonstration for evaluation.
+CATEGORY 6 ‑ GRADES 11 and 12
+INNOVATION CHALLENGE
+PROJECT 1 ꞉ AUTONOMOUS SEARCH & RESCUE ROBOT
+Design and build an autonomous robot capable of completing a simulated rescue mission.
+ Construct a robot capable of navigating through a challenging environment.
+ Use appropriate sensors for obstacle detection, navigation and target identification.
+ Program the robot to operate with minimum human intervention.
+ Create a rescue challenge involving obstacles, checkpoints and a target object.
+ Design a mechanism to identify, collect or transport the target object.
+ Optimise the robot for speed, accuracy and reliability.
+ Submit the working robot, program code, design documentation and demonstration for
+evaluation.
+PROJECT 2 ꞉ AUTONOMOUS DELIVERY ROBOT
+Design and build a robot capable of transporting an object autonomously.
+ Create a simulated school, hospital, warehouse or smart-city environment.
+ Program the robot to navigate between specified locations.
+ Use sensors for line following, obstacle detection or navigation.
+ Design a mechanism to safely carry and release the delivery item.
+ Include multiple destinations or checkpoints.
+ Test the robot under different conditions and improve its performance.
+ Submit the working robot, source code, design documentation and demonstration for
+evaluation.
+PROJECT 3 ꞉ SMART ENERGY MANAGEMENT
+Develop an intelligent system that reduces unnecessary energy consumption.
+ Identify an energy-wastage problem in a classroom, home, office or public building.
+ Design a system that monitors factors such as occupancy, lighting or temperature.
+ Automatically control suitable electrical devices based on collected information.
+ Record energy-related data before and after implementing the solution.
+ Analyse the results and estimate potential energy savings.
+ Explain how the system could contribute to sustainable building management.
+ Submit the working prototype, program/source code, data analysis and project presentation
+for evaluation.
+
+-- 10 of 16 --
+
+PROJECT 4 ꞉ SMART CITY SOLUTION
+Design and develop a technology-based solution for a real urban challenge.
+ Identify a problem related to traffic, waste, transportation, public safety, accessibility, energy
+or environmental sustainability.
+ Research the problem and identify its causes and impact.
+ Design a technological solution using AI, IoT, robotics, app development or a combination of
+technologies.
+ Develop a functional prototype or working demonstration.
+ Test the solution using realistic scenarios and collect results.
+ Explain how the solution could be implemented and scaled in a modern city such as Dubai.
+ Submit the working prototype, technical documentation, testing results and presentation for
+evaluation.
+BUILD THE TECHNOLOGY — NOT THE ENVIRONMENT
+For robotics and physical technology projects, students should focus on the working
+technology rather than constructing large surrounding environments.
+Students do not need to bring꞉
+• Large city models
+• Large farms
+• Buildings
+• Roads
+• Tracks
+• Obstacle courses
+• Large‑scale displays
+IMPORTANT FINAL EVENT RULE
+SCHOOL‑LEVEL EVALUATION
+The school may use the following recommended evaluation framework꞉
+Criteria Weight
+Technical Execution & Functionality 30%
+Innovation & Problem Solving 25%
+Creativity / Design / User Experience 20%
+Demonstration & Explanation 15%
+Documentation & Testing 10%
+TOTAL 100%
+
+-- 11 of 16 --
+
+TEACHER'S ROLE
+Teachers are encouraged to꞉
+  Explain the competition topic to students.
+  Help students understand the requirements.
+  Provide guidance and learning support.
+  Encourage students to develop their own ideas.
+  Conduct testing and practice sessions.
+  Evaluate projects fairly.
+  Ensure students understand their own work.
+Teachers should NOT꞉
+  Build the project on behalf of the student.
+  Write the complete project for the student.
+  Provide unauthorised assistance during an o cial competition challenge.
+  Submit another person's work as the student's project.
+STUDENT OWNERSHIP
+Every student must be able to explain their project.
+Judges may ask꞉
+  What problem are you solving?
+  How does your project work?
+  Why did you choose this idea?
+  What technology did you use?
+  What di culties did you face?
+  How did you test it?
+  What would you improve?
+Students should demonstrate genuine understanding of their work.
+GRAND FINALE REPRESENTATION
+Each participating school will nominate꞉
+2 STUDENTS × 6 CATEGORIES
+12 STUDENTS in total.
+
+-- 12 of 16 --
+
+These students will form the school's o cial꞉
+SCHOOL TECHNOLOGY TEAM
+The school should also nominate a teacher/school coordinator to accompany and support
+the team.
+GRAND FINALE
+Date ꞉ 4 November 2026
+Venue ꞉ EIBFS
+Al Ruwayyah 2 ‑ opposite Zayed University
+Academic City ‑ Dubai ‑ United Arab Emirates
+The Grand Finale will bring together the selected student teams from participating
+schools for practical technology challenges and final evaluation.
+The final challenges may be different from the school‑level projects.
+GRAND FINALE RULES
+1. Only o cially selected finalists may participate.
+2. Each school may send up to 12 finalists.
+3. Two students will represent each category.
+4. Students must participate in their registered category.
+5. Students must follow all instructions given by TechnoSchool.
+6. Unauthorised assistance is not permi ed during the final challenge.
+7. Only permi ed equipment may be brought into the competition area.
+8. Physical projects must comply with the specified size and safety requirements.
+9. Judges' decisions will be final.
+10. TechnoSchool reserves the right to modify challenge conditions where necessary
+for safety, fairness or venue requirements.
+IMPORTANT DATES
+Activity Timeline
+th
+School Registration 14 September 2026
+th
+Student Registration 16 September 2026
+
+-- 13 of 16 --
+
+Activity Timeline
+School‑Level Competition As scheduled by participating school
+st
+Finalist Submission 31 October 2026
+Grand Finale 4 November 2026
+TEACHER CHECKLIST
+Before submi ing your school's finalists, please ensure꞉
+☐ Students are registered in the correct category.
+☐ Student eligibility has been verified.
+☐ Students have completed the assigned project.
+☐ Projects have been evaluated at school level.
+☐ Two finalists have been selected from each category.
+☐ Finalist information has been submi ed to TechnoSchool.
+☐ Finalists understand their projects.
+☐ Students are prepared for the Grand Finale.
+☐ Required project/source files are backed up.
+☐ Robotics/physical projects comply with size and safety requirements.
+SCHOOL PARTICIPATION SUMMARY
+Registration fee
+AED 75 per student.
+Categories ‑ 6
+Grand Finale finalists per school ‑ 12 students
+Finalists per category ‑ 2 students
+
+-- 14 of 16 --
+
+
+
+-- 15 of 16 --
+
+Grand Finale Location
+Scan for
+Registration
++971 - 565104104
+james@technoschool.in
+TechnoSchool ICT Solutions
+Al Qusais 2,
+Dubai, United Arab Emirates
+Scan for
+
+-- 16 of 16 --
+

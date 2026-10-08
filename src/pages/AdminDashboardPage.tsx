@@ -19,7 +19,8 @@ import {
   Clock,
   Medal,
   Award,
-  Layers
+  Layers,
+  FolderKanban
 } from 'lucide-react';
 
 export const AdminDashboardPage: React.FC = () => {
@@ -72,71 +73,142 @@ export const AdminDashboardPage: React.FC = () => {
           </Button>
 
           <Button
-            variant="secondary"
+            variant="primary"
             size="sm"
-            icon={<Radio className="w-4 h-4 text-[#F36C21]" />}
-            onClick={() => navigate('live')}
+            icon={<FolderKanban className="w-4 h-4" />}
+            onClick={() => navigate('projects')}
           >
-            Open Stadium /live
+            Projects (24)
           </Button>
 
           <Button
-            variant="primary"
+            variant="outline"
             size="sm"
-            icon={<Layers className="w-4 h-4" />}
-            onClick={() => navigate('events')}
+            icon={<UserCheck className="w-4 h-4" />}
+            onClick={() => navigate('judges')}
           >
-            Manage Events
+            Judges Roster
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            icon={<Award className="w-4 h-4" />}
+            onClick={() => navigate('assignments')}
+          >
+            Judge Assignments
           </Button>
         </div>
+      </div>
+
+      {/* Core Administration Action Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <button
+          onClick={() => navigate('projects')}
+          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#0057B8] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0057B8] flex items-center justify-center font-black group-hover:bg-[#0057B8] group-hover:text-white transition-colors">
+              <FolderKanban className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#0057B8] transition-colors">
+                24 Championship Projects
+              </h4>
+              <p className="text-[11px] text-slate-500">
+                4 Projects / Category • Full Specifications
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#0057B8] group-hover:translate-x-0.5 transition-all" />
+        </button>
+
+        <button
+          onClick={() => navigate('judges')}
+          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#0057B8] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-50 text-[#03A695] flex items-center justify-center font-black group-hover:bg-[#03A695] group-hover:text-white transition-colors">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#03A695] transition-colors">
+                Judges & Jurors Roster
+              </h4>
+              <p className="text-[11px] text-slate-500">
+                36 Certified Evaluators • Track Allocations
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#03A695] group-hover:translate-x-0.5 transition-all" />
+        </button>
+
+        <button
+          onClick={() => navigate('assignments')}
+          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#F36C21] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#F36C21] flex items-center justify-center font-black group-hover:bg-[#F36C21] group-hover:text-white transition-colors">
+              <Award className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#F36C21] transition-colors">
+                Judge & Finalist Assignments
+              </h4>
+              <p className="text-[11px] text-slate-500">
+                6-Step Wizard • Conflict-Free Matching
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#F36C21] group-hover:translate-x-0.5 transition-all" />
+        </button>
       </div>
 
       {/* Primary KPI Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
         <StatCard
           title="Participants"
-          value="1,248"
-          subtitle="All Grades 6-12"
+          value="1,440"
+          subtitle="Grades 1-12 Spectrum"
           icon={<Users className="w-5 h-5" />}
-          trend={{ value: "+18% YoY", isPositive: true }}
-          onClick={() => navigate('participants')}
+          trend={{ value: "576 Finalists", isPositive: true }}
+          onClick={() => navigate('finalists')}
         />
         <StatCard
           title="Schools"
-          value="42"
-          subtitle="7 Districts"
+          value="48"
+          subtitle="UAE Delegations"
           icon={<Building2 className="w-5 h-5" />}
           onClick={() => navigate('schools')}
         />
         <StatCard
-          title="Active Judges"
-          value="28"
-          subtitle="6 Arenas"
-          icon={<UserCheck className="w-5 h-5" />}
+          title="Projects (24)"
+          value="24"
+          subtitle="4 / Category"
+          icon={<FolderKanban className="w-5 h-5 text-[#0057B8]" />}
+          highlight={true}
+          onClick={() => navigate('projects')}
+        />
+        <StatCard
+          title="Judges Roster"
+          value="36"
+          subtitle="Arena Jurors"
+          icon={<UserCheck className="w-5 h-5 text-[#03A695]" />}
           onClick={() => navigate('judges')}
         />
         <StatCard
-          title="Scores Done"
-          value={totalCompleted + 876}
-          subtitle="Official lock"
-          icon={<FileCheck className="w-5 h-5 text-emerald-600" />}
-          trend={{ value: "78% Rate", isPositive: true }}
-          onClick={() => navigate('scoring')}
+          title="Judge Assignments"
+          value="576"
+          subtitle="Conflict-Free"
+          icon={<Award className="w-5 h-5 text-[#F36C21]" />}
+          onClick={() => navigate('assignments')}
         />
         <StatCard
-          title="Pending"
-          value={totalPending + 372}
-          subtitle="In evaluation"
-          icon={<Clock className="w-5 h-5 text-amber-600" />}
-          onClick={() => navigate('scoring')}
-        />
-        <StatCard
-          title="Competitions"
-          value="12"
-          subtitle="6 Live Streams"
-          icon={<Trophy className="w-5 h-5" />}
-          highlight={true}
-          onClick={() => navigate('competitions')}
+          title="Categories (6)"
+          value="6"
+          subtitle="100-Pt Rubrics"
+          icon={<Trophy className="w-5 h-5 text-purple-600" />}
+          onClick={() => navigate('categories')}
         />
       </div>
 

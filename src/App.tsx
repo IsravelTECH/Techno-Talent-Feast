@@ -2,22 +2,33 @@ import React, { useState } from 'react';
 import { useApp } from './context/AppContext';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
-import { ManagerDemoBar } from './components/common/ManagerDemoBar';
 
 // Pages
 import { LoginPage } from './pages/LoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { EventOverviewPage } from './pages/EventOverviewPage';
 import { UserRolesPage } from './pages/UserRolesPage';
 import { EventsPage, EventDetailPage } from './pages/EventsPage';
 import { ParticipantsPage, ParticipantDetailPage } from './pages/ParticipantsPage';
+import { FinalistsPage } from './pages/FinalistsPage';
 import { SchoolsPage } from './pages/SchoolsPage';
 import { CompetitionsPage, CompetitionDetailPage } from './pages/CompetitionsPage';
+import { ProjectsPage } from './pages/ProjectsPage';
 import { RubricBuilderPage } from './pages/RubricBuilderPage';
-import { JudgesPage, JudgeDashboardPage } from './pages/JudgesPage';
+import { JudgesPage } from './pages/JudgesPage';
+import { JudgeAssignmentPage } from './pages/JudgeAssignmentPage';
+import { ScoringMonitorPage } from './pages/ScoringMonitorPage';
+import { LiveEventControlPage } from './pages/LiveEventControlPage';
+import { ScoreReviewPage } from './pages/ScoreReviewPage';
+import { JudgeDashboardPage } from './pages/JudgeDashboardPage';
+import { JudgeAssignmentsPage } from './pages/JudgeAssignmentsPage';
 import { ScoringPanelPage } from './pages/ScoringPanelPage';
+import { JudgeCompletedPage } from './pages/JudgeCompletedPage';
 import { LiveLeaderboardPage } from './pages/LiveLeaderboardPage';
 import { PublicLiveScoreboardPage } from './pages/PublicLiveScoreboardPage';
 import { ResultsPage } from './pages/ResultsPage';
+import { AnnouncementsPage } from './pages/AnnouncementsPage';
+import { ActivityLogPage } from './pages/ActivityLogPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -36,7 +47,6 @@ export const App: React.FC = () => {
   if (currentPage === 'live') {
     return (
       <div className="min-h-screen bg-[#07132B]">
-        <ManagerDemoBar />
         <PublicLiveScoreboardPage />
       </div>
     );
@@ -45,44 +55,70 @@ export const App: React.FC = () => {
   // 3. Main Application with Sidebar + Header + Page Layout
   const renderCurrentPage = () => {
     switch (currentPage) {
+      // Administration Pages
       case 'dashboard':
         return <AdminDashboardPage />;
-      case 'roles':
-        return <UserRolesPage />;
+      case 'event-overview':
       case 'events':
-        return <EventsPage />;
+        return <EventOverviewPage />;
       case 'event-detail':
         return <EventDetailPage />;
+      case 'schools':
+        return <SchoolsPage />;
       case 'participants':
         return <ParticipantsPage />;
       case 'participant-detail':
         return <ParticipantDetailPage />;
-      case 'schools':
-        return <SchoolsPage />;
+      case 'finalists':
+        return <FinalistsPage />;
+      case 'categories':
       case 'competitions':
         return <CompetitionsPage />;
       case 'competition-detail':
         return <CompetitionDetailPage />;
-      case 'rubrics':
-        return <RubricBuilderPage />;
+      case 'projects':
+        return <ProjectsPage />;
       case 'judges':
         return <JudgesPage />;
-      case 'judge-dashboard':
-        return <JudgeDashboardPage />;
-      case 'scoring':
-        return <ScoringPanelPage />;
-      case 'leaderboard':
-        return <LiveLeaderboardPage />;
+      case 'assignments':
+        return <JudgeAssignmentPage />;
+      case 'scoring-monitor':
+        return <ScoringMonitorPage />;
+      case 'live-control':
+        return <LiveEventControlPage />;
+      case 'score-review':
+        return <ScoreReviewPage />;
       case 'results':
         return <ResultsPage />;
+      case 'announcements':
+        return <AnnouncementsPage />;
+      case 'activity-log':
+        return <ActivityLogPage />;
       case 'reports':
         return <ReportsPage />;
+      case 'settings':
+        return <SettingsPage />;
+      case 'rubrics':
+        return <RubricBuilderPage />;
+      case 'roles':
+        return <UserRolesPage />;
+
+      // Judge Pages
+      case 'judge-dashboard':
+        return <JudgeDashboardPage />;
+      case 'judge-assignments':
+        return <JudgeAssignmentsPage />;
+      case 'scoring':
+        return <ScoringPanelPage />;
+      case 'judge-completed':
+        return <JudgeCompletedPage />;
+      case 'leaderboard':
+        return <LiveLeaderboardPage />;
       case 'notifications':
         return <NotificationsPage />;
       case 'profile':
         return <ProfilePage />;
-      case 'settings':
-        return <SettingsPage />;
+
       default:
         return <AdminDashboardPage />;
     }
@@ -90,9 +126,6 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F7FCFB] flex flex-col selection:bg-[#03A695] selection:text-white">
-      {/* Manager Walkthrough Bar */}
-      <ManagerDemoBar />
-
       <div className="flex-1 flex flex-row relative">
         {/* Sidebar */}
         <Sidebar
@@ -117,7 +150,7 @@ export const App: React.FC = () => {
               TECHNO TALENT FEAST 2026 — Powered by TechnoSchool
             </span>
             <span>
-              Championship Scoring Engine & Live Leaderboard Platform
+              Dubai Grand Finale (4 Nov 2026 at EIBFS) • 2-Role Event Management & Scoring Engine
             </span>
           </footer>
         </div>
