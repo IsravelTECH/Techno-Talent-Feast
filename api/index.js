@@ -32,19 +32,35 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Mount Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/teams', teamRoutes);
-app.use('/api/evaluations', evaluationRoutes);
-app.use('/api/judges', judgeRoutes);
-app.use('/api/schools', schoolRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+// Normalize URL: strips '/api' prefix so routes match seamlessly under Vercel rewrites
+app.use((req, res, next) => {
+  if (req.url.startsWith('/api')) {
+    req.url = req.url.replace(/^\/api/, '') || '/';
+  }
+  next();
+});
 
-app.get('/api/health', (req, res) => {
+// Mount Routes (routes match both /api/* and /*)
+app.use('/auth', authRoutes);
+app.use('/teams', teamRoutes);
+app.use('/evaluations', evaluationRoutes);
+app.use('/judges', judgeRoutes);
+app.use('/schools', schoolRoutes);
+app.use('/categories', categoryRoutes);
+app.use('/dashboard', dashboardRoutes);
+
+app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     message: 'Techno Talent Feast 2026 API on Vercel is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Techno Talent Feast 2026 API Server is operational',
     timestamp: new Date().toISOString()
   });
 });
