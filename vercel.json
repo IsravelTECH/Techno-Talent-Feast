@@ -2,8 +2,8 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api"
+      "source": "/api/:match*",
+      "destination": "https://techno-talent-feast.onrender.com/api/:match*"
     },
     {
       "source": "/((?!api).*)",
