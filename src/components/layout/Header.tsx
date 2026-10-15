@@ -1,20 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { TechnoLogo } from '../common/TechnoLogo';
+import { UserAvatar } from '../common/UserAvatar';
 import {
   Bell,
-  Search,
   ChevronDown,
   Menu,
   LogOut,
   User,
-  Settings,
   ShieldCheck,
-  KeyRound,
-  Radio,
-  ExternalLink,
-  Sparkles,
-  Award
+  KeyRound
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -26,7 +20,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const {
     currentUser,
     currentRole,
-    selectedEvent,
     notifications,
     markNotificationAsRead,
     markAllNotificationsRead,
@@ -37,7 +30,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -57,13 +49,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(currentRole === 'admin' ? 'participants' : 'judge-assignments');
-    }
-  };
-
   return (
     <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-30 shadow-xs">
       <div className="px-4 lg:px-6 h-16 flex items-center justify-between gap-4">
@@ -77,37 +62,23 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             <Menu className="w-5 h-5" />
           </button>
 
+          {/* Techno Talent Feast 2026 Branding */}
           <div
             onClick={() => navigate(currentRole === 'judge' ? 'judge-dashboard' : 'dashboard')}
-            className="cursor-pointer flex items-center"
+            className="cursor-pointer flex items-center gap-2.5 select-none"
           >
-            <TechnoLogo variant="badge" size="md" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#03A695] to-[#0B2545] flex items-center justify-center text-white font-extrabold text-xs shadow-md shadow-teal-500/15 shrink-0">
+              <span className="text-[#FD5E01]">T</span>T
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none">
+                TECHNO TALENT FEAST
+              </span>
+              <span className="text-xs font-black px-2 py-0.5 rounded-md bg-[#FD5E01] text-white leading-none shadow-xs">
+                2026
+              </span>
+            </div>
           </div>
-
-          {/* Event Status Pill */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F6F9FD] border border-[#E2E8F0] text-xs">
-            <span className="w-2 h-2 rounded-full bg-[#0057B8] animate-pulse" />
-            <span className="font-extrabold text-slate-900 tracking-tight">
-              EIBFS Dubai — 4 Nov 2026
-            </span>
-            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#F36C21] text-white uppercase tracking-wider">
-              {selectedEvent.stage.replace('_', ' ')}
-            </span>
-          </div>
-        </div>
-
-        {/* Center: Search */}
-        <div className="hidden lg:flex flex-1 max-w-md mx-4">
-          <form onSubmit={handleSearchSubmit} className="relative w-full">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder={currentRole === 'admin' ? 'Search school, participant, category, project, judge...' : 'Search assigned participant or project...'}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-1.5 bg-[#F6F9FD] hover:bg-white focus:bg-white border border-slate-200 rounded-full text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0057B8]/20 focus:border-[#0057B8] transition-all"
-            />
-          </form>
         </div>
 
         {/* Right: Role Switcher Pill + Notifications + Profile */}
@@ -118,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               onClick={() => loginAs('admin')}
               className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 currentRole === 'admin'
-                  ? 'bg-[#0057B8] text-white shadow-xs'
+                  ? 'bg-[#03A695] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -129,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               onClick={() => loginAs('judge')}
               className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 currentRole === 'judge'
-                  ? 'bg-[#F36C21] text-white shadow-xs'
+                  ? 'bg-[#FD5E01] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -137,16 +108,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               <span>Judge</span>
             </button>
           </div>
-
-          {/* Public Scoreboard Button */}
-          <button
-            onClick={() => navigate('live-control')}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFF3EC] hover:bg-[#ffe5d6] text-[#F36C21] font-bold text-xs border border-orange-200 transition-colors cursor-pointer"
-            title="Live Event Control Center"
-          >
-            <Radio className="w-3.5 h-3.5 text-[#F36C21] animate-pulse" />
-            <span>Live Control</span>
-          </button>
 
           {/* Notifications Center */}
           <div className="relative" ref={notifRef}>
@@ -157,18 +118,18 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             >
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#F36C21] ring-2 ring-white" />
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#FD5E01] ring-2 ring-white" />
               )}
             </button>
 
             {/* Notification Dropdown */}
             {showNotifications && (
               <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden z-50 animate-scale-up">
-                <div className="px-4 py-3 bg-[#F6F9FD] border-b border-slate-100 flex items-center justify-between">
+                <div className="px-4 py-3 bg-[#F7FCFB] border-b border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm text-slate-900">Notifications</span>
                     {unreadCount > 0 && (
-                      <span className="px-2 py-0.5 rounded-full bg-orange-50 text-[#F36C21] text-[10px] font-bold border border-orange-100">
+                      <span className="px-2 py-0.5 rounded-full bg-orange-50 text-[#FD5E01] text-[10px] font-bold border border-orange-100">
                         {unreadCount} New
                       </span>
                     )}
@@ -176,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllNotificationsRead}
-                      className="text-[11px] font-semibold text-[#0057B8] hover:underline cursor-pointer"
+                      className="text-[11px] font-semibold text-[#03A695] hover:underline cursor-pointer"
                     >
                       Mark all as read
                     </button>
@@ -200,12 +161,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                           }
                         }}
                         className={`p-3.5 hover:bg-slate-50 cursor-pointer transition-colors flex items-start gap-3 ${
-                          !notif.isRead ? 'bg-[#F6F9FD]' : ''
+                          !notif.isRead ? 'bg-[#F7FCFB]' : ''
                         }`}
                       >
                         <div
                           className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${
-                            !notif.isRead ? 'bg-[#F36C21]' : 'bg-slate-300'
+                            !notif.isRead ? 'bg-[#FD5E01]' : 'bg-slate-300'
                           }`}
                         />
                         <div className="flex-1 min-w-0">
@@ -233,11 +194,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-100 transition-colors text-left cursor-pointer"
             >
-              <img
-                src={currentUser.avatar}
-                alt={currentUser.name}
-                className="w-8 h-8 rounded-full object-cover border-2 border-[#0057B8] ring-2 ring-blue-50"
-              />
+              <UserAvatar name={currentUser.name} size="sm" />
               <div className="hidden sm:flex flex-col">
                 <span className="text-xs font-bold text-slate-900 leading-none">
                   {currentUser.name}
@@ -255,7 +212,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-xs font-bold text-slate-900">{currentUser.name}</p>
                   <p className="text-[11px] text-slate-500 truncate">{currentUser.email}</p>
-                  <div className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-[10px] font-bold">
+                  <div className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-[10px] font-bold">
                     <span>{currentUser.organization}</span>
                   </div>
                 </div>
@@ -271,18 +228,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                     <User className="w-4 h-4 text-slate-400" />
                     <span>My Profile</span>
                   </button>
-                  {currentRole === 'admin' && (
-                    <button
-                      onClick={() => {
-                        navigate('settings');
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 cursor-pointer"
-                    >
-                      <Settings className="w-4 h-4 text-slate-400" />
-                      <span>System Settings</span>
-                    </button>
-                  )}
                 </div>
 
                 <div className="border-t border-slate-100 pt-1">

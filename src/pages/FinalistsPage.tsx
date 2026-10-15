@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
+import { UserAvatar } from '../components/common/UserAvatar';
 import {
   Award,
   Building2,
@@ -65,7 +66,7 @@ export const FinalistsPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               School Finalists & Quota Verification
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               12 Finalists Rule
             </span>
           </div>
@@ -108,8 +109,8 @@ export const FinalistsPage: React.FC = () => {
                 onClick={() => setSelectedSchoolId(sch.id)}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                   isSelected
-                    ? 'bg-[#0057B8] text-white shadow-md shadow-blue-500/20'
-                    : 'bg-[#F6F9FD] text-slate-700 hover:bg-blue-50 border border-slate-200'
+                    ? 'bg-[#03A695] text-white shadow-md shadow-teal-500/20'
+                    : 'bg-[#F7FCFB] text-slate-700 hover:bg-[#E6F7F5] border border-slate-200'
                 }`}
               >
                 <Building2 className={`w-3.5 h-3.5 ${isSelected ? 'text-[#FF8A3D]' : 'text-slate-400'}`} />
@@ -129,7 +130,7 @@ export const FinalistsPage: React.FC = () => {
       <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#EAF3FF] border border-blue-200 flex items-center justify-center text-[#0057B8] shrink-0 font-black text-sm">
+            <div className="w-12 h-12 rounded-2xl bg-[#E6F7F5] border border-teal-200 flex items-center justify-center text-[#03A695] shrink-0 font-black text-sm">
               {activeSchool?.code || 'SCH'}
             </div>
             <div>
@@ -223,14 +224,14 @@ export const FinalistsPage: React.FC = () => {
                 placeholder="Search finalist/project..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+                className="pl-8 pr-3 py-1.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
               />
             </div>
 
             <select
               value={selectedCategoryFilter}
               onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              className="px-3 py-1.5 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0057B8]"
+              className="px-3 py-1.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#03A695]"
             >
               <option value="ALL">All 6 Categories</option>
               {competitions.map((c) => (
@@ -261,11 +262,7 @@ export const FinalistsPage: React.FC = () => {
                   <tr key={part.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={part.photo}
-                          alt={part.name}
-                          className="w-9 h-9 rounded-xl object-cover border border-slate-200"
-                        />
+                        <UserAvatar name={part.name} size="sm" variant="color" />
                         <div>
                           <span className="font-bold text-slate-900 block">{part.name}</span>
                           <span className="text-[10px] text-slate-400 font-mono">{part.participantId} • Grade {part.grade}</span>
@@ -274,7 +271,7 @@ export const FinalistsPage: React.FC = () => {
                     </td>
                     <td className="py-3 px-3">
                       <span className="font-semibold text-slate-800 block">{comp?.name || 'Category'}</span>
-                      <span className="text-[10px] text-[#0057B8] font-bold">Category {comp?.categoryNumber}</span>
+                      <span className="text-[10px] text-[#03A695] font-bold">Category {comp?.categoryNumber}</span>
                     </td>
                     <td className="py-3 px-3">
                       <span className="font-bold text-slate-900 block">{part.projectTitle}</span>

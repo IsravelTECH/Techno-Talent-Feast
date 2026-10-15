@@ -60,7 +60,7 @@ export const SettingsPage: React.FC = () => {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
               activeTab === tab.id
-                ? 'bg-[#0057B8] text-white shadow-xs'
+                ? 'bg-[#03A695] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
@@ -103,7 +103,7 @@ export const SettingsPage: React.FC = () => {
                 <label className="block font-bold text-slate-700 uppercase mb-1">
                   Event Status
                 </label>
-                <select className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#0057B8]">
+                <select className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#03A695]">
                   <option value="LIVE">● LIVE (Arena Scoring Active)</option>
                   <option value="UPCOMING">Upcoming</option>
                   <option value="COMPLETED">Completed</option>
@@ -132,12 +132,12 @@ export const SettingsPage: React.FC = () => {
             </h3>
 
             <div className="space-y-3">
-              <label className="flex items-center gap-3 p-3 rounded-2xl bg-[#F6F9FD] border border-slate-100 cursor-pointer">
+              <label className="flex items-center gap-3 p-3 rounded-2xl bg-[#F7FCFB] border border-slate-100 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={autoLock}
                   onChange={(e) => setAutoLock(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#0057B8] focus:ring-[#0057B8]"
+                  className="w-4 h-4 rounded text-[#03A695] focus:ring-[#03A695]"
                 />
                 <div>
                   <span className="font-bold text-slate-900 block">
@@ -149,12 +149,12 @@ export const SettingsPage: React.FC = () => {
                 </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 rounded-2xl bg-[#F6F9FD] border border-slate-100 cursor-pointer">
+              <label className="flex items-center gap-3 p-3 rounded-2xl bg-[#F7FCFB] border border-slate-100 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={publicLeaderboard}
                   onChange={(e) => setPublicLeaderboard(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#0057B8] focus:ring-[#0057B8]"
+                  className="w-4 h-4 rounded text-[#03A695] focus:ring-[#03A695]"
                 />
                 <div>
                   <span className="font-bold text-slate-900 block">
@@ -200,15 +200,15 @@ export const SettingsPage: React.FC = () => {
             </p>
             <div className="space-y-2">
               <label className="flex items-center gap-2">
-                <input type="checkbox" defaultChecked className="rounded text-[#0057B8]" />
+                <input type="checkbox" defaultChecked className="rounded text-[#03A695]" />
                 <span>Notify Admin on each judge score submission</span>
               </label>
               <label className="flex items-center gap-2">
-                <input type="checkbox" defaultChecked className="rounded text-[#0057B8]" />
+                <input type="checkbox" defaultChecked className="rounded text-[#03A695]" />
                 <span>Trigger confetti burst on Top 3 Rank changes</span>
               </label>
               <label className="flex items-center gap-2">
-                <input type="checkbox" defaultChecked className="rounded text-[#0057B8]" />
+                <input type="checkbox" defaultChecked className="rounded text-[#03A695]" />
                 <span>Publish real-time score summaries to school coordinators</span>
               </label>
             </div>

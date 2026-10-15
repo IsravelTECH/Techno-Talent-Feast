@@ -39,7 +39,7 @@ export const ActivityLogPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Championship Audit Trail & Activity Log
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               Tamper-Proof Audit
             </span>
           </div>
@@ -69,14 +69,14 @@ export const ActivityLogPage: React.FC = () => {
             placeholder="Search audit actions, jurors, admins..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+            className="w-full pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
           />
         </div>
 
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0057B8]"
+          className="px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#03A695]"
         >
           <option value="ALL">All Actions</option>
           <option value="SCORE_SUBMITTED">Score Submitted</option>
@@ -118,7 +118,7 @@ export const ActivityLogPage: React.FC = () => {
                   </td>
                   <td className="py-3 px-3">
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                      log.userRole === 'admin' ? 'bg-blue-100 text-[#0057B8]' : 'bg-purple-100 text-purple-700'
+                      log.userRole === 'admin' ? 'bg-blue-100 text-[#03A695]' : 'bg-purple-100 text-purple-700'
                     }`}>
                       {log.userRole}
                     </span>

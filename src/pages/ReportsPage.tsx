@@ -99,11 +99,11 @@ export const ReportsPage: React.FC = () => {
           return (
             <div
               key={rep.id}
-              className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-300 transition-all p-6 flex flex-col justify-between"
+              className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-300 transition-all p-6 flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-[#EAF3FF] border border-blue-100 flex items-center justify-center text-[#0057B8]">
+                  <div className="w-12 h-12 rounded-2xl bg-[#E6F7F5] border border-teal-100 flex items-center justify-center text-[#03A695]">
                     <Icon className="w-6 h-6" />
                   </div>
                   <Badge variant="primary" size="sm">
@@ -122,7 +122,7 @@ export const ReportsPage: React.FC = () => {
 
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-600">
                   <span>Scope:</span>
-                  <span className="font-bold text-[#0057B8]">{rep.count}</span>
+                  <span className="font-bold text-[#03A695]">{rep.count}</span>
                 </div>
               </div>
 
@@ -168,7 +168,7 @@ export const ReportsPage: React.FC = () => {
           maxWidth="2xl"
         >
           <div className="space-y-4 text-xs">
-            <div className="p-4 rounded-2xl bg-[#F6F9FD] border border-slate-200">
+            <div className="p-4 rounded-2xl bg-[#F7FCFB] border border-slate-200">
               <p className="font-bold text-slate-900">
                 Techno Talent Feast 2026 — Verified Report Output
               </p>
@@ -195,7 +195,7 @@ export const ReportsPage: React.FC = () => {
                       <td className="p-3 text-center font-bold text-emerald-600">
                         {Math.round((c.completedCount / c.registeredCount) * 100)}%
                       </td>
-                      <td className="p-3 text-right font-black text-[#0057B8]">
+                      <td className="p-3 text-right font-black text-[#03A695]">
                         91.4% Avg
                       </td>
                     </tr>

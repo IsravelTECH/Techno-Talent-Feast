@@ -44,7 +44,7 @@ export const EventOverviewPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Grand Finale Hero Banner */}
-      <div className="bg-gradient-to-br from-[#003B7A] via-[#0057B8] to-[#03A695] p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-[#0B2545] via-[#03A695] to-[#03A695] p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
@@ -104,7 +104,7 @@ export const EventOverviewPage: React.FC = () => {
               Competition Stage Progression
             </h2>
             <p className="text-xs text-slate-500">
-              Current Active Stage: <strong className="text-[#0057B8]">{selectedEvent.currentStage?.replace('_', ' ')}</strong>
+              Current Active Stage: <strong className="text-[#03A695]">{selectedEvent.currentStage?.replace('_', ' ')}</strong>
             </p>
           </div>
           <Badge variant="live" dot>Active Phase</Badge>
@@ -120,7 +120,7 @@ export const EventOverviewPage: React.FC = () => {
                 key={st.id}
                 className={`p-4 rounded-2xl border transition-all ${
                   isCurrent
-                    ? 'bg-[#EAF3FF] border-[#0057B8] shadow-sm ring-2 ring-blue-500/20'
+                    ? 'bg-[#E6F7F5] border-[#03A695] shadow-sm ring-2 ring-blue-500/20'
                     : isPast
                     ? 'bg-emerald-50/50 border-emerald-200 text-slate-700'
                     : 'bg-slate-50 border-slate-200 text-slate-400'
@@ -128,13 +128,13 @@ export const EventOverviewPage: React.FC = () => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                    isCurrent ? 'bg-[#0057B8] text-white' : isPast ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
+                    isCurrent ? 'bg-[#03A695] text-white' : isPast ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
                     {isPast ? 'COMPLETED' : isCurrent ? 'IN PROGRESS' : 'UPCOMING'}
                   </span>
                   {isPast && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
                 </div>
-                <h3 className={`text-xs font-bold ${isCurrent ? 'text-[#0057B8]' : isPast ? 'text-slate-800' : 'text-slate-500'}`}>
+                <h3 className={`text-xs font-bold ${isCurrent ? 'text-[#03A695]' : isPast ? 'text-slate-800' : 'text-slate-500'}`}>
                   {st.label}
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-1 leading-snug">
@@ -149,7 +149,7 @@ export const EventOverviewPage: React.FC = () => {
       {/* 4 Essential TTF Pillars Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-card flex items-start gap-4">
-          <div className="p-3 rounded-2xl bg-blue-50 text-[#0057B8] border border-blue-100">
+          <div className="p-3 rounded-2xl bg-[#E6F7F5] text-[#03A695] border border-teal-100">
             <Building2 className="w-6 h-6" />
           </div>
           <div>
@@ -160,7 +160,7 @@ export const EventOverviewPage: React.FC = () => {
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-card flex items-start gap-4">
-          <div className="p-3 rounded-2xl bg-orange-50 text-[#F36C21] border border-orange-100">
+          <div className="p-3 rounded-2xl bg-orange-50 text-[#FD5E01] border border-orange-100">
             <Trophy className="w-6 h-6" />
           </div>
           <div>
@@ -208,13 +208,13 @@ export const EventOverviewPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {competitions.map((comp) => (
               <div key={comp.id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-black text-xs text-[#0057B8] shrink-0 shadow-xs">
+                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-black text-xs text-[#03A695] shrink-0 shadow-xs">
                   C{comp.categoryNumber}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-1">
                     <h4 className="text-xs font-bold text-slate-900 truncate">{comp.name}</h4>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-[#0057B8]">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-[#03A695]">
                       {comp.gradeBand}
                     </span>
                   </div>
@@ -238,8 +238,8 @@ export const EventOverviewPage: React.FC = () => {
             Grand Finale Venue Brief
           </h2>
           <div className="space-y-3 text-xs">
-            <div className="p-3 rounded-2xl bg-[#EAF3FF] border border-blue-200">
-              <strong className="text-[#0057B8] block mb-1">Official Location</strong>
+            <div className="p-3 rounded-2xl bg-[#E6F7F5] border border-teal-200">
+              <strong className="text-[#03A695] block mb-1">Official Location</strong>
               <p className="text-slate-700">
                 Emirates Institute of Banking and Financial Studies (EIBFS), Al Ruwayyah 2, Opposite Zayed University, Academic City, Dubai, UAE.
               </p>
@@ -292,7 +292,7 @@ export const EventOverviewPage: React.FC = () => {
               onClick={() => setTargetStage(st.id as any)}
               className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition-all ${
                 targetStage === st.id
-                  ? 'bg-[#EAF3FF] border-[#0057B8] ring-2 ring-blue-500/20'
+                  ? 'bg-[#E6F7F5] border-[#03A695] ring-2 ring-blue-500/20'
                   : 'bg-white border-slate-200 hover:bg-slate-50'
               }`}
             >
@@ -301,7 +301,7 @@ export const EventOverviewPage: React.FC = () => {
                 name="stage"
                 checked={targetStage === st.id}
                 onChange={() => setTargetStage(st.id as any)}
-                className="mt-1 text-[#0057B8]"
+                className="mt-1 text-[#03A695]"
               />
               <div>
                 <h4 className="text-xs font-bold text-slate-900">{st.label}</h4>

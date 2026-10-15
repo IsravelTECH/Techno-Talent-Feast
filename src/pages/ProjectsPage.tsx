@@ -55,7 +55,7 @@ export const ProjectsPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               24 Championship Projects Repository
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               4 Projects / Category
             </span>
           </div>
@@ -69,9 +69,9 @@ export const ProjectsPage: React.FC = () => {
             variant="orange"
             size="sm"
             icon={<Sparkles className="w-4 h-4" />}
-            onClick={() => navigate('scoring')}
+            onClick={() => navigate('assignments')}
           >
-            Open Evaluation Desk
+            Judge Assignments Wizard
           </Button>
         </div>
       </div>
@@ -85,7 +85,7 @@ export const ProjectsPage: React.FC = () => {
             placeholder="Search project code, title, tool (e.g. Python, Arduino)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+            className="w-full pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
           />
         </div>
 
@@ -93,7 +93,7 @@ export const ProjectsPage: React.FC = () => {
           <select
             value={selectedCategoryFilter}
             onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-            className="px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0057B8]"
+            className="px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#03A695]"
           >
             <option value="ALL">All 6 Categories (24 Projects)</option>
             {competitions.map((comp) => (
@@ -119,7 +119,7 @@ export const ProjectsPage: React.FC = () => {
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-1 rounded-xl bg-blue-50 text-[#0057B8] font-black font-mono text-xs border border-blue-100">
+                  <span className="px-2.5 py-1 rounded-xl bg-[#E6F7F5] text-[#03A695] font-black font-mono text-xs border border-teal-100">
                     {projectCode}
                   </span>
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
@@ -128,7 +128,7 @@ export const ProjectsPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-black text-slate-900 group-hover:text-[#0057B8] transition-colors line-clamp-1">
+                  <h3 className="text-sm font-black text-slate-900 group-hover:text-[#03A695] transition-colors line-clamp-1">
                     {project.title}
                   </h3>
                   <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
@@ -213,7 +213,7 @@ export const ProjectsPage: React.FC = () => {
             {activeProjectModal.tasks && activeProjectModal.tasks.length > 0 && (
               <div>
                 <strong className="text-slate-900 block font-bold mb-1">Core Deliverables & Tasks:</strong>
-                <ul className="list-disc list-inside space-y-1 p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100 text-slate-700">
+                <ul className="list-disc list-inside space-y-1 p-3.5 rounded-2xl bg-[#E6F7F5]/50 border border-teal-100 text-slate-700">
                   {activeProjectModal.tasks.map((tsk, idx) => (
                     <li key={idx}><strong>{tsk}</strong></li>
                   ))}
@@ -227,7 +227,7 @@ export const ProjectsPage: React.FC = () => {
                 {(activeProjectModal.softwareOrTools || []).map((t, idx) => (
                   <span
                     key={idx}
-                    className="px-2.5 py-1 rounded-xl bg-[#EAF3FF] text-[#0057B8] border border-blue-200 font-mono font-bold text-[11px]"
+                    className="px-2.5 py-1 rounded-xl bg-[#E6F7F5] text-[#03A695] border border-teal-200 font-mono font-bold text-[11px]"
                   >
                     {t}
                   </span>

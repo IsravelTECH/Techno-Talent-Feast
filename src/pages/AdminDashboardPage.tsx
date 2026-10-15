@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { StatCard } from '../components/common/StatCard';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
+import { UserAvatar } from '../components/common/UserAvatar';
 import {
   Users,
   Building2,
@@ -43,7 +44,7 @@ export const AdminDashboardPage: React.FC = () => {
       {/* Top Welcome Banner & Status */}
       <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#EAF3FF] border border-blue-200 flex items-center justify-center text-[#0057B8] shrink-0 shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-[#E6F7F5] border border-teal-200 flex items-center justify-center text-[#03A695] shrink-0 shadow-xs">
             <Trophy className="w-6 h-6" />
           </div>
           <div>
@@ -56,7 +57,7 @@ export const AdminDashboardPage: React.FC = () => {
               </Badge>
             </div>
             <p className="text-xs text-slate-600 mt-1">
-              <strong className="text-[#0057B8]">{selectedEvent.name}</strong> — {selectedEvent.venue} ({selectedEvent.city})
+              <strong className="text-[#03A695]">{selectedEvent.name}</strong> — {selectedEvent.venue} ({selectedEvent.city})
             </p>
           </div>
         </div>
@@ -84,15 +85,6 @@ export const AdminDashboardPage: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            icon={<UserCheck className="w-4 h-4" />}
-            onClick={() => navigate('judges')}
-          >
-            Judges Roster
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
             icon={<Award className="w-4 h-4" />}
             onClick={() => navigate('assignments')}
           >
@@ -102,41 +94,21 @@ export const AdminDashboardPage: React.FC = () => {
       </div>
 
       {/* Core Administration Action Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <button
           onClick={() => navigate('projects')}
-          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#0057B8] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
+          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#03A695] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0057B8] flex items-center justify-center font-black group-hover:bg-[#0057B8] group-hover:text-white transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-[#E6F7F5] text-[#03A695] flex items-center justify-center font-black group-hover:bg-[#03A695] group-hover:text-white transition-colors">
               <FolderKanban className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#0057B8] transition-colors">
+              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#03A695] transition-colors">
                 24 Championship Projects
               </h4>
               <p className="text-[11px] text-slate-500">
                 4 Projects / Category • Full Specifications
-              </p>
-            </div>
-          </div>
-          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#0057B8] group-hover:translate-x-0.5 transition-all" />
-        </button>
-
-        <button
-          onClick={() => navigate('judges')}
-          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#0057B8] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-50 text-[#03A695] flex items-center justify-center font-black group-hover:bg-[#03A695] group-hover:text-white transition-colors">
-              <UserCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#03A695] transition-colors">
-                Judges & Jurors Roster
-              </h4>
-              <p className="text-[11px] text-slate-500">
-                36 Certified Evaluators • Track Allocations
               </p>
             </div>
           </div>
@@ -145,14 +117,14 @@ export const AdminDashboardPage: React.FC = () => {
 
         <button
           onClick={() => navigate('assignments')}
-          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#F36C21] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
+          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#FD5E01] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#F36C21] flex items-center justify-center font-black group-hover:bg-[#F36C21] group-hover:text-white transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#FD5E01] flex items-center justify-center font-black group-hover:bg-[#FD5E01] group-hover:text-white transition-colors">
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#F36C21] transition-colors">
+              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#FD5E01] transition-colors">
                 Judge & Finalist Assignments
               </h4>
               <p className="text-[11px] text-slate-500">
@@ -160,19 +132,19 @@ export const AdminDashboardPage: React.FC = () => {
               </p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#F36C21] group-hover:translate-x-0.5 transition-all" />
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#FD5E01] group-hover:translate-x-0.5 transition-all" />
         </button>
       </div>
 
       {/* Primary KPI Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
         <StatCard
           title="Participants"
           value="1,440"
           subtitle="Grades 1-12 Spectrum"
           icon={<Users className="w-5 h-5" />}
           trend={{ value: "576 Finalists", isPositive: true }}
-          onClick={() => navigate('finalists')}
+          onClick={() => navigate('participants')}
         />
         <StatCard
           title="Schools"
@@ -185,22 +157,15 @@ export const AdminDashboardPage: React.FC = () => {
           title="Projects (24)"
           value="24"
           subtitle="4 / Category"
-          icon={<FolderKanban className="w-5 h-5 text-[#0057B8]" />}
+          icon={<FolderKanban className="w-5 h-5 text-[#03A695]" />}
           highlight={true}
           onClick={() => navigate('projects')}
-        />
-        <StatCard
-          title="Judges Roster"
-          value="36"
-          subtitle="Arena Jurors"
-          icon={<UserCheck className="w-5 h-5 text-[#03A695]" />}
-          onClick={() => navigate('judges')}
         />
         <StatCard
           title="Judge Assignments"
           value="576"
           subtitle="Conflict-Free"
-          icon={<Award className="w-5 h-5 text-[#F36C21]" />}
+          icon={<Award className="w-5 h-5 text-[#FD5E01]" />}
           onClick={() => navigate('assignments')}
         />
         <StatCard
@@ -221,7 +186,7 @@ export const AdminDashboardPage: React.FC = () => {
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
               <div>
                 <h2 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-[#0057B8]" />
+                  <Activity className="w-4 h-4 text-[#03A695]" />
                   <span>Live Competition Progress</span>
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -249,15 +214,15 @@ export const AdminDashboardPage: React.FC = () => {
                   <div
                     key={comp.id}
                     onClick={() => navigate('competitions', { compId: comp.id })}
-                    className="p-4 rounded-2xl border border-slate-100 hover:border-blue-200 bg-[#F6F9FD]/60 hover:bg-white transition-all cursor-pointer group"
+                    className="p-4 rounded-2xl border border-slate-100 hover:border-teal-200 bg-[#F7FCFB]/60 hover:bg-white transition-all cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-[#EAF3FF] text-[#0057B8] flex items-center justify-center font-bold text-xs group-hover:bg-[#0057B8] group-hover:text-white transition-colors">
+                        <div className="w-8 h-8 rounded-xl bg-[#E6F7F5] text-[#03A695] flex items-center justify-center font-bold text-xs group-hover:bg-[#03A695] group-hover:text-white transition-colors">
                           <Trophy className="w-4 h-4" />
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#0057B8] transition-colors">
+                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#03A695] transition-colors">
                             {comp.name}
                           </h4>
                           <span className="text-[11px] text-slate-500">
@@ -279,7 +244,7 @@ export const AdminDashboardPage: React.FC = () => {
                     {/* Progress Bar */}
                     <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden mt-2">
                       <div
-                        className="h-full bg-gradient-to-r from-[#0057B8] to-[#F36C21] rounded-full transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-[#03A695] to-[#FD5E01] rounded-full transition-all duration-500"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -294,7 +259,7 @@ export const AdminDashboardPage: React.FC = () => {
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-[#F36C21]" />
+                  <Building2 className="w-4 h-4 text-[#FD5E01]" />
                   <span>Top Performing Schools</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -361,7 +326,7 @@ export const AdminDashboardPage: React.FC = () => {
                           <span className="text-amber-700">🥉{school.bronzeMedals}</span>
                         </span>
                       </td>
-                      <td className="py-3 text-right pr-2 font-black text-[#0057B8] text-sm">
+                      <td className="py-3 text-right pr-2 font-black text-[#03A695] text-sm">
                         {school.averageScore}%
                       </td>
                     </tr>
@@ -378,7 +343,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#F36C21] animate-ping" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FD5E01] animate-ping" />
                 <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
                   Live Scoring Feed
                 </h3>
@@ -390,18 +355,14 @@ export const AdminDashboardPage: React.FC = () => {
               {scoringActivities.slice(0, 5).map((act) => (
                 <div
                   key={act.id}
-                  className="flex items-start gap-3 p-3 rounded-2xl bg-[#F6F9FD] border border-slate-100/80 hover:border-blue-200 transition-all text-xs"
+                  className="flex items-start gap-3 p-3 rounded-2xl bg-[#F7FCFB] border border-slate-100/80 hover:border-teal-200 transition-all text-xs"
                 >
-                  <img
-                    src={act.judgeAvatar}
-                    alt={act.judgeName}
-                    className="w-8 h-8 rounded-xl object-cover shrink-0 border border-blue-200"
-                  />
+                  <UserAvatar name={act.judgeName} size="sm" variant="color" />
                   <div className="flex-1 min-w-0">
                     <p className="text-slate-800 font-medium leading-tight">
                       <strong className="text-slate-900 font-bold">{act.judgeName}</strong>{' '}
                       {act.action}{' '}
-                      <strong className="text-[#0057B8] font-bold">{act.participantName}</strong>
+                      <strong className="text-[#03A695] font-bold">{act.participantName}</strong>
                     </p>
                     <div className="flex items-center justify-between mt-1.5 text-[11px]">
                       <span className="text-slate-500 font-semibold">{act.competitionName}</span>
@@ -423,18 +384,18 @@ export const AdminDashboardPage: React.FC = () => {
               variant="outline"
               size="sm"
               className="w-full mt-4 text-xs font-bold"
-              onClick={() => navigate('scoring')}
+              onClick={() => navigate('results')}
             >
-              Open Active Scoring Desk →
+              View All Evaluation Records →
             </Button>
           </div>
 
           {/* Top Leaderboard Podium Preview */}
-          <div className="bg-gradient-to-br from-[#003B7A] to-[#0057B8] text-white p-6 rounded-3xl shadow-xl border border-blue-600 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#0B2545] to-[#03A695] text-white p-6 rounded-3xl shadow-xl border border-teal-600 relative overflow-hidden">
             {/* Background sparkle */}
             <div className="flex items-center justify-between pb-4 border-b border-white/15 mb-4">
               <div className="flex items-center gap-2">
-                <Medal className="w-5 h-5 text-[#F36C21]" />
+                <Medal className="w-5 h-5 text-[#FD5E01]" />
                 <h3 className="text-sm font-black uppercase tracking-wider text-white">
                   Leaderboard Podium
                 </h3>
@@ -458,7 +419,7 @@ export const AdminDashboardPage: React.FC = () => {
                           ? 'bg-amber-400 text-slate-900'
                           : idx === 1
                           ? 'bg-slate-200 text-slate-900'
-                          : 'bg-[#F36C21] text-white'
+                          : 'bg-[#FD5E01] text-white'
                       }`}
                     >
                       {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
@@ -486,8 +447,8 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
 
             <button
-              onClick={() => navigate('leaderboard')}
-              className="w-full mt-4 py-2.5 px-4 bg-white hover:bg-blue-50 text-[#003B7A] font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
+              onClick={() => navigate('results')}
+              className="w-full mt-4 py-2.5 px-4 bg-white hover:bg-[#E6F7F5] text-[#0B2545] font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <span>VIEW FULL LEADERBOARD</span>
               <ArrowRight className="w-3.5 h-3.5" />

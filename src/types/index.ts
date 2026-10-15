@@ -22,6 +22,7 @@ export type ScoreboardVisibility = 'HIDDEN' | 'INTERNAL_ONLY' | 'LIVE' | 'PUBLIS
 
 export interface User {
   id: string;
+  judgeId?: string;
   name: string;
   email: string;
   role: UserRole;
@@ -210,6 +211,9 @@ export interface Participant {
   submissionTimestamp?: string;
   evaluatedTimestamp?: string;
   criterionScores?: Record<string, number>;
+  teamId?: string; // e.g. TTF26-TEAM-001 or TTF-2026-00421
+  evaluatedByJudgeId?: string;
+  evaluatedByJudgeName?: string;
   judgeRemarks?: string;
 }
 
@@ -219,6 +223,7 @@ export interface Judge {
   name: string;
   judgeName?: string;
   email: string;
+  role?: string;
   phone: string;
   avatar: string;
   title: string;

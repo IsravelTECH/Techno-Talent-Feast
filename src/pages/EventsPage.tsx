@@ -103,7 +103,7 @@ export const EventsPage: React.FC = () => {
         {eventsList.map((evt) => (
           <div
             key={evt.id}
-            className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-200 transition-all overflow-hidden flex flex-col justify-between"
+            className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-200 transition-all overflow-hidden flex flex-col justify-between"
           >
             <div>
               {/* Event Banner */}
@@ -143,31 +143,31 @@ export const EventsPage: React.FC = () => {
 
                 <div className="mt-4 space-y-2 text-xs text-slate-600">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 text-[#0057B8]" />
+                    <Calendar className="w-3.5 h-3.5 text-[#03A695]" />
                     <span className="font-semibold text-slate-800">{evt.date}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-[#F36C21]" />
+                    <MapPin className="w-3.5 h-3.5 text-[#FD5E01]" />
                     <span className="truncate">{evt.venue}</span>
                   </div>
                 </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-100 text-center">
-                  <div className="p-2 rounded-xl bg-[#F6F9FD]">
+                  <div className="p-2 rounded-xl bg-[#F7FCFB]">
                     <span className="block text-xs font-black text-slate-900">
                       {evt.totalParticipants}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">Students</span>
                   </div>
-                  <div className="p-2 rounded-xl bg-[#F6F9FD]">
-                    <span className="block text-xs font-black text-[#0057B8]">
+                  <div className="p-2 rounded-xl bg-[#F7FCFB]">
+                    <span className="block text-xs font-black text-[#03A695]">
                       {evt.totalSchools}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">Schools</span>
                   </div>
-                  <div className="p-2 rounded-xl bg-[#F6F9FD]">
-                    <span className="block text-xs font-black text-[#F36C21]">
+                  <div className="p-2 rounded-xl bg-[#F7FCFB]">
+                    <span className="block text-xs font-black text-[#FD5E01]">
                       {evt.totalCompetitions}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium">Arenas</span>
@@ -207,7 +207,7 @@ export const EventsPage: React.FC = () => {
             <input
               type="text"
               defaultValue="Techno Talent Feast 2027"
-              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8]"
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
               required
             />
           </div>
@@ -220,7 +220,7 @@ export const EventsPage: React.FC = () => {
               <input
                 type="date"
                 defaultValue="2027-10-10"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8]"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
                 required
               />
             </div>
@@ -231,7 +231,7 @@ export const EventsPage: React.FC = () => {
               <input
                 type="text"
                 defaultValue="Chennai, Tamil Nadu"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8]"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
                 required
               />
             </div>
@@ -244,7 +244,7 @@ export const EventsPage: React.FC = () => {
             <input
               type="text"
               defaultValue="TechnoSchool Main Campus - Grand Complex"
-              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8]"
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
               required
             />
           </div>
@@ -277,7 +277,7 @@ export const EventDetailPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Event Hero Header */}
-      <div className="bg-gradient-to-r from-[#003B7A] via-[#0057B8] to-[#004899] text-white p-6 lg:p-8 rounded-3xl shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#0B2545] via-[#03A695] to-[#004899] text-white p-6 lg:p-8 rounded-3xl shadow-xl relative overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap mb-2">
@@ -296,11 +296,11 @@ export const EventDetailPage: React.FC = () => {
             </p>
             <div className="mt-4 flex items-center gap-4 text-xs text-blue-200 flex-wrap">
               <span className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-[#F36C21]" />
+                <Calendar className="w-4 h-4 text-[#FD5E01]" />
                 <strong className="text-white">{selectedEvent.date}</strong>
               </span>
               <span className="flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-[#F36C21]" />
+                <MapPin className="w-4 h-4 text-[#FD5E01]" />
                 <strong className="text-white">{selectedEvent.venue}</strong>
               </span>
             </div>
@@ -333,7 +333,7 @@ export const EventDetailPage: React.FC = () => {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
               activeTab === tab.id
-                ? 'bg-[#0057B8] text-white shadow-xs'
+                ? 'bg-[#03A695] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
@@ -350,12 +350,12 @@ export const EventDetailPage: React.FC = () => {
               Live Competition Progress Ticker
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-              <div className="p-4 rounded-2xl bg-[#EAF3FF] border border-blue-100">
-                <p className="text-2xl font-black text-[#0057B8]">1,248</p>
+              <div className="p-4 rounded-2xl bg-[#E6F7F5] border border-teal-100">
+                <p className="text-2xl font-black text-[#03A695]">1,248</p>
                 <p className="text-xs text-slate-600 font-semibold mt-1">Total Students</p>
               </div>
               <div className="p-4 rounded-2xl bg-[#FFF3EC] border border-orange-100">
-                <p className="text-2xl font-black text-[#F36C21]">876</p>
+                <p className="text-2xl font-black text-[#FD5E01]">876</p>
                 <p className="text-xs text-slate-600 font-semibold mt-1">Evaluations Done</p>
               </div>
               <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
@@ -374,15 +374,15 @@ export const EventDetailPage: React.FC = () => {
               </h4>
               <ul className="space-y-2 text-xs text-slate-600">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#0057B8]" />
+                  <CheckCircle2 className="w-4 h-4 text-[#03A695]" />
                   <span>Judges score on a standardized 100-point multi-parameter rubric.</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#0057B8]" />
+                  <CheckCircle2 className="w-4 h-4 text-[#03A695]" />
                   <span>Scores are locked and recorded immediately to prevent score tampering.</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#0057B8]" />
+                  <CheckCircle2 className="w-4 h-4 text-[#03A695]" />
                   <span>Top 3 podium finishes awarded official medals, certificates, and trophies.</span>
                 </li>
               </ul>
@@ -429,7 +429,7 @@ export const EventDetailPage: React.FC = () => {
             <div
               key={c.id}
               onClick={() => navigate('competitions', { compId: c.id })}
-              className="p-5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-300 shadow-card cursor-pointer transition-all"
+              className="p-5 rounded-2xl bg-white border border-slate-200/80 hover:border-teal-300 shadow-card cursor-pointer transition-all"
             >
               <div className="flex items-center justify-between">
                 <Badge variant="primary">{c.category}</Badge>
@@ -441,7 +441,7 @@ export const EventDetailPage: React.FC = () => {
               <p className="text-xs text-slate-500 mt-1 line-clamp-2">{c.description}</p>
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
                 <span>{c.registeredCount} Participants</span>
-                <span className="text-[#0057B8]">{c.assignedJudgesCount} Judges</span>
+                <span className="text-[#03A695]">{c.assignedJudgesCount} Judges</span>
               </div>
             </div>
           ))}
@@ -454,13 +454,13 @@ export const EventDetailPage: React.FC = () => {
             <div
               key={sch.id}
               onClick={() => navigate('schools', { schoolId: sch.id })}
-              className="p-5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-300 shadow-card cursor-pointer transition-all"
+              className="p-5 rounded-2xl bg-white border border-slate-200/80 hover:border-teal-300 shadow-card cursor-pointer transition-all"
             >
               <h4 className="text-sm font-bold text-slate-900">{sch.name}</h4>
               <p className="text-xs text-slate-500">{sch.city}, {sch.state}</p>
               <div className="mt-3 flex items-center justify-between text-xs font-semibold">
                 <span>{sch.totalParticipants} Students</span>
-                <span className="text-[#F36C21]">Avg: {sch.averageScore}%</span>
+                <span className="text-[#FD5E01]">Avg: {sch.averageScore}%</span>
               </div>
             </div>
           ))}
@@ -481,7 +481,7 @@ export const EventDetailPage: React.FC = () => {
                 </Badge>
               </div>
               <p className="text-xs text-slate-500 mt-1">{j.competitionName}</p>
-              <p className="text-xs text-[#0057B8] font-bold mt-2">
+              <p className="text-xs text-[#03A695] font-bold mt-2">
                 {j.completedCount} Evaluated / {j.pendingCount} Pending
               </p>
             </div>
@@ -502,10 +502,10 @@ export const EventDetailPage: React.FC = () => {
             ].map((slot, idx) => (
               <div
                 key={idx}
-                className="p-4 rounded-2xl bg-[#F6F9FD] border border-slate-100 flex items-center justify-between text-xs"
+                className="p-4 rounded-2xl bg-[#F7FCFB] border border-slate-100 flex items-center justify-between text-xs"
               >
                 <div>
-                  <span className="font-bold text-[#0057B8]">{slot.time}</span>
+                  <span className="font-bold text-[#03A695]">{slot.time}</span>
                   <p className="font-bold text-slate-900 mt-0.5">{slot.event}</p>
                 </div>
                 <span className="text-slate-500 font-semibold">{slot.hall}</span>

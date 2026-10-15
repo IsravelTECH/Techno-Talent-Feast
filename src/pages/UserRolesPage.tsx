@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
+import { UserAvatar } from '../components/common/UserAvatar';
 import {
   ShieldCheck,
   UserCheck,
@@ -190,7 +191,7 @@ export const UserRolesPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Administration & Judge Roles Portal
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               Strict 2-Role System
             </span>
           </div>
@@ -210,15 +211,6 @@ export const UserRolesPage: React.FC = () => {
           </Button>
 
           <Button
-            variant="outline"
-            size="sm"
-            icon={<UserCheck className="w-4 h-4" />}
-            onClick={() => navigate('judges')}
-          >
-            Judges Roster
-          </Button>
-
-          <Button
             variant="orange"
             size="sm"
             icon={<Award className="w-4 h-4" />}
@@ -229,42 +221,22 @@ export const UserRolesPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3 Core Quick Access Action Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      {/* 2 Core Quick Access Action Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <button
           onClick={() => navigate('projects')}
-          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#0057B8] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
+          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#03A695] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0057B8] flex items-center justify-center font-black group-hover:bg-[#0057B8] group-hover:text-white transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-[#E6F7F5] text-[#03A695] flex items-center justify-center font-black group-hover:bg-[#03A695] group-hover:text-white transition-colors">
               <FolderKanban className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#0057B8] transition-colors">
+              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#03A695] transition-colors">
                 24 Championship Projects
               </h4>
               <p className="text-[11px] text-slate-500">
                 Problem statements, allowed tools & specs
-              </p>
-            </div>
-          </div>
-          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#0057B8] group-hover:translate-x-0.5 transition-all" />
-        </button>
-
-        <button
-          onClick={() => navigate('judges')}
-          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#0057B8] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-50 text-[#03A695] flex items-center justify-center font-black group-hover:bg-[#03A695] group-hover:text-white transition-colors">
-              <UserCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#03A695] transition-colors">
-                Judges & Jurors Roster
-              </h4>
-              <p className="text-[11px] text-slate-500">
-                36 Evaluators • Track allocations
               </p>
             </div>
           </div>
@@ -273,14 +245,14 @@ export const UserRolesPage: React.FC = () => {
 
         <button
           onClick={() => navigate('assignments')}
-          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#F36C21] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
+          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#FD5E01] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#F36C21] flex items-center justify-center font-black group-hover:bg-[#F36C21] group-hover:text-white transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#FD5E01] flex items-center justify-center font-black group-hover:bg-[#FD5E01] group-hover:text-white transition-colors">
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#F36C21] transition-colors">
+              <h4 className="text-xs font-black text-slate-900 group-hover:text-[#FD5E01] transition-colors">
                 Judge Assignments Desk
               </h4>
               <p className="text-[11px] text-slate-500">
@@ -288,7 +260,7 @@ export const UserRolesPage: React.FC = () => {
               </p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#F36C21] group-hover:translate-x-0.5 transition-all" />
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#FD5E01] group-hover:translate-x-0.5 transition-all" />
         </button>
       </div>
 
@@ -306,7 +278,7 @@ export const UserRolesPage: React.FC = () => {
               onClick={() => setSelectedRoleFilter(tab.id as any)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 selectedRoleFilter === tab.id
-                  ? 'bg-[#0057B8] text-white shadow-xs'
+                  ? 'bg-[#03A695] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
@@ -323,7 +295,7 @@ export const UserRolesPage: React.FC = () => {
             placeholder="Search name, category, organization..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+            className="w-full pl-9 pr-3 py-1.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
           />
         </div>
       </div>
@@ -339,13 +311,9 @@ export const UserRolesPage: React.FC = () => {
               {/* User Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-12 h-12 rounded-2xl object-cover border-2 border-blue-200 ring-2 ring-blue-50 shrink-0"
-                  />
+                  <UserAvatar name={user.name} size="md" variant="color" />
                   <div>
-                    <h3 className="text-sm font-black text-slate-900 group-hover:text-[#0057B8] transition-colors leading-tight">
+                    <h3 className="text-sm font-black text-slate-900 group-hover:text-[#03A695] transition-colors leading-tight">
                       {user.name}
                     </h3>
                     <p className="text-[11px] text-slate-500 mt-0.5">
@@ -361,12 +329,12 @@ export const UserRolesPage: React.FC = () => {
 
               {/* Organization */}
               <div className="mt-3 text-xs text-slate-600 flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-[#0057B8] shrink-0" />
+                <Building2 className="w-3.5 h-3.5 text-[#03A695] shrink-0" />
                 <span className="font-semibold text-slate-800 truncate">{user.organization}</span>
               </div>
 
               {/* Assigned Event Details Box */}
-              <div className="mt-4 p-4 rounded-2xl bg-[#F6F9FD] border border-slate-200/80 space-y-2.5 text-xs">
+              <div className="mt-4 p-4 rounded-2xl bg-[#F7FCFB] border border-slate-200/80 space-y-2.5 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Assigned Event & Venue
@@ -382,11 +350,11 @@ export const UserRolesPage: React.FC = () => {
 
                 <div className="space-y-1 text-[11px] text-slate-600">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 text-[#F36C21] shrink-0" />
+                    <Calendar className="w-3.5 h-3.5 text-[#FD5E01] shrink-0" />
                     <span>{user.assignedEventDate}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-[#0057B8] shrink-0" />
+                    <MapPin className="w-3.5 h-3.5 text-[#03A695] shrink-0" />
                     <span className="truncate">{user.assignedHall}</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -404,7 +372,7 @@ export const UserRolesPage: React.FC = () => {
                     {user.assignedTracks.map((trk, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-0.5 rounded-md bg-blue-50 text-[#0057B8] text-[10px] font-semibold border border-blue-100"
+                        className="px-2 py-0.5 rounded-md bg-[#E6F7F5] text-[#03A695] text-[10px] font-semibold border border-teal-100"
                       >
                         {trk}
                       </span>
@@ -468,8 +436,8 @@ export const UserRolesPage: React.FC = () => {
           }
         >
           <div className="space-y-4 text-xs">
-            <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-100 space-y-1">
-              <strong className="text-[#0057B8] block font-bold">Assigned Championship Responsibilities:</strong>
+            <div className="p-3.5 rounded-2xl bg-[#E6F7F5] border border-teal-100 space-y-1">
+              <strong className="text-[#03A695] block font-bold">Assigned Championship Responsibilities:</strong>
               <p className="text-slate-700">{selectedUserForDetail.assignedEvent} — {selectedUserForDetail.assignedVenue}</p>
             </div>
 

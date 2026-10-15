@@ -43,7 +43,7 @@ export const RubricBuilderPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Rubric Builder & Evaluation Engine
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               Standard 100-pt Framework
             </span>
           </div>
@@ -81,7 +81,7 @@ export const RubricBuilderPage: React.FC = () => {
             onClick={() => setActiveRubricId(id)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
               activeRubricId === id
-                ? 'bg-[#0057B8] text-white shadow-xs'
+                ? 'bg-[#03A695] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
@@ -104,11 +104,11 @@ export const RubricBuilderPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-[#EAF3FF] border border-blue-100 text-center min-w-[120px]">
+            <div className="p-3 rounded-2xl bg-[#E6F7F5] border border-teal-100 text-center min-w-[120px]">
               <span className="text-[10px] font-bold uppercase text-slate-500">
                 Calculated Max Score
               </span>
-              <p className="text-2xl font-black text-[#0057B8]">
+              <p className="text-2xl font-black text-[#03A695]">
                 {totalMaxMarks} <span className="text-xs font-bold text-slate-500">/ 100</span>
               </p>
             </div>
@@ -137,11 +137,11 @@ export const RubricBuilderPage: React.FC = () => {
           {currentRubric.criteria.map((crit, index) => (
             <div
               key={crit.id}
-              className="p-5 rounded-2xl bg-[#F6F9FD] border border-slate-200/80 hover:border-blue-300 transition-all space-y-3 group"
+              className="p-5 rounded-2xl bg-[#F7FCFB] border border-slate-200/80 hover:border-teal-300 transition-all space-y-3 group"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-xs text-[#0057B8] shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-xs text-[#03A695] shrink-0">
                     {index + 1}
                   </div>
                   <input
@@ -150,7 +150,7 @@ export const RubricBuilderPage: React.FC = () => {
                     onChange={(e) =>
                       updateRubricCriterion(activeRubricId, crit.id, 'name', e.target.value)
                     }
-                    className="font-bold text-slate-900 text-sm bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#0057B8] focus:bg-white px-1.5 py-0.5 rounded focus:outline-none flex-1 transition-all"
+                    className="font-bold text-slate-900 text-sm bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#03A695] focus:bg-white px-1.5 py-0.5 rounded focus:outline-none flex-1 transition-all"
                   />
                 </div>
 
@@ -169,7 +169,7 @@ export const RubricBuilderPage: React.FC = () => {
                           Number(e.target.value)
                         )
                       }
-                      className="w-12 text-center font-black text-sm text-[#0057B8] bg-slate-50 rounded border border-slate-200 py-0.5 focus:outline-none"
+                      className="w-12 text-center font-black text-sm text-[#03A695] bg-slate-50 rounded border border-slate-200 py-0.5 focus:outline-none"
                     />
                     <span className="text-xs font-bold text-slate-400">pts</span>
                   </div>
@@ -193,7 +193,7 @@ export const RubricBuilderPage: React.FC = () => {
                   onChange={(e) =>
                     updateRubricCriterion(activeRubricId, crit.id, 'description', e.target.value)
                   }
-                  className="w-full text-xs text-slate-600 bg-white/80 border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:bg-white focus:border-[#0057B8] transition-all resize-none"
+                  className="w-full text-xs text-slate-600 bg-white/80 border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:bg-white focus:border-[#03A695] transition-all resize-none"
                   placeholder="Provide grading guidance for judges..."
                 />
               </div>
@@ -232,9 +232,9 @@ export const RubricBuilderPage: React.FC = () => {
         maxWidth="2xl"
       >
         <div className="space-y-4 text-xs">
-          <div className="p-4 rounded-2xl bg-[#EAF3FF] border border-blue-200 flex items-center justify-between">
-            <span className="font-bold text-[#003B7A]">Standard 100-Point Model</span>
-            <span className="font-black text-[#0057B8] text-sm">{totalMaxMarks} Total Marks</span>
+          <div className="p-4 rounded-2xl bg-[#E6F7F5] border border-teal-200 flex items-center justify-between">
+            <span className="font-bold text-[#0B2545]">Standard 100-Point Model</span>
+            <span className="font-black text-[#03A695] text-sm">{totalMaxMarks} Total Marks</span>
           </div>
 
           <div className="space-y-3">

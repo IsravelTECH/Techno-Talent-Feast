@@ -28,17 +28,17 @@ export const CompetitionsPage: React.FC = () => {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'Robotics':
-        return <Bot className="w-6 h-6 text-[#0057B8]" />;
+        return <Bot className="w-6 h-6 text-[#03A695]" />;
       case 'Coding':
-        return <Code2 className="w-6 h-6 text-[#0057B8]" />;
+        return <Code2 className="w-6 h-6 text-[#03A695]" />;
       case 'AI & Data':
-        return <Cpu className="w-6 h-6 text-[#0057B8]" />;
+        return <Cpu className="w-6 h-6 text-[#03A695]" />;
       case 'STEM':
-        return <Sparkles className="w-6 h-6 text-[#0057B8]" />;
+        return <Sparkles className="w-6 h-6 text-[#03A695]" />;
       case 'Digital Design':
-        return <Layout className="w-6 h-6 text-[#0057B8]" />;
+        return <Layout className="w-6 h-6 text-[#03A695]" />;
       default:
-        return <HelpCircle className="w-6 h-6 text-[#0057B8]" />;
+        return <HelpCircle className="w-6 h-6 text-[#03A695]" />;
     }
   };
 
@@ -61,7 +61,7 @@ export const CompetitionsPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Competitions & Categories
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               {competitions.length} Active Categories
             </span>
           </div>
@@ -93,12 +93,12 @@ export const CompetitionsPage: React.FC = () => {
             <div
               key={comp.id}
               onClick={() => navigate('competition-detail', { compId: comp.id })}
-              className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-300 transition-all p-6 cursor-pointer flex flex-col justify-between group"
+              className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-300 transition-all p-6 cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 {/* Top Row */}
                 <div className="flex items-start justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-[#EAF3FF] border border-blue-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-2xl bg-[#E6F7F5] border border-teal-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                     {getCategoryIcon(comp.category)}
                   </div>
 
@@ -112,7 +112,7 @@ export const CompetitionsPage: React.FC = () => {
                 </div>
 
                 <div className="mt-4">
-                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#0057B8] transition-colors leading-snug">
+                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#03A695] transition-colors leading-snug">
                     {comp.name}
                   </h3>
                   <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
@@ -123,17 +123,17 @@ export const CompetitionsPage: React.FC = () => {
                 {/* Meta details */}
                 <div className="mt-4 space-y-2 text-xs text-slate-600">
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-[#F36C21]" />
+                    <MapPin className="w-3.5 h-3.5 text-[#FD5E01]" />
                     <span className="font-semibold text-slate-800">{comp.venueHall}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5 text-[#0057B8]" />
+                    <Clock className="w-3.5 h-3.5 text-[#03A695]" />
                     <span>{comp.timeLimit} • {comp.gradeEligibility}</span>
                   </div>
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 gap-2 mt-5 p-3 rounded-2xl bg-[#F6F9FD] text-center text-xs">
+                <div className="grid grid-cols-2 gap-2 mt-5 p-3 rounded-2xl bg-[#F7FCFB] text-center text-xs">
                   <div>
                     <span className="block font-black text-slate-900">
                       {comp.completedCount} / {comp.registeredCount}
@@ -143,7 +143,7 @@ export const CompetitionsPage: React.FC = () => {
                     </span>
                   </div>
                   <div>
-                    <span className="block font-black text-[#0057B8]">
+                    <span className="block font-black text-[#03A695]">
                       {comp.assignedJudgesCount} Judges
                     </span>
                     <span className="text-[10px] text-slate-500 font-semibold">
@@ -155,13 +155,13 @@ export const CompetitionsPage: React.FC = () => {
                 {/* Progress bar */}
                 <div className="w-full bg-slate-200 rounded-full h-1.5 mt-3 overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-[#0057B8] to-[#F36C21] rounded-full"
+                    className="h-full bg-gradient-to-r from-[#03A695] to-[#FD5E01] rounded-full"
                     style={{ width: `${completionRate}%` }}
                   />
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#0057B8] group-hover:text-[#003B7A]">
+              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#03A695] group-hover:text-[#0B2545]">
                 <span>Open Arena Workspace</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -185,7 +185,7 @@ export const CompetitionsPage: React.FC = () => {
             <input
               type="text"
               defaultValue="Space Exploration & Rocketry"
-              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8]"
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
               required
             />
           </div>
@@ -334,7 +334,7 @@ export const CompetitionDetailPage: React.FC = () => {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
               activeTab === tab.id
-                ? 'bg-[#0057B8] text-white shadow-xs'
+                ? 'bg-[#03A695] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
@@ -349,16 +349,16 @@ export const CompetitionDetailPage: React.FC = () => {
           <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card space-y-6">
             <h3 className="text-base font-bold text-slate-900">Arena Statistics</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-              <div className="p-4 rounded-2xl bg-[#F6F9FD]">
+              <div className="p-4 rounded-2xl bg-[#F7FCFB]">
                 <p className="text-2xl font-black text-slate-900">{comp.registeredCount}</p>
                 <p className="text-xs text-slate-500 font-semibold mt-1">Total Entries</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#EAF3FF]">
-                <p className="text-2xl font-black text-[#0057B8]">{comp.completedCount}</p>
+              <div className="p-4 rounded-2xl bg-[#E6F7F5]">
+                <p className="text-2xl font-black text-[#03A695]">{comp.completedCount}</p>
                 <p className="text-xs text-slate-500 font-semibold mt-1">Evaluated</p>
               </div>
               <div className="p-4 rounded-2xl bg-[#FFF3EC]">
-                <p className="text-2xl font-black text-[#F36C21]">{comp.pendingCount}</p>
+                <p className="text-2xl font-black text-[#FD5E01]">{comp.pendingCount}</p>
                 <p className="text-xs text-slate-500 font-semibold mt-1">Pending</p>
               </div>
               <div className="p-4 rounded-2xl bg-emerald-50">
@@ -377,7 +377,7 @@ export const CompetitionDetailPage: React.FC = () => {
                   {comp.allowedTools.map((tool) => (
                     <span
                       key={tool}
-                      className="px-3 py-1 rounded-xl bg-blue-50 text-[#0057B8] font-bold text-xs border border-blue-100"
+                      className="px-3 py-1 rounded-xl bg-[#E6F7F5] text-[#03A695] font-bold text-xs border border-teal-100"
                     >
                       {tool}
                     </span>
@@ -442,10 +442,10 @@ export const CompetitionDetailPage: React.FC = () => {
             {comp.projects?.map((prj, i) => (
               <div
                 key={prj.id}
-                className="p-5 rounded-2xl bg-[#F6F9FD] border border-slate-200/80 hover:border-blue-300 transition-all space-y-2"
+                className="p-5 rounded-2xl bg-[#F7FCFB] border border-slate-200/80 hover:border-teal-300 transition-all space-y-2"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-lg bg-[#0057B8] text-white text-xs font-extrabold flex items-center justify-center shrink-0">
+                  <span className="w-7 h-7 rounded-lg bg-[#03A695] text-white text-xs font-extrabold flex items-center justify-center shrink-0">
                     {i + 1}
                   </span>
                   <h4 className="font-extrabold text-slate-900 text-sm">{prj.title}</h4>
@@ -503,7 +503,7 @@ export const CompetitionDetailPage: React.FC = () => {
               <h3 className="text-base font-bold text-slate-900">{rubric.name}</h3>
               <p className="text-xs text-slate-500">{rubric.description}</p>
             </div>
-            <span className="px-3 py-1 rounded-xl bg-[#EAF3FF] text-[#0057B8] font-black text-sm">
+            <span className="px-3 py-1 rounded-xl bg-[#E6F7F5] text-[#03A695] font-black text-sm">
               Total: {rubric.maxScore} Marks
             </span>
           </div>
@@ -512,7 +512,7 @@ export const CompetitionDetailPage: React.FC = () => {
             {rubric.criteria.map((crit, idx) => (
               <div
                 key={crit.id}
-                className="p-4 rounded-2xl bg-[#F6F9FD] border border-slate-100 flex items-center justify-between text-xs"
+                className="p-4 rounded-2xl bg-[#F7FCFB] border border-slate-100 flex items-center justify-between text-xs"
               >
                 <div>
                   <span className="font-bold text-slate-900">
@@ -520,7 +520,7 @@ export const CompetitionDetailPage: React.FC = () => {
                   </span>
                   <p className="text-slate-500 mt-0.5">{crit.description}</p>
                 </div>
-                <span className="font-black text-[#0057B8] text-sm shrink-0 pl-4">
+                <span className="font-black text-[#03A695] text-sm shrink-0 pl-4">
                   {crit.maxMarks} pts
                 </span>
               </div>

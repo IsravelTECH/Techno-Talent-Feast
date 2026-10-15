@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
+import { UserAvatar } from '../components/common/UserAvatar';
 import {
   Users,
   Search,
@@ -58,7 +59,7 @@ export const ParticipantsPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Participants Management
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               1,248 Total
             </span>
           </div>
@@ -97,7 +98,7 @@ export const ParticipantsPage: React.FC = () => {
             placeholder="Search student, ID, project..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+            className="w-full pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
           />
         </div>
 
@@ -105,7 +106,7 @@ export const ParticipantsPage: React.FC = () => {
         <select
           value={selectedSchoolFilter}
           onChange={(e) => setSelectedSchoolFilter(e.target.value)}
-          className="w-full px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#0057B8]"
+          className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#03A695]"
         >
           <option value="ALL">All Participating Schools ({schools.length})</option>
           {schools.map((s) => (
@@ -119,7 +120,7 @@ export const ParticipantsPage: React.FC = () => {
         <select
           value={selectedCompFilter}
           onChange={(e) => setSelectedCompFilter(e.target.value)}
-          className="w-full px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#0057B8]"
+          className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#03A695]"
         >
           <option value="ALL">All Competitions ({competitions.length})</option>
           {competitions.map((c) => (
@@ -133,7 +134,7 @@ export const ParticipantsPage: React.FC = () => {
         <select
           value={selectedStatusFilter}
           onChange={(e) => setSelectedStatusFilter(e.target.value)}
-          className="w-full px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#0057B8]"
+          className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#03A695]"
         >
           <option value="ALL">All Evaluation Statuses</option>
           <option value="SUBMITTED">Evaluated & Locked</option>
@@ -166,17 +167,18 @@ export const ParticipantsPage: React.FC = () => {
                 >
                   <td className="py-4 pl-6">
                     <div className="flex items-center gap-3">
-                      <img
-                        src={p.photo}
-                        alt={p.name}
-                        className="w-9 h-9 rounded-xl object-cover border border-slate-200 shrink-0"
-                      />
+                      <UserAvatar name={p.name} size="sm" variant="color" />
                       <div>
-                        <span className="font-bold text-slate-900 group-hover:text-[#0057B8] transition-colors block">
-                          {p.name}
-                        </span>
-                        <span className="text-[11px] text-slate-400 font-mono">
-                          {p.participantId} {p.teamName ? `• ${p.teamName}` : ''}
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono text-[10px] font-bold text-[#03A695] bg-[#E6F7F5] px-1.5 py-0.5 rounded border border-teal-200">
+                            {p.teamId || p.participantId}
+                          </span>
+                          <span className="font-bold text-slate-900 group-hover:text-[#03A695] transition-colors block">
+                            {p.teamName || p.name}
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-slate-500 font-medium">
+                          {p.name} {p.teamMembers ? `(${p.teamMembers.length} members)` : ''}
                         </span>
                       </div>
                     </div>
@@ -187,7 +189,7 @@ export const ParticipantsPage: React.FC = () => {
                   <td className="py-4 px-4 text-slate-600 font-bold">
                     Grade {p.grade}
                   </td>
-                  <td className="py-4 px-4 font-semibold text-[#0057B8]">
+                  <td className="py-4 px-4 font-semibold text-[#03A695]">
                     {p.competitionName}
                   </td>
                   <td className="py-4 px-4">
@@ -235,12 +237,11 @@ export const ParticipantsPage: React.FC = () => {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        loadParticipantForScoring(p.id);
-                        navigate('scoring', { partId: p.id, compId: p.competitionId });
+                        navigate('participant-detail', { partId: p.id, compId: p.competitionId });
                       }}
                     >
                       <FileCheck2 className="w-3.5 h-3.5" />
-                      <span>Score</span>
+                      <span>Dossier</span>
                     </Button>
                   </td>
                 </tr>
@@ -256,7 +257,7 @@ export const ParticipantsPage: React.FC = () => {
             <button className="px-3 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-50">
               Previous
             </button>
-            <span className="px-3 py-1 rounded-lg bg-[#0057B8] text-white font-bold">1</span>
+            <span className="px-3 py-1 rounded-lg bg-[#03A695] text-white font-bold">1</span>
             <button className="px-3 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100">
               2
             </button>
@@ -275,8 +276,8 @@ export const ParticipantsPage: React.FC = () => {
         subtitle="Upload Excel (.xlsx) or CSV roster file"
       >
         <div className="space-y-4 text-xs">
-          <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center bg-slate-50/50 hover:bg-blue-50/30 transition-colors">
-            <Upload className="w-8 h-8 text-[#0057B8] mx-auto mb-2" />
+          <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center bg-slate-50/50 hover:bg-[#E6F7F5]/30 transition-colors">
+            <Upload className="w-8 h-8 text-[#03A695] mx-auto mb-2" />
             <p className="font-bold text-slate-800">
               Drag and drop student roster spreadsheet here
             </p>
@@ -325,7 +326,7 @@ export const ParticipantDetailPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate('participants')}
-          className="text-xs font-bold text-[#0057B8] hover:underline flex items-center gap-1"
+          className="text-xs font-bold text-[#03A695] hover:underline flex items-center gap-1"
         >
           ← Back to Participants Roster
         </button>
@@ -344,11 +345,10 @@ export const ParticipantDetailPage: React.FC = () => {
             size="sm"
             icon={<FileCheck2 className="w-3.5 h-3.5" />}
             onClick={() => {
-              loadParticipantForScoring(participant.id);
-              navigate('scoring', { partId: participant.id, compId: participant.competitionId });
+              navigate('results');
             }}
           >
-            Evaluate / Re-Score
+            Championship Results
           </Button>
         </div>
       </div>
@@ -357,11 +357,7 @@ export const ParticipantDetailPage: React.FC = () => {
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card p-6 lg:p-8">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6 justify-between border-b border-slate-100 pb-6">
           <div className="flex items-center gap-5">
-            <img
-              src={participant.photo}
-              alt={participant.name}
-              className="w-20 h-20 rounded-2xl object-cover border-2 border-blue-200 ring-4 ring-blue-50 shadow-md"
-            />
+            <UserAvatar name={participant.name} size="xl" variant="color" />
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">
@@ -380,7 +376,7 @@ export const ParticipantDetailPage: React.FC = () => {
                 )}
               </div>
 
-              <p className="text-xs text-[#0057B8] font-mono font-bold mt-1">
+              <p className="text-xs text-[#03A695] font-mono font-bold mt-1">
                 Participant ID: {participant.participantId}
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -390,7 +386,7 @@ export const ParticipantDetailPage: React.FC = () => {
           </div>
 
           {/* Score Highlight Box */}
-          <div className="bg-gradient-to-br from-[#003B7A] to-[#0057B8] text-white p-4 rounded-2xl text-center min-w-[160px] shadow-md">
+          <div className="bg-gradient-to-br from-[#0B2545] to-[#03A695] text-white p-4 rounded-2xl text-center min-w-[160px] shadow-md">
             <span className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
               Official Score
             </span>
@@ -437,7 +433,7 @@ export const ParticipantDetailPage: React.FC = () => {
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Project Demonstration
             </h3>
-            <div className="p-3.5 rounded-2xl bg-[#F6F9FD] border border-slate-100 text-xs">
+            <div className="p-3.5 rounded-2xl bg-[#F7FCFB] border border-slate-100 text-xs">
               <p className="font-bold text-slate-900">{participant.projectTitle}</p>
               <p className="text-slate-600 mt-1 leading-relaxed">{participant.projectSummary}</p>
             </div>
@@ -446,32 +442,59 @@ export const ParticipantDetailPage: React.FC = () => {
 
         {/* Official Criteria Breakdown */}
         {participant.status === 'SUBMITTED' && (
-          <div className="mt-8 pt-6 border-t border-slate-100">
-            <h3 className="text-sm font-bold text-slate-900 mb-4">
-              Rubric Criteria Score Breakdown
-            </h3>
+          <div className="mt-8 pt-6 border-t border-slate-100 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">
+                Official 100-Point Rubric Score Breakdown
+              </h3>
+              <span className="text-xs text-slate-500 font-medium">
+                Evaluated by <strong className="text-slate-900">{participant.evaluatedByJudgeName || participant.assignedJudgeName || 'Official Juror'}</strong> • {participant.submissionTimestamp || '10:30 AM'}
+              </span>
+            </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center text-xs">
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-slate-500 font-semibold block">Innovation</span>
-                <span className="text-base font-black text-[#0057B8]">18 / 20</span>
+              <div className="p-3.5 rounded-2xl bg-[#E6F7F5]/50 border border-teal-200">
+                <span className="text-slate-500 font-semibold block text-[11px]">1. Technical Execution</span>
+                <span className="text-lg font-black text-[#03A695] mt-1 block">
+                  {participant.criterionScores?.['crit-tech'] ?? 28} / 30
+                </span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-slate-500 font-semibold block">Technical</span>
-                <span className="text-base font-black text-[#0057B8]">19 / 20</span>
+              <div className="p-3.5 rounded-2xl bg-[#E6F7F5]/50 border border-teal-200">
+                <span className="text-slate-500 font-semibold block text-[11px]">2. Innovation</span>
+                <span className="text-lg font-black text-[#03A695] mt-1 block">
+                  {participant.criterionScores?.['crit-innov'] ?? 24} / 25
+                </span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-slate-500 font-semibold block">Creativity</span>
-                <span className="text-base font-black text-[#0057B8]">17 / 20</span>
+              <div className="p-3.5 rounded-2xl bg-[#E6F7F5]/50 border border-teal-200">
+                <span className="text-slate-500 font-semibold block text-[11px]">3. Design & UX</span>
+                <span className="text-lg font-black text-[#03A695] mt-1 block">
+                  {participant.criterionScores?.['crit-design'] ?? 19} / 20
+                </span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-slate-500 font-semibold block">Presentation</span>
-                <span className="text-base font-black text-[#0057B8]">20 / 20</span>
+              <div className="p-3.5 rounded-2xl bg-[#E6F7F5]/50 border border-teal-200">
+                <span className="text-slate-500 font-semibold block text-[11px]">4. Demo & Defense</span>
+                <span className="text-lg font-black text-[#03A695] mt-1 block">
+                  {participant.criterionScores?.['crit-demo'] ?? 14} / 15
+                </span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-slate-500 font-semibold block">Execution</span>
-                <span className="text-base font-black text-[#0057B8]">18 / 20</span>
+              <div className="p-3.5 rounded-2xl bg-[#E6F7F5]/50 border border-teal-200">
+                <span className="text-slate-500 font-semibold block text-[11px]">5. Documentation</span>
+                <span className="text-lg font-black text-[#03A695] mt-1 block">
+                  {participant.criterionScores?.['crit-doc'] ?? 9} / 10
+                </span>
               </div>
             </div>
+
+            {participant.judgeRemarks && (
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                  Juror Technical Evaluation Remarks:
+                </span>
+                <p className="text-slate-700 italic leading-relaxed">
+                  "{participant.judgeRemarks}"
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

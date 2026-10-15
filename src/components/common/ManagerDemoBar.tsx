@@ -18,13 +18,11 @@ export const ManagerDemoBar: React.FC = () => {
   const demoSteps = [
     { label: 'Admin Dashboard', page: 'dashboard', role: 'admin' as const },
     { label: 'User Roles & Events', page: 'roles', role: 'admin' as const },
-    { label: 'Events 2026', page: 'events', role: 'admin' as const },
     { label: 'Competitions', page: 'competitions', role: 'admin' as const },
     { label: 'Rubric Builder', page: 'rubrics', role: 'admin' as const },
-    { label: 'Judges Roster', page: 'judges', role: 'admin' as const },
+    { label: 'Judge Assignments', page: 'assignments', role: 'admin' as const },
     { label: 'Judge Scoring (Live)', page: 'scoring', role: 'judge' as const },
     { label: 'Live Leaderboard', page: 'leaderboard', role: 'admin' as const },
-    { label: 'Event Overview', page: 'events', role: 'admin' as const },
     { label: 'Official Results', page: 'results', role: 'admin' as const }
   ];
 

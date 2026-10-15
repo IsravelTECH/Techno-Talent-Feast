@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
+import { UserAvatar } from '../components/common/UserAvatar';
 import {
   Medal,
   Trophy,
@@ -39,7 +40,7 @@ export const LiveLeaderboardPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-[#003B7A] via-[#0057B8] to-[#004899] text-white p-6 lg:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-gradient-to-r from-[#0B2545] via-[#03A695] to-[#004899] text-white p-6 lg:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             <Badge variant="live" dot>
@@ -57,17 +58,6 @@ export const LiveLeaderboardPage: React.FC = () => {
             Official multi-arena talent standings computed from verified evaluator scores
           </p>
         </div>
-
-        <div className="flex items-center gap-3 shrink-0">
-          <Button
-            variant="orange"
-            size="md"
-            icon={<Radio className="w-4 h-4 animate-pulse" />}
-            onClick={() => navigate('live')}
-          >
-            Launch Fullscreen /live Scoreboard
-          </Button>
-        </div>
       </div>
 
       {/* Filter Toolbar */}
@@ -79,7 +69,7 @@ export const LiveLeaderboardPage: React.FC = () => {
             placeholder="Search participant or school..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+            className="w-full pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
           />
         </div>
 
@@ -87,7 +77,7 @@ export const LiveLeaderboardPage: React.FC = () => {
           <select
             value={selectedCompFilter}
             onChange={(e) => setSelectedCompFilter(e.target.value)}
-            className="px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-medium text-slate-700 w-full sm:w-auto"
+            className="px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-700 w-full sm:w-auto"
           >
             <option value="ALL">All Competitions (Overall Standings)</option>
             {competitions.map((c) => (
@@ -108,10 +98,10 @@ export const LiveLeaderboardPage: React.FC = () => {
             className="bg-white rounded-3xl border border-slate-200/80 shadow-card p-6 text-center hover:shadow-card-hover hover:border-slate-400 transition-all cursor-pointer md:order-1"
           >
             <div className="relative inline-block mb-3">
-              <img
-                src={top3[1].photo}
-                alt={top3[1].participantName}
-                className="w-20 h-20 rounded-2xl object-cover border-4 border-slate-200 mx-auto shadow-md"
+              <UserAvatar
+                name={top3[1].participantName}
+                size="xl"
+                className="w-20 h-20 text-2xl mx-auto rounded-2xl border-4 border-slate-200 shadow-md"
               />
               <span className="absolute -top-2.5 -right-2.5 w-8 h-8 rounded-xl bg-slate-200 text-slate-800 font-black text-sm flex items-center justify-center shadow-sm">
                 🥈
@@ -128,11 +118,11 @@ export const LiveLeaderboardPage: React.FC = () => {
               {top3[1].schoolName}
             </p>
 
-            <div className="mt-4 p-3 rounded-2xl bg-[#F6F9FD] border border-slate-100">
+            <div className="mt-4 p-3 rounded-2xl bg-[#F7FCFB] border border-slate-100">
               <span className="text-2xl font-black text-slate-800">
                 {top3[1].score}%
               </span>
-              <span className="text-[11px] text-[#0057B8] block font-bold mt-0.5">
+              <span className="text-[11px] text-[#03A695] block font-bold mt-0.5">
                 {top3[1].competitionName}
               </span>
             </div>
@@ -141,17 +131,17 @@ export const LiveLeaderboardPage: React.FC = () => {
           {/* Rank 1 (Gold - Hero Center) */}
           <div
             onClick={() => navigate('participant-detail', { partId: top3[0].participantId })}
-            className="bg-gradient-to-br from-[#003B7A] via-[#0057B8] to-[#004899] text-white rounded-3xl shadow-xl p-8 text-center hover:scale-[1.02] transition-all cursor-pointer border-2 border-amber-400/50 md:order-2 md:-translate-y-2 relative overflow-hidden"
+            className="bg-gradient-to-br from-[#0B2545] via-[#03A695] to-[#004899] text-white rounded-3xl shadow-xl p-8 text-center hover:scale-[1.02] transition-all cursor-pointer border-2 border-amber-400/50 md:order-2 md:-translate-y-2 relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 p-3">
               <Sparkles className="w-5 h-5 text-amber-300" />
             </div>
 
             <div className="relative inline-block mb-3">
-              <img
-                src={top3[0].photo}
-                alt={top3[0].participantName}
-                className="w-24 h-24 rounded-2xl object-cover border-4 border-amber-400 mx-auto shadow-xl ring-4 ring-amber-400/20"
+              <UserAvatar
+                name={top3[0].participantName}
+                size="xl"
+                className="w-24 h-24 text-3xl mx-auto rounded-2xl border-4 border-amber-400 shadow-xl ring-4 ring-amber-400/20"
               />
               <span className="absolute -top-3 -right-3 w-10 h-10 rounded-xl bg-amber-400 text-amber-950 font-black text-base flex items-center justify-center shadow-lg">
                 🥇
@@ -184,10 +174,10 @@ export const LiveLeaderboardPage: React.FC = () => {
             className="bg-white rounded-3xl border border-slate-200/80 shadow-card p-6 text-center hover:shadow-card-hover hover:border-orange-300 transition-all cursor-pointer md:order-3"
           >
             <div className="relative inline-block mb-3">
-              <img
-                src={top3[2].photo}
-                alt={top3[2].participantName}
-                className="w-20 h-20 rounded-2xl object-cover border-4 border-orange-200 mx-auto shadow-md"
+              <UserAvatar
+                name={top3[2].participantName}
+                size="xl"
+                className="w-20 h-20 text-2xl mx-auto rounded-2xl border-4 border-orange-200 shadow-md"
               />
               <span className="absolute -top-2.5 -right-2.5 w-8 h-8 rounded-xl bg-orange-100 text-orange-900 font-black text-sm flex items-center justify-center shadow-sm">
                 🥉
@@ -204,11 +194,11 @@ export const LiveLeaderboardPage: React.FC = () => {
               {top3[2].schoolName}
             </p>
 
-            <div className="mt-4 p-3 rounded-2xl bg-[#F6F9FD] border border-slate-100">
+            <div className="mt-4 p-3 rounded-2xl bg-[#F7FCFB] border border-slate-100">
               <span className="text-2xl font-black text-slate-800">
                 {top3[2].score}%
               </span>
-              <span className="text-[11px] text-[#0057B8] block font-bold mt-0.5">
+              <span className="text-[11px] text-[#03A695] block font-bold mt-0.5">
                 {top3[2].competitionName}
               </span>
             </div>
@@ -251,7 +241,7 @@ export const LiveLeaderboardPage: React.FC = () => {
                       #{item.rank}
                     </span>
                   </td>
-                  <td className="py-4 px-4 font-bold text-slate-900 group-hover:text-[#0057B8]">
+                  <td className="py-4 px-4 font-bold text-slate-900 group-hover:text-[#03A695]">
                     {item.participantName}
                     <span className="block text-[11px] text-slate-400 font-mono font-normal">
                       {item.participantCode}
@@ -260,7 +250,7 @@ export const LiveLeaderboardPage: React.FC = () => {
                   <td className="py-4 px-4 text-slate-700 font-semibold">
                     {item.schoolName}
                   </td>
-                  <td className="py-4 px-4 font-semibold text-[#0057B8]">
+                  <td className="py-4 px-4 font-semibold text-[#03A695]">
                     {item.competitionName}
                   </td>
                   <td className="py-4 px-4 text-center">

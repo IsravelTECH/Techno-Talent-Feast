@@ -16,8 +16,8 @@ export const Badge: React.FC<BadgeProps> = ({
   dot = false
 }) => {
   const variantStyles = {
-    primary: 'bg-[#EAF3FF] text-[#0057B8] border-blue-200',
-    orange: 'bg-[#FFF3EC] text-[#F36C21] border-orange-200',
+    primary: 'bg-[#E6F7F5] text-[#03A695] border-teal-200',
+    orange: 'bg-[#FFF3EC] text-[#FD5E01] border-orange-200',
     success: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     warning: 'bg-amber-50 text-amber-800 border-amber-200',
     danger: 'bg-red-50 text-red-700 border-red-200',
@@ -26,8 +26,8 @@ export const Badge: React.FC<BadgeProps> = ({
   };
 
   const dotColors = {
-    primary: 'bg-[#0057B8]',
-    orange: 'bg-[#F36C21]',
+    primary: 'bg-[#03A695]',
+    orange: 'bg-[#FD5E01]',
     success: 'bg-emerald-500',
     warning: 'bg-amber-500',
     danger: 'bg-red-500',

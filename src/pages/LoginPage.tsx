@@ -4,60 +4,78 @@ import { TechnoLogo } from '../components/common/TechnoLogo';
 import {
   ShieldCheck,
   UserCheck,
-  Users,
-  Eye,
   ArrowRight,
   Lock,
   Mail,
   Sparkles,
-  Trophy,
   CheckCircle2,
-  Radio
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { loginAs, navigate } = useApp();
-  const [email, setEmail] = useState('admin@technoschool.in');
-  const [password, setPassword] = useState('••••••••••••');
+  const { loginWithCredentials } = useApp();
+  const [email, setEmail] = useState('isravel@gmail.com');
+  const [password, setPassword] = useState('123456');
   const [rememberMe, setRememberMe] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    loginAs('admin');
+    setError(null);
+    setLoading(true);
+    const res = await loginWithCredentials(email, password);
+    setLoading(false);
+    if (!res.success) {
+      setError(res.error || 'Invalid credentials. Please verify your email and password.');
+    }
+  };
+
+  const handlePersonaClick = async (targetEmail: string, targetPass: string) => {
+    setEmail(targetEmail);
+    setPassword(targetPass);
+    setError(null);
+    setLoading(true);
+    const res = await loginWithCredentials(targetEmail, targetPass);
+    setLoading(false);
+    if (!res.success) {
+      setError(res.error || 'Could not authenticate persona.');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F9FD] flex flex-col justify-between">
+    <div className="min-h-screen bg-[#F7FCFB] flex flex-col justify-between">
       {/* Top Banner */}
-      <div className="bg-[#003B7A] text-white py-2 px-4 text-center text-xs font-semibold flex items-center justify-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-[#F36C21] animate-pulse" />
+      <div className="bg-[#0B2545] text-white py-2 px-4 text-center text-xs font-semibold flex items-center justify-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-[#FD5E01] animate-pulse" />
         <span>TECHNO TALENT FEAST 2026 — LIVE COMPETITION MANAGEMENT PLATFORM</span>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div className="max-w-5xl w-full bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[620px]">
           {/* Left Column: Brand Hero Showcase */}
-          <div className="lg:col-span-6 bg-gradient-to-br from-[#0057B8] via-[#004899] to-[#003B7A] p-8 lg:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="lg:col-span-6 bg-gradient-to-br from-[#03A695] via-[#004899] to-[#0B2545] p-8 lg:p-12 text-white flex flex-col justify-between relative overflow-hidden">
             {/* Background Decorative Rings */}
             <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/5 blur-2xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-[#F36C21]/15 blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-[#FD5E01]/15 blur-2xl pointer-events-none" />
 
             <div>
               <div className="flex items-center justify-between">
                 <TechnoLogo variant="white" size="lg" />
                 <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-blue-100 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#F36C21]" />
+                  <span className="w-2 h-2 rounded-full bg-[#FD5E01]" />
                   Grand Edition
                 </span>
               </div>
 
               <div className="mt-10">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/10 text-orange-200 border border-white/15 text-xs font-bold tracking-wide uppercase mb-4">
-                  <Sparkles className="w-3.5 h-3.5 text-[#F36C21]" />
+                  <Sparkles className="w-3.5 h-3.5 text-[#FD5E01]" />
                   Powered by TechnoSchool
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
-                  TECHNO TALENT <span className="text-[#F36C21]">FEAST</span>
+                  TECHNO TALENT <span className="text-[#FD5E01]">FEAST</span>
                 </h1>
                 <p className="text-blue-100 text-sm mt-3 leading-relaxed">
                   Manage competitions, evaluate student talent with dynamic rubrics, and track leaderboard rankings in real time.
@@ -67,13 +85,13 @@ export const LoginPage: React.FC = () => {
               {/* Key Features List */}
               <div className="mt-8 space-y-3">
                 {[
-                  'Live multi-criteria scoring with automatic calculation',
-                  'Instant real-time leaderboard and stadium projector view',
-                  'Role-based security for Admins, Judges, and Schools',
-                  'Comprehensive analytics and official verified certificates'
+                  'Live multi-criteria scoring with automatic 100-point calculation',
+                  'Instant real-time leaderboard and administrator review',
+                  'Strict 2-role architecture: Administration and Judges only',
+                  'Real-time persistence backed by MongoDB Atlas'
                 ].map((feature, idx) => (
                   <div key={idx} className="flex items-center gap-3 text-xs text-blue-100">
-                    <CheckCircle2 className="w-4 h-4 text-[#F36C21] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#FD5E01] shrink-0" />
                     <span>{feature}</span>
                   </div>
                 ))}
@@ -87,7 +105,7 @@ export const LoginPage: React.FC = () => {
                 <p className="text-[11px] text-blue-200 font-medium mt-0.5">Participants</p>
               </div>
               <div>
-                <p className="text-2xl font-black text-[#F36C21]">42</p>
+                <p className="text-2xl font-black text-[#FD5E01]">42</p>
                 <p className="text-[11px] text-blue-200 font-medium mt-0.5">Schools</p>
               </div>
               <div>
@@ -105,9 +123,16 @@ export const LoginPage: React.FC = () => {
                   Account Sign In
                 </h2>
                 <p className="text-xs text-[#64748B] mt-1">
-                  Enter your credentials or use 1-click demo access below
+                  Enter your verified credentials or select quick-launch persona below
                 </p>
               </div>
+
+              {error && (
+                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2.5 text-xs text-red-700 font-medium animate-shake">
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -117,11 +142,11 @@ export const LoginPage: React.FC = () => {
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
-                      type="text"
+                      type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0057B8]/20 focus:border-[#0057B8] transition-all"
-                      placeholder="name@technoschool.in"
+                      className="w-full pl-10 pr-4 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695] transition-all"
+                      placeholder="isravel@gmail.com"
                       required
                     />
                   </div>
@@ -132,9 +157,7 @@ export const LoginPage: React.FC = () => {
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                       Password
                     </label>
-                    <a href="#forgot" className="text-xs font-semibold text-[#0057B8] hover:underline">
-                      Forgot Password?
-                    </a>
+                    <span className="text-[11px] text-slate-400 font-medium">Default: 123456</span>
                   </div>
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -142,7 +165,8 @@ export const LoginPage: React.FC = () => {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0057B8]/20 focus:border-[#0057B8] transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695] transition-all"
+                      placeholder="••••••"
                       required
                     />
                   </div>
@@ -154,7 +178,7 @@ export const LoginPage: React.FC = () => {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-slate-300 text-[#0057B8] focus:ring-[#0057B8]"
+                      className="w-4 h-4 rounded border-slate-300 text-[#03A695] focus:ring-[#03A695]"
                     />
                     <span className="text-xs text-slate-600 font-medium">Remember this device</span>
                   </label>
@@ -162,82 +186,70 @@ export const LoginPage: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 bg-[#0057B8] hover:bg-[#004899] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-blue-900/15 flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
+                  disabled={loading}
+                  className="w-full py-3 px-4 bg-[#03A695] hover:bg-[#004899] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-teal-900/15 flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer disabled:opacity-60"
                 >
-                  <span>LOGIN TO WORKSPACE</span>
-                  <ArrowRight className="w-4 h-4" />
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>AUTHENTICATING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>LOGIN TO WORKSPACE</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
               </form>
             </div>
 
-            {/* 1-Click Demo Profiles for Manager Presentation */}
+            {/* Quick Demo Personas with MongoDB Atlas credentials */}
             <div className="mt-8 pt-6 border-t border-slate-100">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  Select Demo Persona
+                  Verified Competition Personas
                 </span>
-                <span className="text-[11px] font-semibold text-[#F36C21]">Instant Launch</span>
+                <span className="text-[11px] font-semibold text-[#FD5E01]">Atlas MongoDB Connected</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => loginAs('admin')}
-                  className="p-3 rounded-xl border border-blue-200 bg-[#EAF3FF]/60 hover:bg-[#EAF3FF] text-left transition-all group cursor-pointer"
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handlePersonaClick('isravel@gmail.com', '123456')}
+                  className="p-3.5 rounded-2xl border-2 border-teal-200 bg-[#E6F7F5]/80 hover:bg-[#E6F7F5] text-left transition-all group cursor-pointer shadow-xs disabled:opacity-50"
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-[#0057B8] text-white flex items-center justify-center">
-                      <ShieldCheck className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#03A695] text-white flex items-center justify-center font-bold">
+                      <ShieldCheck className="w-4 h-4" />
                     </div>
-                    <span className="text-xs font-bold text-[#003B7A] group-hover:text-[#0057B8]">
-                      Super Admin
-                    </span>
+                    <div>
+                      <span className="text-xs font-black text-[#0B2545] group-hover:text-[#03A695] block">
+                        ADMINISTRATION
+                      </span>
+                      <p className="text-[10px] text-slate-500 font-semibold truncate">isravel@gmail.com</p>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-slate-600 mt-1">Full Command Center</p>
                 </button>
 
                 <button
-                  onClick={() => loginAs('judge')}
-                  className="p-3 rounded-xl border border-orange-200 bg-[#FFF3EC]/70 hover:bg-[#FFF3EC] text-left transition-all group cursor-pointer"
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handlePersonaClick('judge@gmail.com', '123456')}
+                  className="p-3.5 rounded-2xl border-2 border-orange-200 bg-[#FFF3EC]/90 hover:bg-[#FFF3EC] text-left transition-all group cursor-pointer shadow-xs disabled:opacity-50"
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-[#F36C21] text-white flex items-center justify-center">
-                      <UserCheck className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#FD5E01] text-white flex items-center justify-center font-bold">
+                      <UserCheck className="w-4 h-4" />
                     </div>
-                    <span className="text-xs font-bold text-amber-900 group-hover:text-[#F36C21]">
-                      Judge Priya
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 mt-1">Robotics Scoring Panel</p>
-                </button>
-
-                <button
-                  onClick={() => loginAs('judge')}
-                  className="p-3 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-50 text-left transition-all group cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-[#0057B8] text-white flex items-center justify-center">
-                      <UserCheck className="w-3.5 h-3.5" />
+                    <div>
+                      <span className="text-xs font-black text-amber-950 group-hover:text-[#FD5E01] block">
+                        JUDGE ROLE
+                      </span>
+                      <p className="text-[10px] text-slate-500 font-semibold truncate">judge@gmail.com</p>
                     </div>
-                    <span className="text-xs font-bold text-slate-800">
-                      Juror Tariq
-                    </span>
                   </div>
-                  <p className="text-[11px] text-slate-600 mt-1">Smart City & IoT Track</p>
-                </button>
-
-                <button
-                  onClick={() => navigate('live')}
-                  className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-50 text-left transition-all group cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
-                      <Radio className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="text-xs font-bold text-emerald-900">
-                      Live Scoreboard
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 mt-1">Projector Display</p>
                 </button>
               </div>
             </div>

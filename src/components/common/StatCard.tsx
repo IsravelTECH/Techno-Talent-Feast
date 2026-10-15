@@ -27,15 +27,15 @@ export const StatCard: React.FC<StatCardProps> = ({
       onClick={onClick}
       className={`relative p-5 rounded-2xl border transition-all duration-200 ${
         highlight
-          ? 'bg-gradient-to-br from-[#0057B8] to-[#003B7A] text-white border-blue-600 shadow-lg shadow-blue-900/15'
-          : 'bg-white text-slate-800 border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-200'
+          ? 'bg-gradient-to-br from-[#03A695] to-[#0B2545] text-white border-teal-500 shadow-lg shadow-teal-900/15'
+          : 'bg-white text-slate-800 border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-200'
       } ${onClick ? 'cursor-pointer' : ''}`}
     >
       <div className="flex items-start justify-between">
         <div>
           <p
             className={`text-xs font-semibold tracking-wider uppercase ${
-              highlight ? 'text-blue-100' : 'text-[#64748B]'
+              highlight ? 'text-teal-100' : 'text-[#64748B]'
             }`}
           >
             {title}
@@ -52,7 +52,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
             highlight
               ? 'bg-white/15 text-white backdrop-blur-xs'
-              : 'bg-[#EAF3FF] text-[#0057B8]'
+              : 'bg-[#E6F7F5] text-[#03A695]'
           }`}
         >
           {icon}
@@ -62,7 +62,7 @@ export const StatCard: React.FC<StatCardProps> = ({
       {(subtitle || trend) && (
         <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
           {subtitle && (
-            <span className={highlight ? 'text-blue-200' : 'text-slate-500'}>
+            <span className={highlight ? 'text-teal-200' : 'text-slate-500'}>
               {subtitle}
             </span>
           )}

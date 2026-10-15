@@ -4,6 +4,7 @@ import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
 import { TechnoLogo } from '../components/common/TechnoLogo';
+import { UserAvatar } from '../components/common/UserAvatar';
 import {
   Award,
   Trophy,
@@ -49,7 +50,7 @@ export const ResultsPage: React.FC = () => {
           <select
             value={selectedComp}
             onChange={(e) => setSelectedComp(e.target.value)}
-            className="px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-bold text-slate-700"
+            className="px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-bold text-slate-700"
           >
             <option value="ALL">All Competitions & Tracks</option>
             {competitions.map((c) => (
@@ -66,16 +67,12 @@ export const ResultsPage: React.FC = () => {
         {filteredResults.map((p) => (
           <div
             key={p.id}
-            className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-300 transition-all p-6 flex flex-col justify-between"
+            className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-300 transition-all p-6 flex flex-col justify-between"
           >
             <div>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={p.photo}
-                    alt={p.name}
-                    className="w-14 h-14 rounded-2xl object-cover border-2 border-blue-200 ring-2 ring-blue-50"
-                  />
+                  <UserAvatar name={p.name} size="lg" variant="color" />
                   <div>
                     <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black uppercase tracking-wider">
                       🏆 {p.rank === 1 ? 'WINNER • 1st Place' : p.rank === 2 ? '1st Runner-Up' : '2nd Runner-Up'}
@@ -90,7 +87,7 @@ export const ResultsPage: React.FC = () => {
                 </div>
 
                 <div className="text-right">
-                  <span className="text-2xl font-black text-[#0057B8]">
+                  <span className="text-2xl font-black text-[#03A695]">
                     {p.finalScore}
                   </span>
                   <span className="text-[10px] text-slate-400 block font-bold">
@@ -100,11 +97,24 @@ export const ResultsPage: React.FC = () => {
               </div>
 
               {/* Competition & Project info */}
-              <div className="mt-4 p-3.5 rounded-2xl bg-[#F6F9FD] border border-slate-100 text-xs space-y-1">
+              <div className="mt-4 p-3.5 rounded-2xl bg-[#F7FCFB] border border-slate-100 text-xs space-y-1.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-mono font-bold text-[#03A695] bg-[#E6F7F5] px-1.5 py-0.5 rounded border border-teal-200">
+                    {p.teamId || p.participantId}
+                  </span>
+                  <span className="text-slate-500 font-medium">
+                    {p.evaluatedByJudgeName ? `Juror: ${p.evaluatedByJudgeName}` : 'Evaluated'}
+                  </span>
+                </div>
                 <p className="font-bold text-slate-900">{p.competitionName}</p>
                 <p className="text-slate-600 text-[11px] line-clamp-1 italic">
                   "{p.projectTitle}"
                 </p>
+                {p.submissionTimestamp && (
+                  <p className="text-[10px] text-slate-400 font-mono">
+                    Locked at {p.submissionTimestamp}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -144,13 +154,13 @@ export const ResultsPage: React.FC = () => {
         >
           <div className="space-y-6">
             {/* Printable Certificate Frame */}
-            <div className="p-8 rounded-2xl border-4 border-double border-[#0057B8] bg-gradient-to-br from-white via-[#F6F9FD] to-[#EAF3FF] text-center space-y-4 shadow-inner relative overflow-hidden">
+            <div className="p-8 rounded-2xl border-4 border-double border-[#03A695] bg-gradient-to-br from-white via-[#F7FCFB] to-[#E6F7F5] text-center space-y-4 shadow-inner relative overflow-hidden">
               <div className="flex justify-center">
                 <TechnoLogo variant="badge" size="lg" />
               </div>
 
               <div className="pt-2">
-                <span className="text-xs font-black uppercase tracking-widest text-[#F36C21]">
+                <span className="text-xs font-black uppercase tracking-widest text-[#FD5E01]">
                   CERTIFICATE OF MERIT & DISTINCTION
                 </span>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -160,7 +170,7 @@ export const ResultsPage: React.FC = () => {
 
               <div className="py-2">
                 <p className="text-xs text-slate-600 italic">This is proudly awarded to</p>
-                <h2 className="text-2xl font-black text-[#003B7A] tracking-tight mt-1">
+                <h2 className="text-2xl font-black text-[#0B2545] tracking-tight mt-1">
                   {selectedParticipantForCert.name}
                 </h2>
                 <p className="text-xs font-bold text-slate-700">
@@ -169,19 +179,19 @@ export const ResultsPage: React.FC = () => {
               </div>
 
               <p className="text-xs text-slate-600 max-w-lg mx-auto leading-relaxed">
-                for securing <strong className="text-[#0057B8]">Rank #{selectedParticipantForCert.rank || 1}</strong> with an aggregate score of <strong className="text-[#F36C21]">{selectedParticipantForCert.finalScore} / 100 ({selectedParticipantForCert.percentage}%)</strong> in the <strong className="text-slate-900">{selectedParticipantForCert.competitionName}</strong>.
+                for securing <strong className="text-[#03A695]">Rank #{selectedParticipantForCert.rank || 1}</strong> with an aggregate score of <strong className="text-[#FD5E01]">{selectedParticipantForCert.finalScore} / 100 ({selectedParticipantForCert.percentage}%)</strong> in the <strong className="text-slate-900">{selectedParticipantForCert.competitionName}</strong>.
               </p>
 
               {/* Signatures */}
               <div className="pt-6 border-t border-slate-200 grid grid-cols-2 gap-8 text-xs text-slate-700">
                 <div>
-                  <p className="font-serif italic text-sm font-bold text-[#003B7A]">Dr. S. Ranganathan</p>
+                  <p className="font-serif italic text-sm font-bold text-[#0B2545]">Dr. S. Ranganathan</p>
                   <p className="text-[10px] text-slate-500 uppercase font-bold mt-0.5">
                     Convener, TechnoSchool Group
                   </p>
                 </div>
                 <div>
-                  <p className="font-serif italic text-sm font-bold text-[#003B7A]">Priya Sharma</p>
+                  <p className="font-serif italic text-sm font-bold text-[#0B2545]">Priya Sharma</p>
                   <p className="text-[10px] text-slate-500 uppercase font-bold mt-0.5">
                     Lead Arena Evaluator
                   </p>

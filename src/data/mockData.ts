@@ -47,31 +47,45 @@ export const INITIAL_EVENT: TTFEvent = {
 export const MOCK_USERS: Record<string, User> = {
   admin: {
     id: 'usr-admin-01',
-    name: 'James Techno',
-    email: 'james@technoschool.in',
+    name: 'Isravel Admin',
+    email: 'isravel@gmail.com',
     role: 'admin',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80',
+    avatar: '',
     title: 'Chief Convener & Grand Director',
-    organization: 'TechnoSchool UAE Central Directorate',
+    organization: 'TechnoSchool Central Directorate',
     phone: '+971 - 565104104'
   },
-  judgePriya: {
-    id: 'jdg-01',
-    name: 'Dr. Priya Sharma',
-    email: 'priya.sharma@technoschool.in',
+  judge: {
+    id: 'usr-judge-01',
+    judgeId: 'JDG-01',
+    name: 'Official Competition Judge',
+    email: 'judge@gmail.com',
     role: 'judge',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=160&q=80',
+    avatar: '',
     title: 'Senior Innovation & Robotics Juror',
-    organization: 'Dubai Tech Jurors Panel & Robotics Institute',
+    organization: 'TechnoSchool Judging Panel',
+    specialization: 'Robotics, Embedded Systems & IoT',
+    phone: '+971 50 840 9876'
+  },
+  judgePriya: {
+    id: 'usr-judge-01',
+    judgeId: 'JDG-01',
+    name: 'Official Competition Judge',
+    email: 'judge@gmail.com',
+    role: 'judge',
+    avatar: '',
+    title: 'Senior Innovation & Robotics Juror',
+    organization: 'TechnoSchool Judging Panel',
     specialization: 'Robotics, Embedded Systems & IoT',
     phone: '+971 50 840 9876'
   },
   judgeTariq: {
     id: 'jdg-02',
+    judgeId: 'JDG-02',
     name: 'Eng. Tariq Al Mansoori',
     email: 'tariq.mansoori@technoschool.in',
     role: 'judge',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=160&q=80',
+    avatar: '',
     title: 'Innovation & Smart City Juror',
     organization: 'UAE Society of Engineers',
     specialization: 'Smart City & Energy Infrastructure',
@@ -772,6 +786,7 @@ export const MOCK_COMPETITIONS: Competition[] = [
 export const INITIAL_PARTICIPANTS: Participant[] = [
   {
     id: 'part-01',
+    teamId: 'TTF26-TEAM-001',
     participantId: 'TTF-2026-00421',
     name: 'Arun Kumar & Team',
     gender: 'Male',
@@ -811,6 +826,7 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
   },
   {
     id: 'part-02',
+    teamId: 'TTF26-TEAM-002',
     participantId: 'TTF-2026-00388',
     name: 'Priya Raj & Team',
     gender: 'Female',
@@ -838,6 +854,8 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     stage: 'STAGE_2_FINALE',
     assignedJudgeId: 'jdg-01',
     assignedJudgeName: 'Dr. Priya Sharma',
+    evaluatedByJudgeId: 'jdg-01',
+    evaluatedByJudgeName: 'Dr. Priya Sharma',
     email: 'priya.raj@ihsdubai.org',
     phone: '+971 50 884 2233',
     status: 'SUBMITTED',
@@ -855,6 +873,7 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
   },
   {
     id: 'part-03',
+    teamId: 'TTF26-TEAM-003',
     participantId: 'TTF-2026-00452',
     name: 'Rahul Kumar & Team',
     gender: 'Male',
@@ -881,6 +900,8 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     stage: 'STAGE_2_FINALE',
     assignedJudgeId: 'jdg-03',
     assignedJudgeName: 'Ms. Fatima Al Zahra',
+    evaluatedByJudgeId: 'jdg-03',
+    evaluatedByJudgeName: 'Ms. Fatima Al Zahra',
     email: 'rahul.k@dpssharjah.com',
     phone: '+971 55 772 3344',
     status: 'SUBMITTED',
@@ -893,10 +914,12 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     softwareUsed: 'Python, OpenCV, TensorFlow Lite',
     filesSubmitted: ['waste_classifier.tflite', 'dataset_eval.pdf'],
     submissionTimestamp: '10:40 AM',
-    criterionScores: { 'crit-tech': 28, 'crit-innov': 24, 'crit-design': 19, 'crit-demo': 14, 'crit-doc': 9 }
+    criterionScores: { 'crit-tech': 28, 'crit-innov': 24, 'crit-design': 19, 'crit-demo': 14, 'crit-doc': 9 },
+    judgeRemarks: 'Impressive accuracy on plastic vs organic classification. Excellent defense of training dataset.'
   },
   {
     id: 'part-04',
+    teamId: 'TTF26-TEAM-004',
     participantId: 'TTF-2026-00109',
     name: 'Ananya Srinivasan & Team',
     gender: 'Female',
@@ -923,6 +946,8 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     stage: 'STAGE_2_FINALE',
     assignedJudgeId: 'jdg-04',
     assignedJudgeName: 'Prof. Rajesh Khanna',
+    evaluatedByJudgeId: 'jdg-04',
+    evaluatedByJudgeName: 'Prof. Rajesh Khanna',
     email: 'ananya.s@dubaibritish.edu',
     phone: '+971 52 994 0122',
     status: 'SUBMITTED',
@@ -935,10 +960,12 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     softwareUsed: 'PHP, HTML5, JavaScript, SQLite',
     filesSubmitted: ['myvote_portal.zip', 'security_audit.pdf'],
     submissionTimestamp: '10:37 AM',
-    criterionScores: { 'crit-tech': 29, 'crit-innov': 23, 'crit-design': 20, 'crit-demo': 14, 'crit-doc': 9 }
+    criterionScores: { 'crit-tech': 29, 'crit-innov': 23, 'crit-design': 20, 'crit-demo': 14, 'crit-doc': 9 },
+    judgeRemarks: 'Superb responsive design and resilient anti-tamper logic for ballot integrity.'
   },
   {
     id: 'part-05',
+    teamId: 'TTF26-TEAM-005',
     participantId: 'TTF-2026-00215',
     name: 'Vishnu Mukund & Team',
     gender: 'Male',
@@ -964,6 +991,8 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     ],
     isGrandFinalist: true,
     stage: 'STAGE_2_FINALE',
+    evaluatedByJudgeId: 'jdg-01',
+    evaluatedByJudgeName: 'Dr. Priya Sharma',
     email: 'vishnu.m@adis.ae',
     phone: '+971 50 966 3344',
     status: 'SUBMITTED',
@@ -976,10 +1005,12 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     softwareUsed: 'Tinkercad, SketchUp',
     filesSubmitted: ['dubai_microcity.obj', 'walkthrough.mp4'],
     submissionTimestamp: '10:35 AM',
-    criterionScores: { 'crit-tech': 27, 'crit-innov': 24, 'crit-design': 19, 'crit-demo': 14, 'crit-doc': 9 }
+    criterionScores: { 'crit-tech': 27, 'crit-innov': 24, 'crit-design': 19, 'crit-demo': 14, 'crit-doc': 9 },
+    judgeRemarks: 'Exceptional attention to Dubai climate considerations and renewable energy integration.'
   },
   {
     id: 'part-06',
+    teamId: 'TTF26-TEAM-006',
     participantId: 'TTF-2026-00312',
     name: 'Meena Ramesh & Team',
     gender: 'Female',
@@ -1004,6 +1035,8 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     ],
     isGrandFinalist: true,
     stage: 'STAGE_2_FINALE',
+    evaluatedByJudgeId: 'jdg-02',
+    evaluatedByJudgeName: 'Eng. Tariq Al Mansoori',
     email: 'meena.r@ourownsharjah.org',
     phone: '+971 56 955 2211',
     status: 'SUBMITTED',
@@ -1016,10 +1049,12 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     softwareUsed: 'Scratch 3.0',
     filesSubmitted: ['fifa2026_finals.sb3'],
     submissionTimestamp: '10:33 AM',
-    criterionScores: { 'crit-tech': 27, 'crit-innov': 23, 'crit-design': 19, 'crit-demo': 14, 'crit-doc': 9 }
+    criterionScores: { 'crit-tech': 27, 'crit-innov': 23, 'crit-design': 19, 'crit-demo': 14, 'crit-doc': 9 },
+    judgeRemarks: 'Engaging sprite animations and clean Scratch broadcast message handling.'
   },
   {
     id: 'part-07',
+    teamId: 'TTF26-TEAM-007',
     participantId: 'TTF-2026-00174',
     name: 'Siddharth V & Team',
     gender: 'Male',
@@ -1043,6 +1078,8 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     ],
     isGrandFinalist: true,
     stage: 'STAGE_2_FINALE',
+    evaluatedByJudgeId: 'jdg-03',
+    evaluatedByJudgeName: 'Ms. Fatima Al Zahra',
     email: 'siddharth.v@gemsdubai.edu',
     phone: '+971 54 944 1177',
     status: 'SUBMITTED',
@@ -1055,10 +1092,12 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     softwareUsed: 'Canva, MS Word',
     filesSubmitted: ['smart_school_sketch.png', 'description.docx'],
     submissionTimestamp: '10:30 AM',
-    criterionScores: { 'crit-tech': 27, 'crit-innov': 23, 'crit-design': 19, 'crit-demo': 13, 'crit-doc': 9 }
+    criterionScores: { 'crit-tech': 27, 'crit-innov': 23, 'crit-design': 19, 'crit-demo': 13, 'crit-doc': 9 },
+    judgeRemarks: 'Vibrant color composition and clear verbal defense for Grade 2 level.'
   },
   {
     id: 'part-08',
+    teamId: 'TTF26-TEAM-008',
     participantId: 'TTF-2026-00508',
     name: 'Kavya Subramanian & Team',
     gender: 'Female',
@@ -1540,7 +1579,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     timeAgo: '2m',
     type: 'score',
     isRead: false,
-    actionLink: 'score-review'
+    actionLink: 'results'
   },
   {
     id: 'notif-02',
@@ -1550,7 +1589,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     timeAgo: '15m',
     type: 'competition',
     isRead: false,
-    actionLink: 'finalists'
+    actionLink: 'participants'
   },
   {
     id: 'notif-03',
@@ -1560,7 +1599,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     timeAgo: '30m',
     type: 'announcement',
     isRead: true,
-    actionLink: 'announcements'
+    actionLink: 'dashboard'
   }
 ];
 

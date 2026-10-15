@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
+import { UserAvatar } from '../components/common/UserAvatar';
 import {
   ClipboardList,
   Search,
@@ -50,12 +51,12 @@ export const JudgeAssignmentsPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               My Assigned Participant Delegations
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               {myAssignments.length} Assigned Teams
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Juror: <strong className="text-slate-900">{currentUser.name}</strong> • Category: <strong className="text-[#0057B8]">{currentUser.assignedCategory || 'Category 1'}</strong>
+            Juror: <strong className="text-slate-900">{currentUser.name}</strong> • Category: <strong className="text-[#03A695]">{currentUser.assignedCategory || 'Category 1'}</strong>
           </p>
         </div>
 
@@ -81,14 +82,14 @@ export const JudgeAssignmentsPage: React.FC = () => {
             placeholder="Search assigned finalist or school..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+            className="w-full pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
           />
         </div>
 
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-semibold"
+          className="px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-semibold"
         >
           <option value="ALL">All Evaluation Statuses</option>
           <option value="ASSIGNED">Assigned / Waiting</option>
@@ -109,7 +110,7 @@ export const JudgeAssignmentsPage: React.FC = () => {
               className={`p-5 rounded-3xl border transition-all flex flex-col justify-between ${
                 isCompleted
                   ? 'bg-emerald-50/30 border-emerald-200 shadow-xs'
-                  : 'bg-white border-slate-200 shadow-card hover:border-[#0057B8]'
+                  : 'bg-white border-slate-200 shadow-card hover:border-[#03A695]'
               }`}
             >
               <div className="space-y-3">
@@ -123,15 +124,11 @@ export const JudgeAssignmentsPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <img
-                    src={part?.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
-                    alt={asgn.participantName}
-                    className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0"
-                  />
+                  <UserAvatar name={asgn.participantName} size="md" variant="color" />
                   <div>
                     <h3 className="text-sm font-black text-slate-900">{asgn.participantName}</h3>
                     <p className="text-xs text-slate-500 font-medium">{asgn.schoolName}</p>
-                    <p className="text-xs font-bold text-[#0057B8] mt-1">{asgn.projectTitle}</p>
+                    <p className="text-xs font-bold text-[#03A695] mt-1">{asgn.projectTitle}</p>
                   </div>
                 </div>
 

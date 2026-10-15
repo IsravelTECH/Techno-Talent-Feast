@@ -70,11 +70,11 @@ export const ScoringMonitorPage: React.FC = () => {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-card">
           <span className="text-xs font-bold text-slate-400 uppercase">Overall Pacing</span>
           <div className="flex items-baseline gap-2 mt-1">
-            <h3 className="text-3xl font-black text-[#0057B8]">{overallRate}%</h3>
+            <h3 className="text-3xl font-black text-[#03A695]">{overallRate}%</h3>
             <span className="text-xs text-slate-500 font-bold">Completed</span>
           </div>
           <div className="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
-            <div className="bg-[#0057B8] h-full rounded-full transition-all duration-500" style={{ width: `${overallRate}%` }} />
+            <div className="bg-[#03A695] h-full rounded-full transition-all duration-500" style={{ width: `${overallRate}%` }} />
           </div>
         </div>
 
@@ -90,7 +90,7 @@ export const ScoringMonitorPage: React.FC = () => {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-card">
           <span className="text-xs font-bold text-slate-400 uppercase">Active In-Arena</span>
           <div className="flex items-baseline gap-2 mt-1">
-            <h3 className="text-3xl font-black text-[#F36C21]">{inProgressAssignments}</h3>
+            <h3 className="text-3xl font-black text-[#FD5E01]">{inProgressAssignments}</h3>
             <span className="text-xs text-slate-500 font-bold">Queues</span>
           </div>
           <span className="text-[11px] text-orange-700 font-semibold mt-2 block">Judges Currently Scoring</span>
@@ -102,7 +102,7 @@ export const ScoringMonitorPage: React.FC = () => {
             <h3 className="text-3xl font-black text-slate-900">88.4</h3>
             <span className="text-xs text-slate-500 font-bold">/ 100 Pts</span>
           </div>
-          <span className="text-[11px] text-blue-700 font-semibold mt-2 block">High Quality Submissions</span>
+          <span className="text-[11px] text-[#008C7E] font-semibold mt-2 block">High Quality Submissions</span>
         </div>
       </div>
 
@@ -127,7 +127,7 @@ export const ScoringMonitorPage: React.FC = () => {
             return (
               <div key={comp.id} className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-card space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-1 rounded-xl bg-blue-50 text-[#0057B8] text-xs font-black">
+                  <span className="px-2.5 py-1 rounded-xl bg-[#E6F7F5] text-[#03A695] text-xs font-black">
                     Category {comp.categoryNumber}
                   </span>
                   <span className="text-xs font-mono font-bold text-slate-900">{compCompleted}/{compTotal} Evaluated</span>
@@ -141,11 +141,11 @@ export const ScoringMonitorPage: React.FC = () => {
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-[11px] font-bold">
                     <span className="text-slate-500">Progress</span>
-                    <span className="text-[#0057B8]">{compPct}%</span>
+                    <span className="text-[#03A695]">{compPct}%</span>
                   </div>
                   <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-[#0057B8] to-[#03A695] h-full rounded-full transition-all duration-500"
+                      className="bg-gradient-to-r from-[#03A695] to-[#03A695] h-full rounded-full transition-all duration-500"
                       style={{ width: `${compPct}%` }}
                     />
                   </div>
@@ -185,12 +185,12 @@ export const ScoringMonitorPage: React.FC = () => {
           {scoringActivities.map((act) => (
             <div key={act.id} className="py-3 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0057B8] flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-[#E6F7F5] text-[#03A695] flex items-center justify-center font-bold text-xs shrink-0">
                   <Award className="w-4 h-4" />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-900">
-                    <span className="text-[#0057B8]">{act.judgeName}</span> submitted evaluation for{' '}
+                    <span className="text-[#03A695]">{act.judgeName}</span> submitted evaluation for{' '}
                     <span className="text-slate-900">{act.participantName}</span>
                   </p>
                   <p className="text-[11px] text-slate-500 font-medium">

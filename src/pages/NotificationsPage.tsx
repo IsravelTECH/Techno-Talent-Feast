@@ -59,7 +59,7 @@ export const NotificationsPage: React.FC = () => {
             onClick={() => setFilterType(tab.id)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
               filterType === tab.id
-                ? 'bg-[#0057B8] text-white shadow-xs'
+                ? 'bg-[#03A695] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
@@ -83,7 +83,7 @@ export const NotificationsPage: React.FC = () => {
                 if (notif.actionLink) navigate(notif.actionLink);
               }}
               className={`p-5 flex items-start gap-4 hover:bg-slate-50 cursor-pointer transition-colors ${
-                !notif.isRead ? 'bg-[#F6F9FD]' : ''
+                !notif.isRead ? 'bg-[#F7FCFB]' : ''
               }`}
             >
               <div
@@ -91,7 +91,7 @@ export const NotificationsPage: React.FC = () => {
                   notif.type === 'score'
                     ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                     : notif.type === 'competition'
-                    ? 'bg-[#EAF3FF] text-[#0057B8] border border-blue-200'
+                    ? 'bg-[#E6F7F5] text-[#03A695] border border-teal-200'
                     : notif.type === 'result'
                     ? 'bg-amber-50 text-amber-700 border border-amber-200'
                     : 'bg-purple-50 text-purple-700 border border-purple-200'
@@ -122,7 +122,7 @@ export const NotificationsPage: React.FC = () => {
               </div>
 
               {!notif.isRead && (
-                <span className="w-2.5 h-2.5 rounded-full bg-[#F36C21] shrink-0 mt-2" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FD5E01] shrink-0 mt-2" />
               )}
             </div>
           ))

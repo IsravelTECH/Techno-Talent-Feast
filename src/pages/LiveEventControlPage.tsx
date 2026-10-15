@@ -50,7 +50,7 @@ export const LiveEventControlPage: React.FC = () => {
       title: 'Internal Admin & Jurors Only',
       desc: 'Scores visible only inside authenticated admin & judge desks',
       icon: Lock,
-      color: 'border-blue-300 text-blue-800 bg-blue-50'
+      color: 'border-teal-300 text-[#0B2545] bg-[#E6F7F5]'
     },
     {
       id: 'LIVE',
@@ -98,16 +98,6 @@ export const LiveEventControlPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <Button
-            variant="orange"
-            size="sm"
-            icon={<ExternalLink className="w-4 h-4" />}
-            onClick={() => navigate('live')}
-          >
-            Launch Stadium Screen (/live)
-          </Button>
-        </div>
       </div>
 
       {/* Visibility Control Panel */}
@@ -141,7 +131,7 @@ export const LiveEventControlPage: React.FC = () => {
                   </span>
                 )}
                 <div className="p-2.5 rounded-xl bg-white border border-slate-200 inline-block mb-3 shadow-xs">
-                  <Icon className="w-5 h-5 text-[#0057B8]" />
+                  <Icon className="w-5 h-5 text-[#03A695]" />
                 </div>
                 <h3 className="text-xs font-black text-slate-900 mb-1">{opt.title}</h3>
                 <p className="text-[11px] text-slate-500 leading-snug">{opt.desc}</p>
@@ -160,8 +150,8 @@ export const LiveEventControlPage: React.FC = () => {
           </h2>
 
           <div className="space-y-3">
-            <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-xs">
-              <strong className="text-[#0057B8] block mb-1">Instant Juror Push Notification</strong>
+            <div className="p-4 rounded-2xl bg-[#E6F7F5] border border-teal-200 text-xs">
+              <strong className="text-[#03A695] block mb-1">Instant Juror Push Notification</strong>
               <p className="text-slate-600">
                 Send an immediate announcement banner to all 36 Juror scoring pads (e.g., "Category 3 judging starts now at Table A4").
               </p>
@@ -260,7 +250,7 @@ export const LiveEventControlPage: React.FC = () => {
             value={broadcastMessage}
             onChange={(e) => setBroadcastMessage(e.target.value)}
             placeholder="e.g. Attention all Category 4 judges: please proceed to Hall B for Robotics Arena defense..."
-            className="w-full p-3 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+            className="w-full p-3 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
           />
         </div>
       </Modal>

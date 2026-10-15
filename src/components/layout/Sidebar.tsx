@@ -1,29 +1,25 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
+import { TechnoLogo } from '../common/TechnoLogo';
+import { UserAvatar } from '../common/UserAvatar';
 import {
   LayoutDashboard,
-  Calendar,
   Users,
   Building2,
   Trophy,
   FolderKanban,
-  UserCheck,
   ClipboardList,
-  Activity,
-  Radio,
-  FileCheck2,
   Medal,
-  Megaphone,
-  History,
   FileSpreadsheet,
   Settings,
   Bell,
   User,
   LogOut,
-  Award,
   ChevronRight,
   ShieldCheck,
-  KeyRound
+  KeyRound,
+  FileCheck2,
+  Award
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -43,39 +39,31 @@ interface NavItem {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { currentPage, currentRole, navigate, logout, notifications, assignments, participants } = useApp();
+  const { currentUser, currentPage, currentRole, navigate, logout, notifications, assignments, participants } = useApp();
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
   const pendingJudgeCount = assignments.filter((a) => a.status === 'ASSIGNED' || a.status === 'IN_PROGRESS').length;
 
-  // STRICT ADMINISTRATION NAVIGATION (17 Items)
+  // STRICT ADMINISTRATION NAVIGATION (9 Items)
   const adminNavItems: NavItem[] = [
     { id: 'dashboard', label: 'Admin Dashboard', icon: LayoutDashboard, badge: 'LIVE' },
-    { id: 'event-overview', label: 'Event Overview', icon: Calendar },
+    { id: 'assignments', label: 'Judge Roaster', icon: ClipboardList, highlight: true },
     { id: 'schools', label: 'Schools', icon: Building2, count: '48' },
     { id: 'participants', label: 'Participants', icon: Users, count: '1,440' },
-    { id: 'finalists', label: 'Finalists (12/School)', icon: Award, highlight: true },
     { id: 'categories', label: 'Categories (6)', icon: Trophy, count: '6' },
     { id: 'projects', label: 'Projects (24)', icon: FolderKanban, count: '24' },
-    { id: 'judges', label: 'Judges Roster', icon: UserCheck, count: '36' },
-    { id: 'assignments', label: 'Judge Assignments', icon: ClipboardList, highlight: true },
-    { id: 'scoring-monitor', label: 'Scoring Monitor', icon: Activity, live: true },
-    { id: 'live-control', label: 'Live Event Control', icon: Radio, badge: 'ARENA' },
-    { id: 'score-review', label: 'Score Review & Audit', icon: FileCheck2 },
     { id: 'results', label: 'Results & Leaderboard', icon: Medal },
-    { id: 'announcements', label: 'Announcements', icon: Megaphone },
-    { id: 'activity-log', label: 'Activity Log', icon: History },
     { id: 'reports', label: 'Reports & Export', icon: FileSpreadsheet },
-    { id: 'settings', label: 'Settings', icon: Settings }
+    { id: 'profile', label: 'My Profile', icon: User }
   ];
 
-  // STRICT JUDGE NAVIGATION (6 Items)
+  const submittedCount = participants.filter((p) => p.status === 'SUBMITTED').length;
+
+  // SIMPLIFIED JUDGE ROLE NAVIGATION (Team Scoring Desk Focus)
   const judgeNavItems: NavItem[] = [
     { id: 'judge-dashboard', label: 'Judge Dashboard', icon: LayoutDashboard },
-    { id: 'judge-assignments', label: 'My Assignments', icon: ClipboardList, count: `${pendingJudgeCount} Active` },
-    { id: 'scoring', label: 'Live Evaluations', icon: FileCheck2, highlight: true, live: true },
-    { id: 'judge-completed', label: 'Completed Evaluations', icon: Award },
-    { id: 'notifications', label: 'Notifications', icon: Bell, notifBadge: unreadCount },
+    { id: 'scoring', label: 'Team Scoring Desk', icon: FileCheck2, highlight: true, live: true },
+    { id: 'judge-completed', label: 'Submission Status', icon: Award, count: `${submittedCount} Locked` },
     { id: 'profile', label: 'Juror Profile', icon: User }
   ];
 
@@ -99,20 +87,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       >
         {/* Top Brand Area in Sidebar */}
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0057B8] to-[#003B7A] flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-blue-500/15">
-              <span className="text-[#F36C21]">T</span>T
-            </div>
-            <div>
-              <h2 className="text-sm font-extrabold text-slate-900 tracking-tight leading-none">
-                TECHNO TALENT
-              </h2>
-              <p className="text-[10px] font-bold text-[#F36C21] uppercase tracking-wider mt-0.5">
-                FEAST 2026
-              </p>
-            </div>
+          <div
+            onClick={() => navigate(currentRole === 'judge' ? 'judge-dashboard' : 'dashboard')}
+            className="cursor-pointer flex items-center"
+          >
+            <TechnoLogo variant="full" size="sm" />
           </div>
-          <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#0057B8] border border-blue-200 text-[10px] font-bold uppercase">
+          <span className="px-2 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] border border-teal-200 text-[10px] font-bold uppercase">
             {currentRole === 'admin' ? 'ADMIN' : 'JUDGE'}
           </span>
         </div>
@@ -122,13 +103,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div
             className={`p-2.5 rounded-2xl flex items-center gap-2.5 text-xs border ${
               currentRole === 'admin'
-                ? 'bg-[#EAF3FF] border-blue-200 text-[#003B7A]'
+                ? 'bg-[#E6F7F5] border-teal-200 text-[#007A6E]'
                 : 'bg-[#FFF3EC] border-orange-200 text-[#C2410C]'
             }`}
           >
             <div
               className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-white shrink-0 ${
-                currentRole === 'admin' ? 'bg-[#0057B8]' : 'bg-[#F36C21]'
+                currentRole === 'admin' ? 'bg-[#03A695]' : 'bg-[#FD5E01]'
               }`}
             >
               {currentRole === 'admin' ? <ShieldCheck className="w-4 h-4" /> : <KeyRound className="w-4 h-4" />}
@@ -163,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 }}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 group cursor-pointer ${
                   isActive
-                    ? 'bg-[#0057B8] text-white shadow-xs font-bold'
+                    ? 'bg-[#03A695] text-white shadow-xs font-bold'
                     : item.highlight
                     ? 'text-slate-800 hover:bg-slate-100 hover:text-slate-900 font-semibold'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -175,7 +156,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       isActive
                         ? 'text-white'
                         : item.highlight
-                        ? 'text-[#F36C21]'
+                        ? 'text-[#FD5E01]'
                         : 'text-slate-400 group-hover:text-slate-700'
                     }`}
                   />
@@ -188,7 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
                         isActive
                           ? 'bg-white/20 text-white'
-                          : 'bg-orange-100 text-[#F36C21]'
+                          : 'bg-orange-100 text-[#FD5E01]'
                       }`}
                     >
                       {item.badge}
@@ -208,7 +189,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   )}
 
                   {item.notifBadge && item.notifBadge > 0 ? (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#F36C21] text-white animate-pulse">
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#FD5E01] text-white animate-pulse">
                       {item.notifBadge}
                     </span>
                   ) : null}
@@ -220,13 +201,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           })}
         </div>
 
-        {/* Bottom Slogan & Sign Out */}
+        {/* Bottom User Info & Sign Out */}
         <div className="p-3 border-t border-slate-100 space-y-2">
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-[10px] text-slate-600 text-center leading-tight">
-            <span className="font-bold text-[#0057B8] block">OFFICIAL MOTTO:</span>
-            <span className="text-slate-700 font-semibold italic">
-              "BUILD THE TECHNOLOGY — NOT THE ENVIRONMENT"
-            </span>
+          {/* Admin / Logged-in User Profile Card */}
+          <div
+            onClick={() => navigate('profile')}
+            className="p-2.5 rounded-xl bg-slate-50 hover:bg-[#E6F7F5] border border-slate-200/80 hover:border-teal-200 transition-all cursor-pointer flex items-center gap-2.5 group"
+            title="View Profile"
+          >
+            <UserAvatar name={currentUser.name} size="sm" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-900 group-hover:text-[#03A695] truncate transition-colors">
+                {currentUser.name}
+              </p>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide truncate">
+                {currentRole === 'admin' ? 'Administration' : 'Official Juror'}
+              </p>
+            </div>
           </div>
 
           <button

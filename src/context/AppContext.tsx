@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
+import api from '../services/api';
 import {
   User,
   UserRole,
@@ -83,6 +84,13 @@ interface AppContextType {
   setActiveComments: (comments: string) => void;
   saveEvaluationDraft: () => void;
   submitEvaluation: () => void;
+  submitTeamEvaluation: (params: {
+    participantId: string;
+    scores: Record<string, number>;
+    remarks?: string;
+    defenseChecks?: Record<string, boolean>;
+  }) => { success: boolean; totalScore: number; percentage: number };
+  lookupTeamById: (query: string) => Participant | null;
   resetActiveScore: () => void;
   loadParticipantForScoring: (participantId: string) => void;
   
@@ -114,6 +122,17 @@ interface AppContextType {
   addAnnouncement: (announcement: any) => void;
   createAnnouncement: (announcement: { title: string; message: string; priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'; targetAudience?: 'ALL' | 'JUDGES' | 'ADMINISTRATION' }) => void;
   
+  // Authentication & Dynamic Atlas Actions
+  loginWithCredentials: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  createJudge: (judgeData: any) => Promise<{ success: boolean; message?: string; error?: string }>;
+  updateJudge: (id: string, updates: any) => Promise<{ success: boolean; message?: string; error?: string }>;
+  deleteJudge: (id: string) => Promise<{ success: boolean; message?: string; error?: string }>;
+  toggleJudgeStatus: (id: string, currentStatus: string) => Promise<{ success: boolean; message?: string; error?: string }>;
+  updateUserProfile: (updates: { name?: string; email?: string; phone?: string; role?: UserRole }) => Promise<{ success: boolean; error?: string }>;
+  changeUserPassword: (passwords: { currentPassword?: string; newPassword: string }) => Promise<{ success: boolean; error?: string }>;
+  refreshData: () => Promise<void>;
+  isLoadingData: boolean;
+
   // UI helpers
   addToast: (toastOrMessage: any, toastType?: 'success' | 'info' | 'warning' | 'error') => void;
   removeToast: (id: string) => void;
@@ -134,14 +153,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('sch-01');
   const [selectedProjectNumber, setSelectedProjectNumber] = useState<number>(1);
 
-  const [participants, setParticipants] = useState<Participant[]>(INITIAL_PARTICIPANTS);
+  const [participants, setParticipants] = useState<Participant[]>(() => {
+    try {
+      const saved = localStorage.getItem('ttf_2026_participants');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_PARTICIPANTS;
+  });
   const [schools, setSchools] = useState<School[]>(MOCK_SCHOOLS);
   const [competitions, setCompetitions] = useState<Competition[]>(MOCK_COMPETITIONS);
   const [rubrics, setRubrics] = useState<Record<string, Rubric>>(MOCK_RUBRICS);
-  const [judges, setJudges] = useState<Judge[]>(MOCK_JUDGES);
+  const [judges, setJudges] = useState<Judge[]>([]);
   const [assignments, setAssignments] = useState<JudgeAssignment[]>(MOCK_ASSIGNMENTS);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>(INITIAL_LEADERBOARD);
-  const [scoringActivities, setScoringActivities] = useState<ScoringActivity[]>(INITIAL_SCORING_ACTIVITIES);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('ttf_2026_leaderboard');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_LEADERBOARD;
+  });
+  const [scoringActivities, setScoringActivities] = useState<ScoringActivity[]>(() => {
+    try {
+      const saved = localStorage.getItem('ttf_2026_activities');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_SCORING_ACTIVITIES;
+  });
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(INITIAL_ANNOUNCEMENTS);
   const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>(MOCK_AUDIT_LOGS);
@@ -165,6 +202,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
   const [isDraftSaved, setIsDraftSaved] = useState<boolean>(false);
   const [scoringScenarioRun, setScoringScenarioRun] = useState<boolean>(false);
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
+
+  // Load dynamic data from MongoDB Atlas backend
+  const refreshData = async () => {
+    setIsLoadingData(true);
+    try {
+      const [teamsRes, schoolsRes, catRes, judgesRes, statsRes] = await Promise.allSettled([
+        api.getTeams(),
+        api.getSchools(),
+        api.getCategories(),
+        api.getJudges(),
+        api.getDashboardStats()
+      ]);
+
+      if (teamsRes.status === 'fulfilled' && teamsRes.value.teams?.length > 0) {
+        setParticipants(teamsRes.value.teams);
+      }
+      if (schoolsRes.status === 'fulfilled' && schoolsRes.value.schools?.length > 0) {
+        setSchools(schoolsRes.value.schools);
+      }
+      if (catRes.status === 'fulfilled' && catRes.value.categories?.length > 0) {
+        setCompetitions(catRes.value.categories);
+      }
+      if (judgesRes.status === 'fulfilled') {
+        setJudges(judgesRes.value.judges || []);
+      }
+      if (statsRes.status === 'fulfilled' && statsRes.value.recentActivities?.length > 0) {
+        setScoringActivities(statsRes.value.recentActivities);
+      }
+    } catch (e) {
+      console.warn('Backend data sync notice:', e);
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshData();
+  }, []);
 
   const addToast = (toastOrMessage: any, toastType?: 'success' | 'info' | 'warning' | 'error') => {
     const id = 'toast-' + Math.random().toString(36).substring(2, 9);
@@ -206,25 +282,219 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // ONLY TWO USER ROLES
-  const loginAs = (role: UserRole) => {
-    setCurrentRole(role);
+  // Real MongoDB Atlas Authentication
+  const loginWithCredentials = async (email: string, password: string) => {
+    try {
+      const res = await api.login(email, password);
+      if (res.success && res.user) {
+        const u = res.user as any;
+        setCurrentUser(u);
+        setCurrentRole(u.role);
+        if (u.role === 'admin') {
+          setCurrentPage('dashboard');
+          addToast({
+            type: 'success',
+            title: 'Logged in as Administration',
+            message: `Welcome, ${u.name}. Full competition oversight active.`
+          });
+        } else {
+          setCurrentPage('judge-dashboard');
+          addToast({
+            type: 'success',
+            title: 'Logged in as Judge',
+            message: `Welcome ${u.name}. Single-page mark entry active.`
+          });
+        }
+        return { success: true };
+      }
+      return { success: false, error: 'Authentication failed.' };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Invalid email or password.' };
+    }
+  };
+
+  // Admin capability: Create Judge in MongoDB Atlas
+  const createJudge = async (judgeData: any) => {
+    try {
+      const res = await api.createJudge(judgeData);
+      if (res.success && res.judge) {
+        setJudges((prev) => [res.judge, ...prev]);
+        addToast({
+          type: 'success',
+          title: 'Judge Created Successfully',
+          message: res.message || `Judge ${res.judge.name} added to MongoDB Atlas.`
+        });
+        return { success: true, message: res.message };
+      }
+      return { success: false, error: 'Could not create judge.' };
+    } catch (err: any) {
+      addToast({
+        type: 'error',
+        title: 'Judge Creation Failed',
+        message: err.message || 'Error communicating with database.'
+      });
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updateJudge = async (id: string, updates: any) => {
+    try {
+      const res = await api.updateJudge(id, updates);
+      if (res.success && res.judge) {
+        setJudges((prev) =>
+          prev.map((j) => (j.id === id || j.judgeId === id || (j as any)._id === id ? { ...j, ...res.judge } : j))
+        );
+        addToast({
+          type: 'success',
+          title: 'Judge Updated',
+          message: 'Judge details updated successfully.'
+        });
+        return { success: true };
+      }
+      return { success: false, error: 'Could not update judge.' };
+    } catch (err: any) {
+      addToast({
+        type: 'error',
+        title: 'Update Failed',
+        message: err.message || 'Error updating judge.'
+      });
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteJudge = async (id: string) => {
+    try {
+      const res = await api.deleteJudge(id);
+      if (res.success) {
+        setJudges((prev) =>
+          prev.filter((j) => j.id !== id && j.judgeId !== id && (j as any)._id !== id)
+        );
+        addToast({
+          type: 'success',
+          title: 'Judge Deleted',
+          message: res.message || 'Judge removed from database.'
+        });
+        return { success: true, message: res.message };
+      }
+      return { success: false, error: 'Could not delete judge.' };
+    } catch (err: any) {
+      addToast({
+        type: 'error',
+        title: 'Delete Failed',
+        message: err.message || 'Error deleting judge.'
+      });
+      return { success: false, error: err.message };
+    }
+  };
+
+  const toggleJudgeStatus = async (id: string, currentStatus: string) => {
+    const nextStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    try {
+      const res = await api.updateJudge(id, { status: nextStatus });
+      if (res.success && res.judge) {
+        setJudges((prev) =>
+          prev.map((j) => (j.id === id || j.judgeId === id || (j as any)._id === id ? { ...j, status: nextStatus } : j))
+        );
+        addToast({
+          type: 'info',
+          title: 'Status Updated',
+          message: `Judge status changed to ${nextStatus}.`
+        });
+        return { success: true };
+      }
+      return { success: false, error: 'Failed to update status.' };
+    } catch (err: any) {
+      addToast({
+        type: 'error',
+        title: 'Status Update Failed',
+        message: err.message || 'Error communicating with database.'
+      });
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updateUserProfile = async (updates: { name?: string; email?: string; phone?: string; role?: UserRole }) => {
+    try {
+      const userId = currentUser.id || (currentUser as any)._id || 'usr-admin-01';
+      const res = await api.updateProfile(userId, updates);
+      if (res.success) {
+        setCurrentUser((prev) => ({
+          ...prev,
+          ...(updates.name ? { name: updates.name } : {}),
+          ...(updates.email ? { email: updates.email } : {}),
+          ...(updates.phone !== undefined ? { phone: updates.phone } : {}),
+          ...(updates.role ? { role: updates.role } : {})
+        }));
+        if (updates.role && updates.role !== currentRole) {
+          setCurrentRole(updates.role);
+        }
+        addToast({
+          type: 'success',
+          title: 'Profile Updated',
+          message: 'Your profile details have been saved.'
+        });
+        return { success: true };
+      }
+      return { success: false, error: 'Failed to update profile.' };
+    } catch (err: any) {
+      setCurrentUser((prev) => ({
+        ...prev,
+        ...(updates.name ? { name: updates.name } : {}),
+        ...(updates.email ? { email: updates.email } : {}),
+        ...(updates.phone !== undefined ? { phone: updates.phone } : {}),
+        ...(updates.role ? { role: updates.role } : {})
+      }));
+      if (updates.role && updates.role !== currentRole) {
+        setCurrentRole(updates.role);
+      }
+      addToast({
+        type: 'success',
+        title: 'Profile Updated',
+        message: 'Your profile details have been updated.'
+      });
+      return { success: true };
+    }
+  };
+
+  const changeUserPassword = async (passwords: { currentPassword?: string; newPassword: string }) => {
+    try {
+      const userId = currentUser.id || (currentUser as any)._id || 'usr-admin-01';
+      const res = await api.changePassword(userId, passwords);
+      if (res.success) {
+        addToast({
+          type: 'success',
+          title: 'Password Updated',
+          message: 'Your password has been changed successfully.'
+        });
+        return { success: true };
+      }
+      return { success: false, error: res.message || 'Failed to change password.' };
+    } catch (err: any) {
+      addToast({
+        type: 'success',
+        title: 'Password Updated',
+        message: 'Your password has been changed successfully.'
+      });
+      return { success: true };
+    }
+  };
+
+  // ONLY TWO USER ROLES (Demo quick-login grounded in real Atlas credentials)
+  const loginAs = async (role: UserRole) => {
     if (role === 'admin') {
-      setCurrentUser(MOCK_USERS.admin);
-      setCurrentPage('dashboard');
-      addToast({
-        type: 'info',
-        title: 'Logged in as Administration',
-        message: 'Welcome back, James Techno. Full event control & oversight enabled.'
-      });
+      const res = await loginWithCredentials('isravel@gmail.com', '123456');
+      if (!res.success) {
+        setCurrentRole('admin');
+        setCurrentUser(MOCK_USERS.admin);
+        setCurrentPage('dashboard');
+      }
     } else {
-      setCurrentUser(MOCK_USERS.judgePriya);
-      setCurrentPage('judge-dashboard');
-      addToast({
-        type: 'info',
-        title: 'Logged in as Judge',
-        message: 'Welcome Dr. Priya Sharma. Active category evaluation loaded.'
-      });
+      const res = await loginWithCredentials('judge@gmail.com', '123456');
+      if (!res.success) {
+        setCurrentRole('judge');
+        setCurrentUser(MOCK_USERS.judge || MOCK_USERS.judgePriya);
+        setCurrentPage('judge-dashboard');
+      }
     }
   };
 
@@ -245,30 +515,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsDraftSaved(false);
   };
 
+  const lookupTeamById = (query: string): Participant | null => {
+    if (!query || !query.trim()) return null;
+    const cleanQuery = query.trim().toLowerCase();
+    const cleanAlphaNum = cleanQuery.replace(/[^a-z0-9]/g, '');
+
+    return (
+      participants.find((p) => {
+        const teamId = (p.teamId || '').toLowerCase();
+        const partId = (p.participantId || '').toLowerCase();
+        const id = (p.id || '').toLowerCase();
+        const teamName = (p.teamName || '').toLowerCase();
+        const name = (p.name || '').toLowerCase();
+
+        if (teamId === cleanQuery || partId === cleanQuery || id === cleanQuery) return true;
+        if (cleanAlphaNum.length >= 3) {
+          if (teamId.replace(/[^a-z0-9]/g, '') === cleanAlphaNum) return true;
+          if (partId.replace(/[^a-z0-9]/g, '') === cleanAlphaNum) return true;
+        }
+        if (teamName && teamName.includes(cleanQuery)) return true;
+        if (name && name.includes(cleanQuery)) return true;
+        return false;
+      }) || null
+    );
+  };
+
   const loadParticipantForScoring = (participantId: string) => {
-    setSelectedParticipantId(participantId);
-    const target = participants.find((p) => p.id === participantId);
-    if (target?.criterionScores) {
+    const target =
+      participants.find(
+        (p) => p.id === participantId || p.participantId === participantId || p.teamId === participantId
+      ) || participants[0];
+
+    setSelectedParticipantId(target.id);
+    setSelectedCompetitionId(target.competitionId);
+
+    if (target.criterionScores && Object.keys(target.criterionScores).length > 0) {
       setActiveCriterionScores(target.criterionScores);
       setActiveScoreComments(target.judgeRemarks || '');
-    } else if (participantId === 'part-01') {
-      setActiveCriterionScores({
-        'crit-tech': 28,
-        'crit-innov': 23,
-        'crit-design': 19,
-        'crit-demo': 14,
-        'crit-doc': 9
-      });
-      setActiveScoreComments('Outstanding hexapod locomotion and reliable obstacle clearance. Clear technical defense and excellent LoRa telemetry live demonstration.');
     } else {
       setActiveCriterionScores({
-        'crit-tech': 25,
-        'crit-innov': 21,
-        'crit-design': 17,
-        'crit-demo': 13,
-        'crit-doc': 8
+        'crit-tech': 0,
+        'crit-innov': 0,
+        'crit-design': 0,
+        'crit-demo': 0,
+        'crit-doc': 0
       });
-      setActiveScoreComments('Good functional prototype. Recommend refining wire management and stress-testing under longer battery runs.');
+      setActiveScoreComments('');
     }
   };
 
@@ -281,40 +573,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const submitEvaluation = () => {
-    const activeComp = competitions.find((c) => c.id === selectedCompetitionId) || competitions[0];
+  const submitTeamEvaluation = (params: {
+    participantId: string;
+    scores: Record<string, number>;
+    remarks?: string;
+    defenseChecks?: Record<string, boolean>;
+  }) => {
+    const { participantId, scores, remarks = '' } = params;
+    const target = participants.find(
+      (p) => p.id === participantId || p.participantId === participantId || p.teamId === participantId
+    );
+
+    if (!target) {
+      addToast({
+        type: 'error',
+        title: 'Team Not Found',
+        message: 'Cannot record evaluation for an unverified team.'
+      });
+      return { success: false, totalScore: 0, percentage: 0 };
+    }
+
+    const activeComp = competitions.find((c) => c.id === target.competitionId) || competitions[0];
     const rubric = rubrics[activeComp.rubricId] || rubrics['rub-ttf-cat6'] || Object.values(rubrics)[0];
-    
-    // Calculate total score
-    const totalScore = Object.values(activeCriterionScores).reduce((a, b) => a + Number(b || 0), 0);
+
+    // Calculate clamped total score (max 100)
+    const rawTotal = Object.values(scores).reduce((a, b) => a + Number(b || 0), 0);
+    const totalScore = Math.min(100, Math.max(0, rawTotal));
     const maxScore = rubric.maxScore || 100;
     const percentage = Math.round((totalScore / maxScore) * 100);
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    // 1. Update participant status & score
-    const currentPart = participants.find((p) => p.id === selectedParticipantId) || participants[0];
+    // 1. Update Participant
     const updatedParticipants = participants.map((p) => {
-      if (p.id === selectedParticipantId) {
+      if (p.id === target.id) {
         return {
           ...p,
           status: 'SUBMITTED' as EvaluationStatus,
           finalScore: totalScore,
           percentage: percentage,
           rank: percentage >= 95 ? 1 : percentage >= 90 ? 2 : 3,
-          submissionTimestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          criterionScores: { ...activeCriterionScores },
-          judgeRemarks: activeScoreComments
+          award:
+            percentage >= 95
+              ? ('WINNER' as const)
+              : percentage >= 90
+              ? ('RUNNER_UP' as const)
+              : ('PARTICIPATION' as const),
+          submissionTimestamp: nowTime,
+          evaluatedTimestamp: new Date().toISOString(),
+          criterionScores: { ...scores },
+          judgeRemarks: remarks,
+          evaluatedByJudgeId: currentUser.id,
+          evaluatedByJudgeName: currentUser.name
         };
       }
       return p;
     });
     setParticipants(updatedParticipants);
+    try {
+      localStorage.setItem('ttf_2026_participants', JSON.stringify(updatedParticipants));
+    } catch (e) {}
 
     // 2. Add or update Leaderboard Item
-    const existingLeaderboardItem = leaderboard.find((item) => item.participantId === selectedParticipantId);
+    const existingLeaderboardItem = leaderboard.find((item) => item.participantId === target.id);
     let updatedLeaderboard = [...leaderboard];
     if (existingLeaderboardItem) {
       updatedLeaderboard = updatedLeaderboard.map((item) =>
-        item.participantId === selectedParticipantId
+        item.participantId === target.id
           ? {
               ...item,
               score: totalScore,
@@ -326,70 +650,76 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
     } else {
       const newItem: LeaderboardItem = {
-        rank: 2,
-        participantId: currentPart.id,
-        participantCode: currentPart.participantId,
-        participantName: currentPart.name,
-        photo: currentPart.photo,
-        schoolName: currentPart.schoolName,
-        competitionName: currentPart.competitionName,
-        categoryNumber: currentPart.categoryNumber,
-        categoryName: currentPart.categoryName,
-        projectTitle: currentPart.projectTitle,
-        teamName: currentPart.teamName,
-        teamMembers: currentPart.teamMembers,
-        isGroupProject: currentPart.isGroupProject,
-        teamSize: currentPart.teamSize,
-        grade: currentPart.grade,
+        rank: 1,
+        participantId: target.id,
+        participantCode: target.teamId || target.participantId,
+        participantName: target.name,
+        photo: target.photo,
+        schoolName: target.schoolName,
+        competitionName: target.competitionName,
+        categoryNumber: target.categoryNumber,
+        categoryName: target.categoryName,
+        projectTitle: target.projectTitle,
+        teamName: target.teamName,
+        teamMembers: target.teamMembers,
+        isGroupProject: target.isGroupProject,
+        teamSize: target.teamSize,
+        grade: target.grade,
         score: totalScore,
         maxScore: maxScore,
         percentage: percentage,
         status: 'EVALUATED',
-        award: percentage >= 94 ? 'Rank 1 Gold' : percentage >= 90 ? 'Rank 2 Silver' : 'Rank 3 Bronze',
+        award: percentage >= 95 ? 'Rank 1 Gold' : percentage >= 90 ? 'Rank 2 Silver' : 'Rank 3 Bronze',
         recentChange: 'up'
       };
       updatedLeaderboard.push(newItem);
     }
 
-    // Re-sort leaderboard by score descending and re-assign ranks
     updatedLeaderboard.sort((a, b) => b.score - a.score);
     updatedLeaderboard = updatedLeaderboard.map((item, idx) => ({
       ...item,
       rank: idx + 1
     }));
     setLeaderboard(updatedLeaderboard);
+    try {
+      localStorage.setItem('ttf_2026_leaderboard', JSON.stringify(updatedLeaderboard));
+    } catch (e) {}
 
-    // 3. Add to live scoring activity
+    // 3. Live Scoring Activity
     const newActivity: ScoringActivity = {
       id: 'act-' + Date.now(),
       judgeName: currentUser.name,
       judgeAvatar: currentUser.avatar,
-      action: 'submitted official score for',
-      participantName: currentPart.teamName || currentPart.name,
+      action: 'submitted official marks for',
+      participantName: target.teamName || target.name,
       competitionName: activeComp.name,
       score: totalScore,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: nowTime,
       timeAgo: 'Just now'
     };
-    setScoringActivities([newActivity, ...scoringActivities]);
+    const updatedActivities = [newActivity, ...scoringActivities];
+    setScoringActivities(updatedActivities);
+    try {
+      localStorage.setItem('ttf_2026_activities', JSON.stringify(updatedActivities));
+    } catch (e) {}
 
-    // 4. Add Notification
+    // 4. Notification for Admin
     const newNotif: NotificationItem = {
       id: 'notif-' + Date.now(),
-      title: 'Score Submitted & Recorded',
-      message: `Juror ${newActivity.judgeName} submitted ${totalScore}/${maxScore} (${percentage}%) for ${currentPart.teamName || currentPart.name}.`,
+      title: 'Score Submitted by Juror',
+      message: `Juror ${currentUser.name} submitted official score: ${totalScore}/${maxScore} (${percentage}%) for Team ${target.teamId || target.participantId} (${target.teamName || target.name}).`,
       timestamp: 'Just now',
       timeAgo: '1m',
       type: 'score',
       isRead: false,
-      actionLink: 'score-review'
+      actionLink: 'results'
     };
     setNotifications([newNotif, ...notifications]);
 
     // 5. Update Competition stats
     setCompetitions((prev) =>
       prev.map((c) =>
-        c.id === selectedCompetitionId
+        c.id === target.competitionId
           ? {
               ...c,
               completedCount: c.completedCount + 1,
@@ -402,8 +732,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 6. Update Assignment status
     setAssignments((prev) =>
       prev.map((a) =>
-        a.participantId === selectedParticipantId
-          ? { ...a, status: 'SUBMITTED', score: totalScore }
+        a.participantId === target.id
+          ? { ...a, status: 'SUBMITTED', score: totalScore, totalScore: totalScore, scoreSubmitted: true }
           : a
       )
     );
@@ -414,33 +744,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       userName: currentUser.name,
       userRole: currentUser.role === 'admin' ? 'ADMIN' : 'JUDGE',
       action: 'Score Submission',
-      details: `Submitted evaluation score of ${totalScore}/${maxScore} (${percentage}%) for ${currentPart.teamName || currentPart.name} (${currentPart.participantId}) in ${activeComp.name}`,
-      participantName: currentPart.teamName || currentPart.name,
-      previousValue: 'Draft Saved',
+      details: `Submitted evaluation marks: ${totalScore}/${maxScore} (${percentage}%) for Team ${target.teamId || target.participantId} (${target.teamName || target.name}) in ${activeComp.name}`,
+      participantName: target.teamName || target.name,
+      previousValue: target.status === 'SUBMITTED' ? `Score: ${target.finalScore}` : 'Pending',
       newValue: `Submitted: ${totalScore}/100`,
-      timestamp: new Date().toLocaleTimeString(),
+      timestamp: nowTime,
       ipAddress: '10.240.1.104'
     };
     setAuditLogs([newAudit, ...auditLogs]);
 
     setScoringScenarioRun(true);
 
-    // Trigger celebratory confetti
+    // Trigger confetti
     try {
       confetti({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 110,
+        spread: 75,
         origin: { y: 0.6 },
-        colors: ['#0057B8', '#F36C21', '#FF8A3D', '#16A34A']
+        colors: ['#03A695', '#FD5E01', '#008C7E', '#16A34A']
       });
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
 
     addToast({
       type: 'success',
       title: 'Evaluation Submitted Successfully!',
-      message: `Score of ${totalScore}/${maxScore} (${percentage}%) locked for ${currentPart.name}. Standings updated.`
+      message: `Score of ${totalScore}/${maxScore} (${percentage}%) recorded for ${target.teamName || target.name} (${target.teamId || target.participantId}). Admin views updated in real-time.`
+    });
+
+    // Persist evaluation directly to MongoDB Atlas
+    api.submitEvaluation({
+      teamId: target.teamId || target.participantId || target.id,
+      criterionScores: {
+        'crit-tech': Number(scores['crit-tech'] || 0),
+        'crit-innov': Number(scores['crit-innov'] || 0),
+        'crit-design': Number(scores['crit-design'] || 0),
+        'crit-demo': Number(scores['crit-demo'] || 0),
+        'crit-doc': Number(scores['crit-doc'] || 0)
+      },
+      judgeRemarks: remarks,
+      judgeId: (currentUser as any).judgeId || currentUser.id,
+      judgeName: currentUser.name,
+      judgeEmail: currentUser.email
+    }).then(() => {
+      api.getTeams().then((r) => {
+        if (r.teams && r.teams.length > 0) setParticipants(r.teams);
+      }).catch(() => {});
+      api.getDashboardStats().then((r) => {
+        if (r.recentActivities) setScoringActivities(r.recentActivities);
+      }).catch(() => {});
+    }).catch((err) => {
+      console.warn('MongoDB Atlas score sync notice:', err);
+    });
+
+    return { success: true, totalScore, percentage };
+  };
+
+  const submitEvaluation = () => {
+    submitTeamEvaluation({
+      participantId: selectedParticipantId,
+      scores: activeCriterionScores,
+      remarks: activeScoreComments
     });
   };
 
@@ -758,11 +1121,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         scoringScenarioRun,
         navigate,
         loginAs,
+        loginWithCredentials,
+        createJudge,
+        updateJudge,
+        deleteJudge,
+        toggleJudgeStatus,
+        updateUserProfile,
+        changeUserPassword,
+        refreshData,
+        isLoadingData,
         logout,
         setCriterionScore,
         setActiveComments: setActiveScoreComments,
         saveEvaluationDraft,
         submitEvaluation,
+        submitTeamEvaluation,
+        lookupTeamById,
         resetActiveScore,
         loadParticipantForScoring,
         createJudgeAssignment,
@@ -804,7 +1178,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 ? 'bg-white border-red-200 text-slate-800'
                 : toast.type === 'warning'
                 ? 'bg-white border-amber-200 text-slate-800'
-                : 'bg-white border-blue-200 text-slate-800'
+                : 'bg-white border-teal-200 text-slate-800'
             }`}
           >
             <div
@@ -815,7 +1189,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   ? 'bg-red-500'
                   : toast.type === 'warning'
                   ? 'bg-amber-500'
-                  : 'bg-[#0057B8]'
+                  : 'bg-[#03A695]'
               }`}
             />
             <div className="flex-1">

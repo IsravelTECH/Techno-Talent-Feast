@@ -38,7 +38,7 @@ export const SchoolsPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               School Management
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               {schools.length} Schools Registered
             </span>
           </div>
@@ -55,7 +55,7 @@ export const SchoolsPage: React.FC = () => {
               placeholder="Search school name or city..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+              className="pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
             />
           </div>
         </div>
@@ -67,13 +67,13 @@ export const SchoolsPage: React.FC = () => {
           <div
             key={school.id}
             onClick={() => setSelectedSchool(school)}
-            className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-300 transition-all p-6 cursor-pointer flex flex-col justify-between group"
+            className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-300 transition-all p-6 cursor-pointer flex flex-col justify-between group"
           >
             <div>
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#F6F9FD] border border-slate-200/90 flex items-center justify-center p-2 group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-2xl bg-[#F7FCFB] border border-slate-200/90 flex items-center justify-center p-2 group-hover:scale-105 transition-transform">
                     <img
                       src={school.logo}
                       alt={school.name}
@@ -82,14 +82,14 @@ export const SchoolsPage: React.FC = () => {
                         e.target.style.display = 'none';
                       }}
                     />
-                    <Building2 className="w-6 h-6 text-[#0057B8]" />
+                    <Building2 className="w-6 h-6 text-[#03A695]" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-slate-900 group-hover:text-[#0057B8] transition-colors line-clamp-1">
+                    <h3 className="text-sm font-black text-slate-900 group-hover:text-[#03A695] transition-colors line-clamp-1">
                       {school.name}
                     </h3>
                     <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-3 h-3 text-[#F36C21]" />
+                      <MapPin className="w-3 h-3 text-[#FD5E01]" />
                       <span>{school.city}, {school.state}</span>
                     </p>
                   </div>
@@ -111,7 +111,7 @@ export const SchoolsPage: React.FC = () => {
               </div>
 
               {/* Stats Bar */}
-              <div className="grid grid-cols-3 gap-2 mt-5 p-3 rounded-2xl bg-[#F6F9FD] text-center text-xs">
+              <div className="grid grid-cols-3 gap-2 mt-5 p-3 rounded-2xl bg-[#F7FCFB] text-center text-xs">
                 <div>
                   <span className="block font-black text-slate-900">
                     {school.totalParticipants}
@@ -119,13 +119,13 @@ export const SchoolsPage: React.FC = () => {
                   <span className="text-[10px] text-slate-500 font-semibold">Students</span>
                 </div>
                 <div>
-                  <span className="block font-black text-[#0057B8]">
+                  <span className="block font-black text-[#03A695]">
                     {school.totalCompetitions}
                   </span>
                   <span className="text-[10px] text-slate-500 font-semibold">Arenas</span>
                 </div>
                 <div>
-                  <span className="block font-black text-[#F36C21]">
+                  <span className="block font-black text-[#FD5E01]">
                     {school.averageScore}%
                   </span>
                   <span className="text-[10px] text-slate-500 font-semibold">Avg Score</span>
@@ -143,7 +143,7 @@ export const SchoolsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#0057B8] group-hover:text-[#003B7A]">
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#03A695] group-hover:text-[#0B2545]">
               <span>View Registered Delegation</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -162,7 +162,7 @@ export const SchoolsPage: React.FC = () => {
         >
           <div className="space-y-6 text-xs">
             {/* Principal / Coordinator info */}
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-[#F6F9FD] border border-slate-100">
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-[#F7FCFB] border border-slate-100">
               <div>
                 <span className="text-[10px] font-bold uppercase text-slate-400">Principal</span>
                 <p className="font-bold text-slate-900 mt-0.5">{selectedSchool.principalName}</p>
@@ -196,7 +196,7 @@ export const SchoolsPage: React.FC = () => {
                       .map((p) => (
                         <tr key={p.id} className="hover:bg-slate-50">
                           <td className="p-3 font-bold text-slate-900">{p.name}</td>
-                          <td className="p-3 text-[#0057B8] font-semibold">{p.competitionName}</td>
+                          <td className="p-3 text-[#03A695] font-semibold">{p.competitionName}</td>
                           <td className="p-3 text-slate-600">Grade {p.grade}</td>
                           <td className="p-3 text-right">
                             <Badge variant={p.status === 'SUBMITTED' ? 'success' : 'orange'} size="sm">

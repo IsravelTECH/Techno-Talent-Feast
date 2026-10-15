@@ -68,7 +68,7 @@ export const ScoreReviewPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Score Review, Verification & Audit Desk
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               100-Pt Rubric Audit
             </span>
           </div>
@@ -106,14 +106,14 @@ export const ScoreReviewPage: React.FC = () => {
             placeholder="Search juror, student, school..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+            className="w-full pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
           />
         </div>
 
         <select
           value={selectedCatFilter}
           onChange={(e) => setSelectedCatFilter(e.target.value)}
-          className="px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0057B8]"
+          className="px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#03A695]"
         >
           <option value="ALL">All 6 Categories</option>
           {competitions.map((comp) => (
@@ -163,7 +163,7 @@ export const ScoreReviewPage: React.FC = () => {
                     <td className="py-3.5 px-3">
                       <span className="font-bold text-slate-900 block">{asgn.participantName}</span>
                       <span className="text-[10px] text-slate-500 font-semibold">{asgn.schoolName}</span>
-                      <span className="text-[10px] text-[#0057B8] font-mono block">{asgn.projectTitle}</span>
+                      <span className="text-[10px] text-[#03A695] font-mono block">{asgn.projectTitle}</span>
                     </td>
 
                     <td className="py-3.5 px-3">
@@ -188,7 +188,7 @@ export const ScoreReviewPage: React.FC = () => {
                     </td>
 
                     <td className="py-3.5 px-3 text-center">
-                      <span className="text-sm font-black font-mono px-2.5 py-1 rounded-xl bg-blue-50 text-[#0057B8] border border-blue-200">
+                      <span className="text-sm font-black font-mono px-2.5 py-1 rounded-xl bg-[#E6F7F5] text-[#03A695] border border-teal-200">
                         {total}
                       </span>
                     </td>
@@ -249,7 +249,7 @@ export const ScoreReviewPage: React.FC = () => {
               value={reopenReason}
               onChange={(e) => setReopenReason(e.target.value)}
               placeholder="e.g. Please re-evaluate Defense Q4 answer regarding power budgeting..."
-              className="w-full p-3 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+              className="w-full p-3 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
             />
           </div>
         </Modal>

@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
+import { UserAvatar } from '../components/common/UserAvatar';
 import {
   UserCheck,
   Search,
@@ -109,7 +110,7 @@ export const JudgesPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Judges & Evaluators Roster
             </h1>
-            <span className="px-3 py-1 rounded-full bg-[#EAF3FF] text-[#0057B8] border border-blue-200 text-xs font-bold">
+            <span className="px-3 py-1 rounded-full bg-[#E6F7F5] text-[#03A695] border border-teal-200 text-xs font-bold">
               {totalJudges} Accredited Jurors
             </span>
             <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
@@ -150,7 +151,7 @@ export const JudgesPage: React.FC = () => {
           </span>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-2xl font-black text-slate-900">{totalJudges}</span>
-            <span className="text-xs font-bold text-[#0057B8]">6 per Category</span>
+            <span className="text-xs font-bold text-[#03A695]">6 per Category</span>
           </div>
           <p className="text-[11px] text-slate-500 mt-1">Certified for Grand Finale</p>
         </div>
@@ -171,7 +172,7 @@ export const JudgesPage: React.FC = () => {
             Evaluations Completed
           </span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-black text-[#0057B8]">{totalEvaluated}</span>
+            <span className="text-2xl font-black text-[#03A695]">{totalEvaluated}</span>
             <span className="text-xs font-bold text-slate-500">/ {totalAssigned} total</span>
           </div>
           <p className="text-[11px] text-slate-500 mt-1">{overallCompletionRate}% total completion rate</p>
@@ -182,7 +183,7 @@ export const JudgesPage: React.FC = () => {
             Judging Standard
           </span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-black text-[#F36C21]">100 Pts</span>
+            <span className="text-2xl font-black text-[#FD5E01]">100 Pts</span>
             <span className="text-xs font-bold text-slate-500">5 Official Pillars</span>
           </div>
           <p className="text-[11px] text-slate-500 mt-1">Mandatory student defense</p>
@@ -198,20 +199,20 @@ export const JudgesPage: React.FC = () => {
             placeholder="Search by juror name, university, track, or specialization..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-[#0057B8] text-slate-800"
+            className="w-full pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-[#03A695] text-slate-800"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
           {/* Status Filter */}
-          <div className="flex items-center bg-[#F6F9FD] p-1 rounded-xl border border-slate-200 shrink-0">
+          <div className="flex items-center bg-[#F7FCFB] p-1 rounded-xl border border-slate-200 shrink-0">
             {(['ALL', 'IN_SESSION', 'ACTIVE'] as const).map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
                 className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   statusFilter === st
-                    ? 'bg-white text-[#0057B8] shadow-xs'
+                    ? 'bg-white text-[#03A695] shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -224,7 +225,7 @@ export const JudgesPage: React.FC = () => {
           <select
             value={selectedCompFilter}
             onChange={(e) => setSelectedCompFilter(e.target.value)}
-            className="px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
+            className="px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
           >
             <option value="ALL">All 6 Categories</option>
             {competitions.map((c) => (
@@ -273,23 +274,13 @@ export const JudgesPage: React.FC = () => {
             return (
               <div
                 key={j.id || j.judgeId}
-                className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-blue-300 transition-all p-6 flex flex-col justify-between"
+                className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-300 transition-all p-6 flex flex-col justify-between"
               >
                 <div className="space-y-4">
                   {/* Top Profile Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      {j.avatar ? (
-                        <img
-                          src={j.avatar}
-                          alt={judgeName}
-                          className="w-12 h-12 rounded-2xl object-cover border-2 border-blue-100 ring-2 ring-blue-50 shrink-0"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-2xl bg-[#EAF3FF] border border-blue-200 flex items-center justify-center text-[#0057B8] font-bold text-base shrink-0">
-                          <UserCheck className="w-6 h-6" />
-                        </div>
-                      )}
+                      <UserAvatar name={judgeName} size="lg" />
                       <div>
                         <h3 className="text-sm font-extrabold text-slate-900 leading-tight">
                           {judgeName}
@@ -310,8 +301,8 @@ export const JudgesPage: React.FC = () => {
                   </div>
 
                   {/* Category & Arena Badges */}
-                  <div className="space-y-1.5 p-3 rounded-2xl bg-[#F6F9FD] border border-slate-100">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#0057B8]">
+                  <div className="space-y-1.5 p-3 rounded-2xl bg-[#F7FCFB] border border-slate-100">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#03A695]">
                       <Trophy className="w-3.5 h-3.5 shrink-0" />
                       <span className="line-clamp-1">{assignedCategories}</span>
                     </div>
@@ -337,7 +328,7 @@ export const JudgesPage: React.FC = () => {
                         j.assignedProjects.map((proj, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded-lg bg-blue-50 text-[#0057B8] border border-blue-200/60 text-[10px] font-semibold line-clamp-1"
+                            className="px-2 py-0.5 rounded-lg bg-[#E6F7F5] text-[#03A695] border border-teal-200/60 text-[10px] font-semibold line-clamp-1"
                           >
                             {proj}
                           </span>
@@ -354,13 +345,13 @@ export const JudgesPage: React.FC = () => {
                   <div className="pt-2">
                     <div className="flex items-center justify-between text-xs mb-1.5">
                       <span className="font-bold text-slate-600">Evaluation Progress</span>
-                      <span className="font-black text-[#0057B8]">
+                      <span className="font-black text-[#03A695]">
                         {completed} / {assigned} ({completionPct}%)
                       </span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[#0057B8] to-[#16A34A] rounded-full transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-[#03A695] to-[#16A34A] rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(100, completionPct)}%` }}
                       />
                     </div>
@@ -369,7 +360,7 @@ export const JudgesPage: React.FC = () => {
                         <Clock className="w-3 h-3" />
                         {j.lastActivity || 'Scored recently'}
                       </span>
-                      <span className="font-semibold text-[#F36C21]">
+                      <span className="font-semibold text-[#FD5E01]">
                         {pending} Pending in Queue
                       </span>
                     </div>
@@ -428,7 +419,7 @@ export const JudgesPage: React.FC = () => {
               placeholder="e.g. Dr. K. Swaminathan (IIT Madras)"
               value={newJudgeName}
               onChange={(e) => setNewJudgeName(e.target.value)}
-              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8] focus:bg-white text-slate-900"
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695] focus:bg-white text-slate-900"
               required
             />
           </div>
@@ -442,7 +433,7 @@ export const JudgesPage: React.FC = () => {
                 type="text"
                 value={newJudgeTitle}
                 onChange={(e) => setNewJudgeTitle(e.target.value)}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8] focus:bg-white text-slate-900"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695] focus:bg-white text-slate-900"
               />
             </div>
             <div>
@@ -454,7 +445,7 @@ export const JudgesPage: React.FC = () => {
                 placeholder="e.g. Dubai Future Labs"
                 value={newJudgeOrg}
                 onChange={(e) => setNewJudgeOrg(e.target.value)}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8] focus:bg-white text-slate-900"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695] focus:bg-white text-slate-900"
               />
             </div>
           </div>
@@ -467,7 +458,7 @@ export const JudgesPage: React.FC = () => {
               <select
                 value={newJudgeCategory}
                 onChange={(e) => setNewJudgeCategory(e.target.value)}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8] focus:bg-white text-slate-900 cursor-pointer"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695] focus:bg-white text-slate-900 cursor-pointer"
               >
                 {competitions.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -484,7 +475,7 @@ export const JudgesPage: React.FC = () => {
                 type="text"
                 value={newJudgeSpecialization}
                 onChange={(e) => setNewJudgeSpecialization(e.target.value)}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8] focus:bg-white text-slate-900"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695] focus:bg-white text-slate-900"
               />
             </div>
           </div>
@@ -499,7 +490,7 @@ export const JudgesPage: React.FC = () => {
                 placeholder="juror@organization.org"
                 value={newJudgeEmail}
                 onChange={(e) => setNewJudgeEmail(e.target.value)}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8] focus:bg-white text-slate-900"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695] focus:bg-white text-slate-900"
               />
             </div>
             <div>
@@ -511,17 +502,17 @@ export const JudgesPage: React.FC = () => {
                 placeholder="+971 50 000 0000"
                 value={newJudgePhone}
                 onChange={(e) => setNewJudgePhone(e.target.value)}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0057B8] focus:bg-white text-slate-900"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695] focus:bg-white text-slate-900"
               />
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 space-y-1">
+          <div className="p-3 rounded-xl bg-[#E6F7F5] border border-teal-200 text-blue-900 space-y-1">
             <p className="font-bold text-[11px] flex items-center gap-1">
-              <Shield className="w-3.5 h-3.5 text-[#0057B8]" />
+              <Shield className="w-3.5 h-3.5 text-[#03A695]" />
               Official Grand Finale Accreditation
             </p>
-            <p className="text-[10px] text-blue-700">
+            <p className="text-[10px] text-[#008C7E]">
               The juror will be bound to the official 100-point rubric and allocated 48 finalists across the selected category arena at EIBFS Dubai.
             </p>
           </div>

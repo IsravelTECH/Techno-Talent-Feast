@@ -64,7 +64,7 @@ export const AnnouncementsPage: React.FC = () => {
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Event Announcements & Intercom
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3FF] text-[#0057B8] text-xs font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               Broadcast System
             </span>
           </div>
@@ -94,7 +94,7 @@ export const AnnouncementsPage: React.FC = () => {
             placeholder="Search announcements..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+            className="w-full pl-8 pr-3 py-1.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
           />
         </div>
         <span className="text-xs font-semibold text-slate-500">
@@ -122,7 +122,7 @@ export const AnnouncementsPage: React.FC = () => {
                       ? 'bg-rose-100 text-rose-700'
                       : ann.priority === 'HIGH'
                       ? 'bg-amber-100 text-amber-800'
-                      : 'bg-blue-100 text-[#0057B8]'
+                      : 'bg-blue-100 text-[#03A695]'
                   }`}>
                     {ann.priority}
                   </span>
@@ -179,7 +179,7 @@ export const AnnouncementsPage: React.FC = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Schedule Update: Category 5 Defense Commences at 11:30 AM"
-              className="w-full px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+              className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
             />
           </div>
 
@@ -189,7 +189,7 @@ export const AnnouncementsPage: React.FC = () => {
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as any)}
-                className="w-full px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-semibold"
+                className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-semibold"
               >
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
@@ -203,7 +203,7 @@ export const AnnouncementsPage: React.FC = () => {
               <select
                 value={targetAudience}
                 onChange={(e) => setTargetAudience(e.target.value as any)}
-                className="w-full px-3 py-2 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs font-semibold"
+                className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-semibold"
               >
                 <option value="ALL">All (Judges & Administration)</option>
                 <option value="JUDGES">Judges Only</option>
@@ -219,7 +219,7 @@ export const AnnouncementsPage: React.FC = () => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Enter full details, table locations, instructions..."
-              className="w-full p-3 bg-[#F6F9FD] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0057B8]"
+              className="w-full p-3 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
             />
           </div>
         </div>
