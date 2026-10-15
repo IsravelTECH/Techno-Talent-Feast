@@ -16,12 +16,16 @@ import {
   ExternalLink,
   BookOpen,
   CheckCircle2,
-  Clock
+  Clock,
+  Users,
+  Layers,
+  Building2
 } from 'lucide-react';
 import { CompetitionProject } from '../types';
+import { CATEGORY_CATALOG } from '../utils/projectCatalog';
 
 export const ProjectsPage: React.FC = () => {
-  const { competitions, projects = [], navigate, setSelectedProject, addToast } = useApp();
+  const { competitions, projects = [], participants, navigate, setSelectedProject, addToast } = useApp();
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeProjectModal, setActiveProjectModal] = useState<CompetitionProject | null>(null);
@@ -53,14 +57,14 @@ export const ProjectsPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
-              24 Championship Projects Repository
+              24 Official Championship Projects
             </h1>
             <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
               4 Projects / Category
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Official specifications, permissible hardware/software tools, problem statements, and evaluation criteria
+            Standardized project statements across Grades 1 to 12 • Every team chooses exactly 1 project in their category
           </p>
         </div>
 
@@ -68,12 +72,41 @@ export const ProjectsPage: React.FC = () => {
           <Button
             variant="orange"
             size="sm"
-            icon={<Sparkles className="w-4 h-4" />}
-            onClick={() => navigate('assignments')}
+            icon={<Users className="w-4 h-4" />}
+            onClick={() => navigate('participants')}
           >
-            Judge Assignments Wizard
+            Manage Team Projects
           </Button>
         </div>
+      </div>
+
+      {/* Category Grade Bands Grid Guide */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {CATEGORY_CATALOG.map((cat) => {
+          const isSelected = selectedCategoryFilter === String(cat.categoryNumber) || selectedCategoryFilter === cat.id;
+
+          return (
+            <div
+              key={cat.categoryNumber}
+              onClick={() => setSelectedCategoryFilter(isSelected ? 'ALL' : String(cat.categoryNumber))}
+              className={`p-3.5 rounded-2xl border-2 transition-all cursor-pointer text-center ${
+                isSelected
+                  ? 'border-[#03A695] bg-[#E6F7F5] shadow-xs ring-2 ring-teal-500/20'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
+              }`}
+            >
+              <span className="text-[10px] font-black uppercase text-[#03A695] block">
+                Cat {cat.categoryNumber}
+              </span>
+              <h4 className="text-xs font-black text-slate-900 truncate mt-0.5">
+                {cat.gradeEligibility}
+              </h4>
+              <span className="text-[10px] text-slate-400 font-semibold block mt-1">
+                4 Projects (Choose 1)
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Filter and Search Bar */}
@@ -82,7 +115,7 @@ export const ProjectsPage: React.FC = () => {
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search project code, title, tool (e.g. Python, Arduino)..."
+            placeholder="Search project code, title, tools (MS Paint, Python, Scratch)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
@@ -93,12 +126,12 @@ export const ProjectsPage: React.FC = () => {
           <select
             value={selectedCategoryFilter}
             onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-            className="px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#03A695]"
+            className="px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#03A695]"
           >
             <option value="ALL">All 6 Categories (24 Projects)</option>
             {competitions.map((comp) => (
-              <option key={comp.id} value={comp.id}>
-                Cat {comp.categoryNumber}: {comp.name}
+              <option key={comp.id} value={String(comp.categoryNumber)}>
+                Category {comp.categoryNumber}: {comp.name} ({comp.gradeEligibility})
               </option>
             ))}
           </select>
@@ -112,6 +145,14 @@ export const ProjectsPage: React.FC = () => {
           const tools = project.softwareOrTools || [];
           const projectCode = `P${project.categoryNumber}-0${project.projectNumber}`;
 
+          // Count teams enrolled in this specific project
+          const enrolledCount = participants.filter(
+            (p) =>
+              (p.categoryNumber === project.categoryNumber && p.projectNumber === project.projectNumber) ||
+              p.projectId === project.id ||
+              p.projectTitle?.toLowerCase() === project.title?.toLowerCase()
+          ).length;
+
           return (
             <div
               key={project.id}
@@ -119,11 +160,16 @@ export const ProjectsPage: React.FC = () => {
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-1 rounded-xl bg-[#E6F7F5] text-[#03A695] font-black font-mono text-xs border border-teal-100">
-                    {projectCode}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2.5 py-1 rounded-xl bg-[#E6F7F5] text-[#03A695] font-black font-mono text-xs border border-teal-100">
+                      {projectCode}
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                      Project {project.projectNumber} of 4
+                    </span>
+                  </div>
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    {project.categoryName || comp?.name}
+                    {project.gradeEligibility || comp?.gradeEligibility}
                   </span>
                 </div>
 
@@ -161,7 +207,7 @@ export const ProjectsPage: React.FC = () => {
 
               <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
                 <span className="text-[11px] text-slate-500 font-medium">
-                  Grade Band: <strong>{project.gradeEligibility || comp?.gradeEligibility || 'Grades 6-12'}</strong>
+                  Enrolled Teams: <strong className="text-[#03A695]">{enrolledCount}</strong>
                 </span>
                 <Button
                   variant="primary"
@@ -183,7 +229,7 @@ export const ProjectsPage: React.FC = () => {
           isOpen={!!activeProjectModal}
           onClose={() => setActiveProjectModal(null)}
           title={`Project Spec: P${activeProjectModal.categoryNumber}-0${activeProjectModal.projectNumber} — ${activeProjectModal.title}`}
-          subtitle={`${activeProjectModal.categoryName} • Official TTF 2026 Problem Statement`}
+          subtitle={`${activeProjectModal.categoryName} (${activeProjectModal.gradeEligibility}) • Official TTF 2026 Problem Statement`}
           footer={
             <div className="flex items-center justify-end gap-3">
               <Button variant="secondary" onClick={() => setActiveProjectModal(null)}>
@@ -194,10 +240,10 @@ export const ProjectsPage: React.FC = () => {
                 icon={<ArrowRight className="w-4 h-4" />}
                 onClick={() => {
                   setActiveProjectModal(null);
-                  navigate('scoring');
+                  navigate('participants');
                 }}
               >
-                Score this Project
+                Assign / View Enrolled Teams
               </Button>
             </div>
           }
@@ -233,6 +279,13 @@ export const ProjectsPage: React.FC = () => {
                   </span>
                 ))}
               </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+              <p className="font-bold">Selection Rule:</p>
+              <p className="mt-0.5 text-[11px]">
+                Each participating team in Category {activeProjectModal.categoryNumber} ({activeProjectModal.gradeEligibility}) must select exactly <strong>ONE</strong> of the 4 designated projects to prepare, submit, and defend before the jury panel.
+              </p>
             </div>
           </div>
         </Modal>

@@ -193,7 +193,7 @@ export const JudgeSinglePageScoring: React.FC = () => {
       const result = submitTeamEvaluation({
         participantId: activeTeam.id,
         scores: numericScores,
-        remarks: `Evaluated by ${currentUser.name}`
+        remarks: `Evaluated by ${currentUser?.name || 'Official Juror'}`
       });
 
       if (result.success) {
@@ -258,9 +258,9 @@ export const JudgeSinglePageScoring: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Judge Identity Badge */}
             <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-[#E6F7F5] border border-teal-200 text-xs">
-              <UserAvatar name={currentUser.name} size="xs" />
+              <UserAvatar name={currentUser?.name || 'Official Juror'} size="xs" />
               <span className="font-bold text-[#0B2545] max-w-[100px] sm:max-w-none truncate text-[11px] sm:text-xs">
-                {currentUser.name}
+                {currentUser?.name || 'Official Juror'}
               </span>
               <span className="hidden sm:inline-block text-[10px] font-semibold text-[#03A695] uppercase">
                 • Juror
@@ -444,11 +444,16 @@ export const JudgeSinglePageScoring: React.FC = () => {
 
               <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] sm:col-span-2">
                 <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
-                  Assigned Project
+                  Selected Project (1 of 4)
                 </span>
-                <span className="font-semibold text-[#172B4D] text-xs mt-0.5 block break-words">
-                  {activeTeam.projectTitle}
-                </span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="font-mono text-[10px] font-black text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-300 shrink-0">
+                    P{activeTeam.categoryNumber || 1}-0{activeTeam.projectNumber || 1}
+                  </span>
+                  <span className="font-bold text-[#172B4D] text-xs break-words">
+                    {activeTeam.projectTitle}
+                  </span>
+                </div>
               </div>
             </div>
 

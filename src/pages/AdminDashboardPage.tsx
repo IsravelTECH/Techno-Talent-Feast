@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { StatCard } from '../components/common/StatCard';
 import { Badge } from '../components/common/Badge';
@@ -7,21 +7,17 @@ import { UserAvatar } from '../components/common/UserAvatar';
 import {
   Users,
   Building2,
-  UserCheck,
-  FileCheck,
   Trophy,
   Activity,
   ArrowRight,
-  TrendingUp,
-  Sparkles,
-  Radio,
-  ExternalLink,
   ChevronRight,
-  Clock,
   Medal,
   Award,
-  Layers,
-  FolderKanban
+  FolderKanban,
+  RefreshCw,
+  Calendar,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 
 export const AdminDashboardPage: React.FC = () => {
@@ -30,14 +26,86 @@ export const AdminDashboardPage: React.FC = () => {
     selectedEvent,
     competitions,
     schools,
+    participants,
+    judges,
+    assignments,
+    projects: allProjects,
+    dashboardStats,
     leaderboard,
     scoringActivities,
     navigate,
-    triggerManagerScenario
+    refreshData,
+    isLoadingData
   } = useApp();
 
-  const totalCompleted = competitions.reduce((acc, c) => acc + c.completedCount, 0);
-  const totalPending = competitions.reduce((acc, c) => acc + c.pendingCount, 0);
+  // Dynamic Time-aware Greeting
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }, []);
+
+  // Dynamic Live Calendar Date
+  const dynamicLiveDate = useMemo(() => {
+    return new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }).format(new Date());
+  }, []);
+
+  // Live Dynamic Statistics from MongoDB Atlas & App Context
+  const totalTeamsCount = dashboardStats?.totalTeams ?? (participants.length > 0 ? participants.length : 8);
+  const completedEvaluationsCount = dashboardStats?.completedEvaluations ?? 
+    participants.filter(p => p.status === 'SUBMITTED' || p.status === 'EVALUATED').length;
+  const pendingEvaluationsCount = dashboardStats?.pendingEvaluations ?? 
+    Math.max(0, totalTeamsCount - completedEvaluationsCount);
+  const scoringPercentage = dashboardStats?.scoringProgress ?? 
+    (totalTeamsCount > 0 ? Math.round((completedEvaluationsCount / totalTeamsCount) * 100) : 0);
+  const totalSchoolsCount = dashboardStats?.totalSchools ?? (schools.length > 0 ? schools.length : 6);
+  const totalJudgesCount = dashboardStats?.totalJudges ?? (judges.length > 0 ? judges.length : 8);
+  const totalProjectsCount = allProjects.length > 0 ? allProjects.length : 24;
+  const totalCategoriesCount = competitions.length > 0 ? competitions.length : 6;
+
+  // Dynamic School Performance Leaderboard
+  const dynamicSchools = useMemo(() => {
+    return schools.map((school) => {
+      const schoolTeams = participants.filter(
+        p => p.schoolId === school.id || p.schoolName?.toLowerCase() === school.name?.toLowerCase()
+      );
+      const evaluatedTeams = schoolTeams.filter(p => (p.finalScore || 0) > 0);
+      const dynamicAvg = evaluatedTeams.length > 0
+        ? Math.round(evaluatedTeams.reduce((sum, t) => sum + (t.finalScore || 0), 0) / evaluatedTeams.length)
+        : school.averageScore || 0;
+
+      return {
+        ...school,
+        totalParticipants: schoolTeams.length || school.totalParticipants,
+        averageScore: dynamicAvg
+      };
+    }).sort((a, b) => b.averageScore - a.averageScore);
+  }, [schools, participants]);
+
+  // Dynamic Top 3 Leaderboard Podium from Evaluated Teams
+  const dynamicPodium = useMemo(() => {
+    const evaluated = participants
+      .filter(p => (p.finalScore || 0) > 0)
+      .sort((a, b) => (b.finalScore || 0) - (a.finalScore || 0));
+
+    if (evaluated.length >= 3) {
+      return evaluated.slice(0, 3).map((p) => ({
+        participantId: p.id,
+        participantName: p.name,
+        schoolName: p.schoolName,
+        score: p.finalScore || 0,
+        competitionName: p.categoryName || 'Innovation Challenge'
+      }));
+    }
+
+    return leaderboard.slice(0, 3);
+  }, [participants, leaderboard]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -50,27 +118,35 @@ export const AdminDashboardPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
-                Good Morning, {currentUser.name}
+                {greeting}, {currentUser?.name || 'Administrator'}
               </h1>
               <Badge variant="live" dot>
                 LIVE EVENT
               </Badge>
             </div>
-            <p className="text-xs text-slate-600 mt-1">
-              <strong className="text-[#03A695]">{selectedEvent.name}</strong> — {selectedEvent.venue} ({selectedEvent.city})
-            </p>
+            <div className="flex items-center gap-2 mt-1 text-xs text-slate-600 flex-wrap">
+              <span className="font-bold text-[#03A695]">{selectedEvent?.name || 'Techno Talent Feast 2026'}</span>
+              <span className="text-slate-300">•</span>
+              <span className="inline-flex items-center gap-1 text-slate-500 font-medium">
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                {dynamicLiveDate}
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-500 font-medium">{selectedEvent?.venue || 'EIBFS Dubai'}</span>
+            </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions Bar */}
         <div className="flex items-center gap-2.5 flex-wrap">
           <Button
-            variant="orange"
+            variant="outline"
             size="sm"
-            icon={<Sparkles className="w-4 h-4" />}
-            onClick={triggerManagerScenario}
+            icon={<RefreshCw className={`w-3.5 h-3.5 text-[#03A695] ${isLoadingData ? 'animate-spin' : ''}`} />}
+            onClick={() => refreshData()}
+            className="cursor-pointer font-bold shadow-xs hover:border-teal-300"
           >
-            Launch Scoring Demo (92%)
+            <span>{isLoadingData ? 'Syncing...' : 'Sync Live Data'}</span>
           </Button>
 
           <Button
@@ -78,8 +154,9 @@ export const AdminDashboardPage: React.FC = () => {
             size="sm"
             icon={<FolderKanban className="w-4 h-4" />}
             onClick={() => navigate('projects')}
+            className="cursor-pointer shadow-xs"
           >
-            Projects (24)
+            <span>Projects ({totalProjectsCount})</span>
           </Button>
 
           <Button
@@ -87,8 +164,9 @@ export const AdminDashboardPage: React.FC = () => {
             size="sm"
             icon={<Award className="w-4 h-4" />}
             onClick={() => navigate('assignments')}
+            className="cursor-pointer shadow-xs"
           >
-            Judge Assignments
+            <span>Judge Assignments</span>
           </Button>
         </div>
       </div>
@@ -97,7 +175,7 @@ export const AdminDashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <button
           onClick={() => navigate('projects')}
-          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#03A695] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
+          className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-[#03A695] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#E6F7F5] text-[#03A695] flex items-center justify-center font-black group-hover:bg-[#03A695] group-hover:text-white transition-colors">
@@ -105,10 +183,10 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
             <div>
               <h4 className="text-xs font-black text-slate-900 group-hover:text-[#03A695] transition-colors">
-                24 Championship Projects
+                {totalProjectsCount} Championship Projects
               </h4>
               <p className="text-[11px] text-slate-500">
-                4 Projects / Category • Full Specifications
+                {totalCategoriesCount} Categories • Full Engineering Rubrics
               </p>
             </div>
           </div>
@@ -117,7 +195,7 @@ export const AdminDashboardPage: React.FC = () => {
 
         <button
           onClick={() => navigate('assignments')}
-          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-[#FD5E01] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
+          className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-[#FD5E01] hover:shadow-md transition-all text-left flex items-center justify-between group cursor-pointer"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#FD5E01] flex items-center justify-center font-black group-hover:bg-[#FD5E01] group-hover:text-white transition-colors">
@@ -125,10 +203,10 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
             <div>
               <h4 className="text-xs font-black text-slate-900 group-hover:text-[#FD5E01] transition-colors">
-                Judge & Finalist Assignments
+                {totalJudgesCount} Jurors Assigned
               </h4>
               <p className="text-[11px] text-slate-500">
-                6-Step Wizard • Conflict-Free Matching
+                {assignments.length} Matchings • Conflict-Free Arena Allocation
               </p>
             </div>
           </div>
@@ -136,44 +214,45 @@ export const AdminDashboardPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Primary KPI Stat Cards */}
+      {/* Primary KPI Stat Cards (All White Backgrounds) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
         <StatCard
           title="Participants"
-          value="1,440"
-          subtitle="Grades 1-12 Spectrum"
+          value={totalTeamsCount.toLocaleString()}
+          subtitle="Verified Finalist Teams"
           icon={<Users className="w-5 h-5" />}
-          trend={{ value: "576 Finalists", isPositive: true }}
+          trend={{ value: `${completedEvaluationsCount} Scored`, isPositive: true }}
           onClick={() => navigate('participants')}
         />
         <StatCard
           title="Schools"
-          value="48"
-          subtitle="UAE Delegations"
+          value={totalSchoolsCount.toLocaleString()}
+          subtitle="Participating Delegations"
           icon={<Building2 className="w-5 h-5" />}
           onClick={() => navigate('schools')}
         />
+        {/* Project Card: Clean White Background matching all cards */}
         <StatCard
-          title="Projects (24)"
-          value="24"
-          subtitle="4 / Category"
+          title={`Projects (${totalProjectsCount})`}
+          value={totalProjectsCount.toString()}
+          subtitle={`${totalCategoriesCount} Categories Spectrum`}
           icon={<FolderKanban className="w-5 h-5 text-[#03A695]" />}
-          highlight={true}
+          highlight={false}
           onClick={() => navigate('projects')}
         />
         <StatCard
-          title="Judge Assignments"
-          value="576"
-          subtitle="Conflict-Free"
+          title="Active Judges"
+          value={totalJudgesCount.toLocaleString()}
+          subtitle={`${assignments.length} Arena Matchings`}
           icon={<Award className="w-5 h-5 text-[#FD5E01]" />}
           onClick={() => navigate('assignments')}
         />
         <StatCard
-          title="Categories (6)"
-          value="6"
-          subtitle="100-Pt Rubrics"
-          icon={<Trophy className="w-5 h-5 text-purple-600" />}
-          onClick={() => navigate('categories')}
+          title="Scoring Progress"
+          value={`${scoringPercentage}%`}
+          subtitle={`${completedEvaluationsCount}/${totalTeamsCount} Evaluations`}
+          icon={<Activity className="w-5 h-5 text-[#03A695]" />}
+          onClick={() => navigate('competitions')}
         />
       </div>
 
@@ -200,15 +279,24 @@ export const AdminDashboardPage: React.FC = () => {
                 icon={<ArrowRight className="w-3.5 h-3.5" />}
                 iconPosition="right"
               >
-                View All 12
+                View All {competitions.length}
               </Button>
             </div>
 
             <div className="space-y-4">
               {competitions.slice(0, 5).map((comp) => {
-                const total = comp.registeredCount;
-                const completed = comp.completedCount;
-                const percentage = Math.round((completed / total) * 100);
+                // Compute category team progress dynamically
+                const catTeams = participants.filter(
+                  p => String(p.category) === String(comp.id) || 
+                       String(p.category) === String(comp.categoryNumber) || 
+                       p.categoryName?.toLowerCase() === comp.name?.toLowerCase() ||
+                       p.category === comp.name
+                );
+                const total = catTeams.length > 0 ? catTeams.length : (comp.registeredCount || 1);
+                const completed = catTeams.length > 0 
+                  ? catTeams.filter(p => p.status === 'SUBMITTED' || p.status === 'EVALUATED').length 
+                  : (comp.completedCount || 0);
+                const percentage = Math.min(100, Math.round((completed / total) * 100));
 
                 return (
                   <div
@@ -226,7 +314,7 @@ export const AdminDashboardPage: React.FC = () => {
                             {comp.name}
                           </h4>
                           <span className="text-[11px] text-slate-500">
-                            {comp.category} • {comp.venueHall}
+                            {comp.category || comp.name} • {comp.venueHall}
                           </span>
                         </div>
                       </div>
@@ -289,7 +377,7 @@ export const AdminDashboardPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
-                  {schools.slice(0, 4).map((school, index) => (
+                  {dynamicSchools.slice(0, 4).map((school, index) => (
                     <tr
                       key={school.id}
                       onClick={() => navigate('schools', { schoolId: school.id })}
@@ -307,7 +395,7 @@ export const AdminDashboardPage: React.FC = () => {
                               : 'text-slate-500'
                           }`}
                         >
-                          #{school.rank}
+                          #{index + 1}
                         </span>
                       </td>
                       <td className="py-3 font-bold text-slate-900">
@@ -321,9 +409,9 @@ export const AdminDashboardPage: React.FC = () => {
                       </td>
                       <td className="py-3 text-center">
                         <span className="inline-flex items-center gap-1 font-bold">
-                          <span className="text-amber-500">🥇{school.goldMedals}</span>
-                          <span className="text-slate-400">🥈{school.silverMedals}</span>
-                          <span className="text-amber-700">🥉{school.bronzeMedals}</span>
+                          <span className="text-amber-500">🥇{school.goldMedals || 0}</span>
+                          <span className="text-slate-400">🥈{school.silverMedals || 0}</span>
+                          <span className="text-amber-700">🥉{school.bronzeMedals || 0}</span>
                         </span>
                       </td>
                       <td className="py-3 text-right pr-2 font-black text-[#03A695] text-sm">
@@ -337,7 +425,7 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Live Scoring Activity & Leaderboard Preview */}
+        {/* Right Column: Live Scoring Activity & Leaderboard Podium */}
         <div className="lg:col-span-4 space-y-6">
           {/* Live Scoring Activity Feed */}
           <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card">
@@ -390,13 +478,12 @@ export const AdminDashboardPage: React.FC = () => {
             </Button>
           </div>
 
-          {/* Top Leaderboard Podium Preview */}
-          <div className="bg-gradient-to-br from-[#0B2545] to-[#03A695] text-white p-6 rounded-3xl shadow-xl border border-teal-600 relative overflow-hidden">
-            {/* Background sparkle */}
-            <div className="flex items-center justify-between pb-4 border-b border-white/15 mb-4">
+          {/* Top Leaderboard Podium Preview (Clean White Card Layout) */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
               <div className="flex items-center gap-2">
                 <Medal className="w-5 h-5 text-[#FD5E01]" />
-                <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
                   Leaderboard Podium
                 </h3>
               </div>
@@ -406,39 +493,39 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              {leaderboard.slice(0, 3).map((item, idx) => (
+              {dynamicPodium.slice(0, 3).map((item, idx) => (
                 <div
                   key={item.participantId}
                   onClick={() => navigate('participant-detail', { partId: item.participantId })}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-xs border border-white/10 transition-all cursor-pointer"
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[#F7FCFB] hover:bg-[#E6F7F5] border border-slate-100/80 hover:border-teal-200 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs ${
                         idx === 0
-                          ? 'bg-amber-400 text-slate-900'
+                          ? 'bg-amber-100 text-amber-900 border border-amber-300'
                           : idx === 1
-                          ? 'bg-slate-200 text-slate-900'
-                          : 'bg-[#FD5E01] text-white'
+                          ? 'bg-slate-200 text-slate-800 border border-slate-300'
+                          : 'bg-orange-100 text-orange-900 border border-orange-300'
                       }`}
                     >
                       {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-white leading-tight">
+                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#03A695] transition-colors leading-tight">
                         {item.participantName}
                       </h4>
-                      <p className="text-[10px] text-blue-200 truncate max-w-[130px]">
+                      <p className="text-[10px] text-slate-500 truncate max-w-[130px]">
                         {item.schoolName}
                       </p>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <span className="text-sm font-black text-white">
+                    <span className="text-sm font-black text-[#03A695]">
                       {item.score}%
                     </span>
-                    <span className="text-[10px] text-blue-200 block font-semibold">
+                    <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">
                       {item.competitionName.split(' ')[0]}
                     </span>
                   </div>
@@ -448,7 +535,7 @@ export const AdminDashboardPage: React.FC = () => {
 
             <button
               onClick={() => navigate('results')}
-              className="w-full mt-4 py-2.5 px-4 bg-white hover:bg-[#E6F7F5] text-[#0B2545] font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="w-full mt-4 py-2.5 px-4 bg-[#E6F7F5] hover:bg-[#03A695] text-[#03A695] hover:text-white font-extrabold text-xs rounded-xl border border-teal-200 shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <span>VIEW FULL LEADERBOARD</span>
               <ArrowRight className="w-3.5 h-3.5" />

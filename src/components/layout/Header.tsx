@@ -194,10 +194,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-100 transition-colors text-left cursor-pointer"
             >
-              <UserAvatar name={currentUser.name} size="sm" />
+              <UserAvatar name={currentUser?.name || 'Administrator'} size="sm" />
               <div className="hidden sm:flex flex-col">
                 <span className="text-xs font-bold text-slate-900 leading-none">
-                  {currentUser.name}
+                  {currentUser?.name || 'Administrator'}
                 </span>
                 <span className="text-[10px] font-semibold text-slate-500 mt-0.5 uppercase tracking-wide">
                   {currentRole === 'admin' ? 'Administration' : 'Juror / Judge'}
@@ -210,10 +210,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             {showProfileMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-1.5 z-50 animate-scale-up">
                 <div className="px-4 py-3 border-b border-slate-100">
-                  <p className="text-xs font-bold text-slate-900">{currentUser.name}</p>
-                  <p className="text-[11px] text-slate-500 truncate">{currentUser.email}</p>
+                  <p className="text-xs font-bold text-slate-900">{currentUser?.name || 'Administrator'}</p>
+                  <p className="text-[11px] text-slate-500 truncate">{currentUser?.email || 'admin@technoschool.in'}</p>
                   <div className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-[10px] font-bold">
-                    <span>{currentUser.organization}</span>
+                    <span>{currentUser?.organization || 'TechnoSchool Central Directorate'}</span>
                   </div>
                 </div>
 

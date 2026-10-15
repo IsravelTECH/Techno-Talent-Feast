@@ -44,26 +44,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
   const pendingJudgeCount = assignments.filter((a) => a.status === 'ASSIGNED' || a.status === 'IN_PROGRESS').length;
 
-  // STRICT ADMINISTRATION NAVIGATION (9 Items)
+  // STRICT ADMINISTRATION NAVIGATION (9 Items - Clean without counts)
   const adminNavItems: NavItem[] = [
     { id: 'dashboard', label: 'Admin Dashboard', icon: LayoutDashboard, badge: 'LIVE' },
     { id: 'assignments', label: 'Judge Roaster', icon: ClipboardList, highlight: true },
-    { id: 'schools', label: 'Schools', icon: Building2, count: '48' },
-    { id: 'participants', label: 'Participants', icon: Users, count: '1,440' },
-    { id: 'categories', label: 'Categories (6)', icon: Trophy, count: '6' },
-    { id: 'projects', label: 'Projects (24)', icon: FolderKanban, count: '24' },
+    { id: 'schools', label: 'Schools', icon: Building2 },
+    { id: 'participants', label: 'Participants', icon: Users },
+    { id: 'categories', label: 'Categories', icon: Trophy },
+    { id: 'projects', label: 'Projects', icon: FolderKanban },
     { id: 'results', label: 'Results & Leaderboard', icon: Medal },
     { id: 'reports', label: 'Reports & Export', icon: FileSpreadsheet },
     { id: 'profile', label: 'My Profile', icon: User }
   ];
 
-  const submittedCount = participants.filter((p) => p.status === 'SUBMITTED').length;
-
   // SIMPLIFIED JUDGE ROLE NAVIGATION (Team Scoring Desk Focus)
   const judgeNavItems: NavItem[] = [
     { id: 'judge-dashboard', label: 'Judge Dashboard', icon: LayoutDashboard },
     { id: 'scoring', label: 'Team Scoring Desk', icon: FileCheck2, highlight: true, live: true },
-    { id: 'judge-completed', label: 'Submission Status', icon: Award, count: `${submittedCount} Locked` },
+    { id: 'judge-completed', label: 'Submission Status', icon: Award },
     { id: 'profile', label: 'Juror Profile', icon: User }
   ];
 
@@ -176,18 +174,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </span>
                   )}
 
-                  {item.count && (
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded-md ${
-                        isActive
-                          ? 'bg-white/20 text-white font-bold'
-                          : 'bg-slate-100 text-slate-500 font-medium'
-                      }`}
-                    >
-                      {item.count}
-                    </span>
-                  )}
-
                   {item.notifBadge && item.notifBadge > 0 ? (
                     <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#FD5E01] text-white animate-pulse">
                       {item.notifBadge}
@@ -209,10 +195,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             className="p-2.5 rounded-xl bg-slate-50 hover:bg-[#E6F7F5] border border-slate-200/80 hover:border-teal-200 transition-all cursor-pointer flex items-center gap-2.5 group"
             title="View Profile"
           >
-            <UserAvatar name={currentUser.name} size="sm" />
+            <UserAvatar name={currentUser?.name || 'Administrator'} size="sm" />
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-slate-900 group-hover:text-[#03A695] truncate transition-colors">
-                {currentUser.name}
+                {currentUser?.name || 'Administrator'}
               </p>
               <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide truncate">
                 {currentRole === 'admin' ? 'Administration' : 'Official Juror'}

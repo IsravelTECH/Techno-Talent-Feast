@@ -211,16 +211,6 @@ export const ProfilePage: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* Quick Edit Icon Button */}
-          <button
-            onClick={handleOpenEditModal}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-[#03A695] bg-[#E6F7F5] hover:bg-blue-100 border border-teal-200/80 transition-colors cursor-pointer"
-            title="Edit profile details"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-            <span>Edit Details</span>
-          </button>
         </div>
 
         {/* Profile Details Grid */}
@@ -229,12 +219,12 @@ export const ProfilePage: React.FC = () => {
             <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
               Personal & Security Information
             </h3>
-            <span className="text-[11px] text-slate-400">Click edit icon to modify fields</span>
+            <span className="text-[11px] text-slate-400">Use "Edit Profile" above to update info</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 1. System Identifier (ID) - Strictly Non-Editable */}
-            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 relative group">
+            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                   <Hash className="w-3 h-3" />
@@ -254,19 +244,12 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             {/* 2. User Name */}
-            <div className="p-4 rounded-2xl bg-[#F7FCFB] border border-teal-100/70 relative group hover:border-teal-200 transition-colors">
+            <div className="p-4 rounded-2xl bg-[#F7FCFB] border border-teal-100/70">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                   <User className="w-3 h-3 text-[#03A695]" />
                   User Name
                 </span>
-                <button
-                  onClick={handleOpenEditModal}
-                  className="opacity-60 group-hover:opacity-100 text-[#03A695] hover:text-[#0B2545] transition-opacity cursor-pointer p-0.5"
-                  title="Edit User Name"
-                >
-                  <Pencil className="w-3 h-3" />
-                </button>
               </div>
               <p className="font-bold text-slate-900 text-sm mt-1.5">
                 {currentUser.name}
@@ -277,19 +260,12 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             {/* 3. Email Address */}
-            <div className="p-4 rounded-2xl bg-[#F7FCFB] border border-teal-100/70 relative group hover:border-teal-200 transition-colors">
+            <div className="p-4 rounded-2xl bg-[#F7FCFB] border border-teal-100/70">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                   <Mail className="w-3 h-3 text-[#03A695]" />
                   Email Address
                 </span>
-                <button
-                  onClick={handleOpenEditModal}
-                  className="opacity-60 group-hover:opacity-100 text-[#03A695] hover:text-[#0B2545] transition-opacity cursor-pointer p-0.5"
-                  title="Edit Email Address"
-                >
-                  <Pencil className="w-3 h-3" />
-                </button>
               </div>
               <p className="font-bold text-slate-900 text-sm mt-1.5 truncate">
                 {currentUser.email}
@@ -300,19 +276,12 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             {/* 4. Phone Number */}
-            <div className="p-4 rounded-2xl bg-[#F7FCFB] border border-teal-100/70 relative group hover:border-teal-200 transition-colors">
+            <div className="p-4 rounded-2xl bg-[#F7FCFB] border border-teal-100/70">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                   <Phone className="w-3 h-3 text-[#03A695]" />
                   Phone Number
                 </span>
-                <button
-                  onClick={handleOpenEditModal}
-                  className="opacity-60 group-hover:opacity-100 text-[#03A695] hover:text-[#0B2545] transition-opacity cursor-pointer p-0.5"
-                  title="Edit Phone Number"
-                >
-                  <Pencil className="w-3 h-3" />
-                </button>
               </div>
               <p className="font-bold text-slate-900 text-sm mt-1.5">
                 {currentUser.phone || '+971 - 565104104'}
@@ -323,23 +292,16 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             {/* 5. Role */}
-            <div className="p-4 rounded-2xl bg-[#F7FCFB] border border-teal-100/70 relative group hover:border-teal-200 transition-colors">
+            <div className="p-4 rounded-2xl bg-[#F7FCFB] border border-teal-100/70">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                   <Shield className="w-3 h-3 text-[#03A695]" />
                   System Role
                 </span>
-                <button
-                  onClick={handleOpenEditModal}
-                  className="opacity-60 group-hover:opacity-100 text-[#03A695] hover:text-[#0B2545] transition-opacity cursor-pointer p-0.5"
-                  title="Edit Role"
-                >
-                  <Pencil className="w-3 h-3" />
-                </button>
               </div>
               <p className="font-bold text-slate-900 text-sm mt-1.5 flex items-center gap-2">
                 <span>{currentRole === 'admin' ? 'Super Administrator' : 'Judge / Juror'}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-[#03A695] font-mono font-bold uppercase">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-50 text-[#03A695] border border-teal-200 font-mono font-bold uppercase">
                   {currentUser.role || currentRole}
                 </span>
               </p>
@@ -350,19 +312,20 @@ export const ProfilePage: React.FC = () => {
               </p>
             </div>
 
-            {/* 6. Password (Separate Edit) */}
-            <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80 relative group hover:border-amber-300 transition-colors">
+            {/* 6. Password (Separate Edit Button) */}
+            <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1">
                   <KeyRound className="w-3 h-3 text-amber-600" />
                   Account Password
                 </span>
+                {/* Dedicated Separate Password Edit Button */}
                 <button
                   onClick={handleOpenPasswordModal}
-                  className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-100/80 hover:bg-amber-200 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-xl border border-amber-300 transition-colors cursor-pointer shadow-xs"
                   title="Change Password"
                 >
-                  <Pencil className="w-2.5 h-2.5" />
+                  <Pencil className="w-3 h-3 text-amber-700" />
                   <span>Change Password</span>
                 </button>
               </div>
@@ -377,33 +340,15 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Security & Action Footer */}
+        {/* Security & Status Footer */}
         <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <Shield className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>Authenticated session via MongoDB Atlas. All updates sync in real time.</span>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleOpenPasswordModal}
-              className="gap-2 flex-1 sm:flex-none cursor-pointer"
-            >
-              <KeyRound className="w-3.5 h-3.5 text-amber-600" />
-              <span>Change Password</span>
-            </Button>
-
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleOpenEditModal}
-              className="gap-2 flex-1 sm:flex-none cursor-pointer"
-            >
-              <Pencil className="w-3.5 h-3.5" />
-              <span>Edit Details</span>
-            </Button>
+          <div className="text-[11px] text-slate-400 font-medium">
+            Techno Talent Feast 2026 Security Layer
           </div>
         </div>
       </div>

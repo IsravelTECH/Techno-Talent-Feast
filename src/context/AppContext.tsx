@@ -67,10 +67,16 @@ interface AppContextType {
   leaderboard: LeaderboardItem[];
   scoringActivities: ScoringActivity[];
   notifications: NotificationItem[];
-  announcements: AnnouncementItem[];
   auditLogs: AuditLogItem[];
-  
-  // Scoring state
+  dashboardStats: {
+    totalTeams: number;
+    completedEvaluations: number;
+    pendingEvaluations: number;
+    scoringProgress: number;
+    totalSchools: number;
+    totalJudges: number;
+    averageScore: number;
+  } | null;
   activeCriterionScores: Record<string, number>;
   activeScoreComments: string;
   isDraftSaved: boolean;
@@ -120,8 +126,19 @@ interface AppContextType {
   setEventStageMode: (stage: EventStage) => void;
   setEventStage: (stage: EventStage) => void;
   addAnnouncement: (announcement: any) => void;
-  createAnnouncement: (announcement: { title: string; message: string; priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'; targetAudience?: 'ALL' | 'JUDGES' | 'ADMINISTRATION' }) => void;
-  
+  // Project Assignment & Registration
+  updateParticipantProject: (participantId: string, projectId: string) => { success: boolean; message: string };
+  registerTeamWithProject: (params: {
+    name: string;
+    teamName?: string;
+    schoolId: string;
+    schoolName: string;
+    grade: number;
+    categoryNumber: number;
+    projectId: string;
+    teamMembers?: string[];
+  }) => { success: boolean; message: string };
+
   // Authentication & Dynamic Atlas Actions
   loginWithCredentials: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   createJudge: (judgeData: any) => Promise<{ success: boolean; message?: string; error?: string }>;
@@ -144,19 +161,75 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User>(MOCK_USERS.admin);
-  const [currentRole, setCurrentRole] = useState<UserRole>('admin');
-  const [currentPage, setCurrentPage] = useState<string>('dashboard');
+  // Valid pages recognized by TTF router
+  const VALID_PAGES = new Set([
+    'dashboard', 'events', 'event-detail', 'schools', 'participants', 'participant-detail',
+    'categories', 'competitions', 'competition-detail', 'projects', 'assignments', 'results',
+    'reports', 'settings', 'rubrics', 'roles', 'judge-dashboard', 'judge-assignments',
+    'scoring', 'judge-completed', 'leaderboard', 'notifications', 'profile', 'login'
+  ]);
+
+  // Helper to read initial page state on browser refresh or URL hash
+  const getInitialPage = (): string => {
+    try {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash && VALID_PAGES.has(hash)) return hash;
+      const savedPage = localStorage.getItem('ttf_2026_current_page');
+      if (savedPage && VALID_PAGES.has(savedPage)) return savedPage;
+    } catch (e) {}
+    return 'dashboard';
+  };
+
+  const [currentUser, setCurrentUser] = useState<User>(() => {
+    try {
+      const savedUser = localStorage.getItem('ttf_2026_current_user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && typeof parsed === 'object' && parsed.id && parsed.name && parsed.role) {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return MOCK_USERS.admin;
+  });
+
+  const [currentRole, setCurrentRole] = useState<UserRole>(() => {
+    try {
+      const savedRole = localStorage.getItem('ttf_2026_current_role');
+      if (savedRole === 'admin' || savedRole === 'judge') return savedRole;
+    } catch (e) {}
+    return 'admin';
+  });
+
+  const [currentPage, setCurrentPage] = useState<string>(getInitialPage);
   const [selectedEvent, setSelectedEvent] = useState<TTFEvent>(INITIAL_EVENT);
-  const [selectedCompetitionId, setSelectedCompetitionId] = useState<string>('cat-6');
-  const [selectedParticipantId, setSelectedParticipantId] = useState<string>('part-01'); // Arun Kumar & Team
+
+  const [selectedCompetitionId, setSelectedCompetitionId] = useState<string>(() => {
+    try {
+      return localStorage.getItem('ttf_2026_comp_id') || 'cat-6';
+    } catch (e) {}
+    return 'cat-6';
+  });
+
+  const [selectedParticipantId, setSelectedParticipantId] = useState<string>(() => {
+    try {
+      return localStorage.getItem('ttf_2026_part_id') || 'part-01';
+    } catch (e) {}
+    return 'part-01';
+  });
+
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('sch-01');
   const [selectedProjectNumber, setSelectedProjectNumber] = useState<number>(1);
 
   const [participants, setParticipants] = useState<Participant[]>(() => {
     try {
       const saved = localStorage.getItem('ttf_2026_participants');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed.every((p) => p && typeof p === 'object')) {
+          return parsed;
+        }
+      }
     } catch (e) {}
     return INITIAL_PARTICIPANTS;
   });
@@ -168,14 +241,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>(() => {
     try {
       const saved = localStorage.getItem('ttf_2026_leaderboard');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
     } catch (e) {}
     return INITIAL_LEADERBOARD;
   });
   const [scoringActivities, setScoringActivities] = useState<ScoringActivity[]>(() => {
     try {
       const saved = localStorage.getItem('ttf_2026_activities');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
     } catch (e) {}
     return INITIAL_SCORING_ACTIVITIES;
   });
@@ -185,7 +268,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   // Flat list of 24 projects
-  const allProjects = competitions.flatMap((c) => c.projects || []);
+  const allProjects = Array.isArray(competitions)
+    ? competitions.flatMap((c) => (c && Array.isArray(c.projects) ? c.projects : []))
+    : [];
   const [selectedProject, setSelectedProject] = useState<CompetitionProject | null>(allProjects[0] || null);
 
   // Active Scoring state for Arun Kumar & Team (Category 6: Innovation Challenge)
@@ -203,6 +288,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isDraftSaved, setIsDraftSaved] = useState<boolean>(false);
   const [scoringScenarioRun, setScoringScenarioRun] = useState<boolean>(false);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
+
+  const [dashboardStats, setDashboardStats] = useState<{
+    totalTeams: number;
+    completedEvaluations: number;
+    pendingEvaluations: number;
+    scoringProgress: number;
+    totalSchools: number;
+    totalJudges: number;
+    averageScore: number;
+  } | null>(null);
 
   // Load dynamic data from MongoDB Atlas backend
   const refreshData = async () => {
@@ -228,8 +323,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (judgesRes.status === 'fulfilled') {
         setJudges(judgesRes.value.judges || []);
       }
-      if (statsRes.status === 'fulfilled' && statsRes.value.recentActivities?.length > 0) {
-        setScoringActivities(statsRes.value.recentActivities);
+      if (statsRes.status === 'fulfilled' && statsRes.value?.stats) {
+        setDashboardStats(statsRes.value.stats);
+        if (statsRes.value.recentActivities?.length > 0) {
+          setScoringActivities(statsRes.value.recentActivities);
+        }
       }
     } catch (e) {
       console.warn('Backend data sync notice:', e);
@@ -241,6 +339,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     refreshData();
   }, []);
+
+  // Support browser Refresh, Back/Forward buttons, and URL deep-linking
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash && hash !== currentPage) {
+        setCurrentPage(hash);
+        try { localStorage.setItem('ttf_2026_current_page', hash); } catch (e) {}
+      }
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, [currentPage]);
 
   const addToast = (toastOrMessage: any, toastType?: 'success' | 'info' | 'warning' | 'error') => {
     const id = 'toast-' + Math.random().toString(36).substring(2, 9);
@@ -270,15 +381,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const navigate = (page: string, params?: { compId?: string; partId?: string; schoolId?: string; projectNum?: number }) => {
-    if (params?.compId) setSelectedCompetitionId(params.compId);
+    if (params?.compId) {
+      setSelectedCompetitionId(params.compId);
+      try { localStorage.setItem('ttf_2026_comp_id', params.compId); } catch (e) {}
+    }
     if (params?.partId) {
       setSelectedParticipantId(params.partId);
       loadParticipantForScoring(params.partId);
+      try { localStorage.setItem('ttf_2026_part_id', params.partId); } catch (e) {}
     }
     if (params?.schoolId) setSelectedSchoolId(params.schoolId);
     if (params?.projectNum) setSelectedProjectNumber(params.projectNum);
 
     setCurrentPage(page);
+    try {
+      localStorage.setItem('ttf_2026_current_page', page);
+      window.location.hash = page;
+    } catch (e) {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -290,15 +409,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const u = res.user as any;
         setCurrentUser(u);
         setCurrentRole(u.role);
+        try {
+          localStorage.setItem('ttf_2026_current_user', JSON.stringify(u));
+          localStorage.setItem('ttf_2026_current_role', u.role);
+        } catch (e) {}
+
         if (u.role === 'admin') {
-          setCurrentPage('dashboard');
+          navigate('dashboard');
           addToast({
             type: 'success',
             title: 'Logged in as Administration',
             message: `Welcome, ${u.name}. Full competition oversight active.`
           });
         } else {
-          setCurrentPage('judge-dashboard');
+          navigate('judge-dashboard');
           addToast({
             type: 'success',
             title: 'Logged in as Judge',
@@ -499,6 +623,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = () => {
+    try {
+      localStorage.removeItem('ttf_2026_current_page');
+      localStorage.removeItem('ttf_2026_current_user');
+      localStorage.removeItem('ttf_2026_current_role');
+      window.location.hash = '';
+    } catch (e) {}
     setCurrentPage('login');
     addToast({
       type: 'info',
@@ -905,15 +1035,106 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const reopenParticipantEvaluation = (participantId: string) => {
+  const reopenParticipantEvaluation = (participantId: string, reason?: string) => {
     setParticipants((prev) =>
       prev.map((p) => (p.id === participantId ? { ...p, status: 'IN_PROGRESS' as EvaluationStatus } : p))
     );
     addToast({
-      type: 'warning',
+      type: 'info',
       title: 'Evaluation Reopened',
-      message: 'Juror can now make adjustments to the scoring sheet.'
+      message: reason ? `Evaluation reopened: ${reason}` : 'Evaluation reopened for scoring review.'
     });
+  };
+
+  const updateParticipantProject = (participantId: string, projectId: string) => {
+    const project = allProjects.find((p) => p.id === projectId);
+    if (!project) return { success: false, message: 'Project not found' };
+
+    setParticipants((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === participantId) {
+          return {
+            ...p,
+            projectId: project.id,
+            projectNumber: project.projectNumber,
+            projectTitle: project.title,
+            selectedProjectTitle: project.title,
+            projectSummary: project.objective || project.specification,
+            categoryNumber: project.categoryNumber,
+            categoryName: project.categoryName
+          };
+        }
+        return p;
+      });
+      try {
+        localStorage.setItem('ttf_2026_participants', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    addToast({
+      type: 'success',
+      title: 'Project Assigned',
+      message: `Team project updated to P${project.categoryNumber}-0${project.projectNumber}: ${project.title}`
+    });
+
+    return { success: true, message: 'Project successfully assigned.' };
+  };
+
+  const registerTeamWithProject = (params: {
+    name: string;
+    teamName?: string;
+    schoolId: string;
+    schoolName: string;
+    grade: number;
+    categoryNumber: number;
+    projectId: string;
+    teamMembers?: string[];
+  }) => {
+    const project = allProjects.find((p) => p.id === params.projectId);
+    if (!project) return { success: false, message: 'Project not found' };
+
+    const newId = 'ttf-team-' + Date.now();
+    const newTeamCode = `TTF26-TEAM-${String(participants.length + 1).padStart(3, '0')}`;
+
+    const newParticipant: Participant = {
+      id: newId,
+      participantId: newTeamCode,
+      teamId: newTeamCode,
+      name: params.name,
+      teamName: params.teamName || `${params.name} & Team`,
+      schoolId: params.schoolId,
+      schoolName: params.schoolName,
+      grade: params.grade,
+      categoryNumber: params.categoryNumber,
+      categoryName: project.categoryName,
+      competitionId: `cat-${params.categoryNumber}`,
+      competitionName: project.categoryName,
+      projectNumber: project.projectNumber,
+      projectId: project.id,
+      projectTitle: project.title,
+      selectedProjectTitle: project.title,
+      projectSummary: project.objective || project.specification,
+      status: 'PENDING',
+      teamMembers: params.teamMembers ? params.teamMembers.map((m) => ({ name: m, grade: params.grade })) : [],
+      teamSize: params.teamMembers ? params.teamMembers.length + 1 : 1
+    };
+
+    setParticipants((prev) => {
+      const updated = [newParticipant, ...prev];
+      try {
+        localStorage.setItem('ttf_2026_participants', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    addToast({
+      type: 'success',
+      title: 'Team Registered with Project',
+      message: `${newParticipant.teamName} enrolled in P${project.categoryNumber}-0${project.projectNumber}: ${project.title}`
+    });
+
+    return { success: true, message: 'Team successfully registered.' };
   };
 
   const publishResultsOfficially = () => {
@@ -1115,6 +1336,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         notifications,
         announcements,
         auditLogs,
+        dashboardStats,
         activeCriterionScores,
         activeScoreComments,
         isDraftSaved,
@@ -1144,6 +1366,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         removeJudgeAssignment,
         verifyParticipantScore,
         verifyScoreByAdmin,
+        updateParticipantProject,
+        registerTeamWithProject,
         reopenParticipantEvaluation,
         reopenEvaluation,
         publishResultsOfficially,
