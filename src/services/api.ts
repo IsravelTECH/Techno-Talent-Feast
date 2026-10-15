@@ -58,12 +58,28 @@ class ApiService {
       ...options
     });
 
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || data.message || `Request failed with status ${res.status}`);
+    const contentType = res.headers.get('content-type') || '';
+    let data: any;
+
+    if (contentType.includes('application/json')) {
+      try {
+        data = await res.json();
+      } catch (e: any) {
+        throw new Error(`Invalid JSON received from server: ${e?.message || 'Unexpected end of JSON'}`);
+      }
+    } else {
+      const text = await res.text();
+      if (!res.ok) {
+        throw new Error(`Server returned HTTP ${res.status}: ${text.slice(0, 150) || res.statusText}`);
+      }
+      data = text;
     }
 
-    return data;
+    if (!res.ok) {
+      throw new Error(data?.error || data?.message || `Request failed with status ${res.status}`);
+    }
+
+    return data as T;
   }
 
   // Authentication

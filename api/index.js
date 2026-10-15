@@ -18,38 +18,41 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Cache DB connection across serverless invocations
-let isConnected = false;
+// Ensure DB connection before handling request, return clean JSON on failure
 app.use(async (req, res, next) => {
-  if (!isConnected) {
-    try {
-      await connectDB();
-      isConnected = true;
-    } catch (err) {
-      console.error('[Vercel Serverless] Database connection error:', err.message);
-    }
+  // Allow health checks even if DB is still establishing
+  if (req.url === '/health' || req.url === '/api/health') {
+    return next();
   }
-  next();
+
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('[Vercel Serverless] DB connection failed:', err.message);
+    return res.status(503).json({
+      success: false,
+      error: 'Database connection failed. Please ensure MongoDB Atlas has Network Access set to 0.0.0.0/0.',
+      detail: err.message
+    });
+  }
 });
 
-// Normalize URL: strips '/api' prefix so routes match seamlessly under Vercel rewrites
-app.use((req, res, next) => {
-  if (req.url.startsWith('/api')) {
-    req.url = req.url.replace(/^\/api/, '') || '/';
-  }
-  next();
-});
+// Mount Routes under both root ('/') and '/api' to support any Vercel rewrite variation
+const registerRoutes = (prefix = '') => {
+  app.use(`${prefix}/auth`, authRoutes);
+  app.use(`${prefix}/teams`, teamRoutes);
+  app.use(`${prefix}/evaluations`, evaluationRoutes);
+  app.use(`${prefix}/judges`, judgeRoutes);
+  app.use(`${prefix}/schools`, schoolRoutes);
+  app.use(`${prefix}/categories`, categoryRoutes);
+  app.use(`${prefix}/dashboard`, dashboardRoutes);
+};
 
-// Mount Routes (routes match both /api/* and /*)
-app.use('/auth', authRoutes);
-app.use('/teams', teamRoutes);
-app.use('/evaluations', evaluationRoutes);
-app.use('/judges', judgeRoutes);
-app.use('/schools', schoolRoutes);
-app.use('/categories', categoryRoutes);
-app.use('/dashboard', dashboardRoutes);
+registerRoutes('');
+registerRoutes('/api');
 
-app.get('/health', (req, res) => {
+app.get(['/health', '/api/health'], (req, res) => {
   res.json({
     status: 'ok',
     message: 'Techno Talent Feast 2026 API on Vercel is running',
@@ -57,11 +60,28 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.get('/', (req, res) => {
+app.get(['/', '/api'], (req, res) => {
   res.json({
     status: 'ok',
     message: 'Techno Talent Feast 2026 API Server is operational',
     timestamp: new Date().toISOString()
+  });
+});
+
+// JSON 404 Handler - never returns Express default HTML 404
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: `API route not found: ${req.method} ${req.originalUrl || req.url}`
+  });
+});
+
+// JSON Global Error Handler - catches any synchronous or async throw
+app.use((err, req, res, next) => {
+  console.error('[Vercel Serverless API Error]:', err);
+  res.status(err.status || 500).json({
+    success: false,
+    error: err.message || 'Internal Server Error'
   });
 });
 
