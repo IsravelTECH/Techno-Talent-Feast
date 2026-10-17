@@ -25,23 +25,23 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`relative p-5 rounded-2xl border transition-all duration-200 ${
+      className={`relative p-3.5 sm:p-5 rounded-2xl border transition-all duration-200 ${
         highlight
           ? 'bg-gradient-to-br from-[#03A695] to-[#0B2545] text-white border-teal-500 shadow-lg shadow-teal-900/15'
           : 'bg-white text-slate-800 border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-200'
       } ${onClick ? 'cursor-pointer' : ''}`}
     >
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
           <p
-            className={`text-xs font-semibold tracking-wider uppercase ${
+            className={`text-[10px] sm:text-xs font-semibold tracking-wider uppercase truncate ${
               highlight ? 'text-teal-100' : 'text-[#64748B]'
             }`}
           >
             {title}
           </p>
           <h3
-            className={`text-2xl lg:text-3xl font-extrabold mt-1 tracking-tight ${
+            className={`text-xl sm:text-2xl lg:text-3xl font-extrabold mt-0.5 sm:mt-1 tracking-tight truncate ${
               highlight ? 'text-white' : 'text-slate-900'
             }`}
           >
@@ -49,7 +49,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           </h3>
         </div>
         <div
-          className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+          className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 ${
             highlight
               ? 'bg-white/15 text-white backdrop-blur-xs'
               : 'bg-[#E6F7F5] text-[#03A695]'
@@ -60,9 +60,9 @@ export const StatCard: React.FC<StatCardProps> = ({
       </div>
 
       {(subtitle || trend) && (
-        <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+        <div className="mt-2.5 sm:mt-3.5 pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-xs">
           {subtitle && (
-            <span className={highlight ? 'text-teal-200' : 'text-slate-500'}>
+            <span className={`truncate mr-1 ${highlight ? 'text-teal-200' : 'text-slate-500'}`}>
               {subtitle}
             </span>
           )}

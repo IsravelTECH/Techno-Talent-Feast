@@ -16,7 +16,7 @@ export type EventStage =
 
 export type CompetitionStatus = 'UPCOMING' | 'STAGE_1_SCHOOL' | 'FINALISTS_CONFIRMED' | 'LIVE' | 'COMPLETED';
 
-export type EvaluationStatus = 'PENDING' | 'IN_PROGRESS' | 'DRAFT' | 'SUBMITTED' | 'VERIFIED' | 'LOCKED' | 'COMPLETED';
+export type EvaluationStatus = 'PENDING' | 'PENDING_EVALUATION' | 'IN_PROGRESS' | 'DRAFT' | 'SUBMITTED' | 'VERIFIED' | 'LOCKED' | 'COMPLETED' | 'EVALUATED';
 
 export type ScoreboardVisibility = 'HIDDEN' | 'INTERNAL_ONLY' | 'LIVE' | 'PUBLISHED';
 
@@ -90,12 +90,17 @@ export interface School {
   email: string;
   totalRegistered: number;
   totalParticipants?: number;
+  totalStudents?: number;
+  totalTeams?: number;
+  completedEvaluations?: number;
+  pendingEvaluations?: number;
   totalCompetitions?: number;
   totalFinalists: number; // Max 12
   isQuotaConfirmed: boolean;
   categoryQuotas: CategoryFinalistQuota[];
   averageScore: number;
   rank: number;
+  computedRank?: number;
   goldMedals: number;
   silverMedals: number;
   bronzeMedals: number;
@@ -177,6 +182,7 @@ export interface Participant {
   grade: number;
   categoryNumber: number; // 1 to 6
   projectNumber: number; // 1 to 4
+  projectId?: string;
   categoryName: string;
   category?: string;
   competitionId: string;
@@ -185,25 +191,25 @@ export interface Participant {
   selectedProjectTitle: string;
   schoolId: string;
   schoolName: string;
-  city: string;
-  isGroupProject: boolean;
+  city?: string;
+  isGroupProject?: boolean;
   teamName?: string;
   teamMembers?: TeamMember[];
   teamSize?: number;
-  isGrandFinalist: boolean; // 2 per category per school
-  stage: 'STAGE_1_SCHOOL' | 'STAGE_2_FINALE';
+  isGrandFinalist?: boolean; // 2 per category per school
+  stage?: 'STAGE_1_SCHOOL' | 'STAGE_2_FINALE';
   assignedJudgeId?: string;
   assignedJudgeName?: string;
-  email: string;
-  phone: string;
+  email?: string;
+  phone?: string;
   parentName?: string;
   parentContact?: string;
   status: EvaluationStatus;
-  finalScore: number;
-  percentage: number;
+  finalScore?: number;
+  percentage?: number;
   rank?: number;
   award?: 'WINNER' | 'RUNNER_UP' | 'SECOND_RUNNER_UP' | 'SPECIAL_AWARD' | 'PARTICIPATION';
-  photo: string;
+  photo?: string;
   projectSummary: string;
   projectDescription?: string;
   softwareUsed?: string;
@@ -274,11 +280,15 @@ export interface ScoringActivity {
   judgeAvatar: string;
   action: string;
   participantName: string;
+  participantId?: string;
+  teamId?: string;
+  categoryNumber?: number;
   competitionName: string;
   score?: number;
   timestamp: string;
   timeAgo: string;
   time?: string;
+  createdAt?: string;
 }
 
 export interface LeaderboardItem {

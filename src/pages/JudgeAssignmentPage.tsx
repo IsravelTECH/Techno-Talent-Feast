@@ -145,11 +145,11 @@ export const JudgeAssignmentPage: React.FC = () => {
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Unified Judge Roaster Panel */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card space-y-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-card space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-slate-100">
           <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
                 Judge Roaster
               </h1>
               <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
@@ -161,8 +161,8 @@ export const JudgeAssignmentPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="relative min-w-[260px]">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
+            <div className="relative w-full sm:min-w-[260px]">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -178,6 +178,7 @@ export const JudgeAssignmentPage: React.FC = () => {
               size="sm"
               icon={<Plus className="w-4 h-4" />}
               onClick={() => setIsCreateJudgeOpen(true)}
+              className="text-xs shrink-0"
             >
               + Create New Judge
             </Button>
@@ -192,8 +193,8 @@ export const JudgeAssignmentPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto -mx-1 sm:mx-0">
+            <table className="w-full text-left text-xs min-w-[620px]">
               <thead>
                 <tr className="border-b border-slate-100 text-slate-400 uppercase text-[10px] tracking-wider font-bold">
                   <th className="py-3 px-3">Juror / Judge ID</th>

@@ -414,9 +414,9 @@ export const EventDetailPage: React.FC = () => {
                 variant="outline"
                 size="sm"
                 className="w-full justify-start text-xs font-semibold"
-                onClick={() => navigate('reports')}
+                onClick={() => navigate('results')}
               >
-                Export Event Summaries →
+                Official Event Standings →
               </Button>
             </div>
           </div>

@@ -8,6 +8,9 @@ const scoringActivitySchema = new mongoose.Schema({
   participantName: { type: String, required: true },
   competitionName: { type: String, required: true },
   score: { type: Number, default: 0 },
+  participantId: { type: String, default: '' },
+  teamId: { type: String, default: '' },
+  categoryNumber: { type: Number, default: null },
   timestamp: { type: String, required: true },
   timeAgo: { type: String, default: 'Just now' },
   time: { type: String, default: '' }

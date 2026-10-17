@@ -53,10 +53,10 @@ export const ProjectsPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-card">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               24 Official Championship Projects
             </h1>
             <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
@@ -74,6 +74,7 @@ export const ProjectsPage: React.FC = () => {
             size="sm"
             icon={<Users className="w-4 h-4" />}
             onClick={() => navigate('participants')}
+            className="text-xs"
           >
             Manage Team Projects
           </Button>
@@ -81,7 +82,7 @@ export const ProjectsPage: React.FC = () => {
       </div>
 
       {/* Category Grade Bands Grid Guide */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
         {CATEGORY_CATALOG.map((cat) => {
           const isSelected = selectedCategoryFilter === String(cat.categoryNumber) || selectedCategoryFilter === cat.id;
 
@@ -89,7 +90,7 @@ export const ProjectsPage: React.FC = () => {
             <div
               key={cat.categoryNumber}
               onClick={() => setSelectedCategoryFilter(isSelected ? 'ALL' : String(cat.categoryNumber))}
-              className={`p-3.5 rounded-2xl border-2 transition-all cursor-pointer text-center ${
+              className={`p-3 sm:p-3.5 rounded-2xl border-2 transition-all cursor-pointer text-center ${
                 isSelected
                   ? 'border-[#03A695] bg-[#E6F7F5] shadow-xs ring-2 ring-teal-500/20'
                   : 'border-slate-200 bg-white hover:border-slate-300'
@@ -110,12 +111,12 @@ export const ProjectsPage: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative flex-1 max-w-sm w-full">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search project code, title, tools (MS Paint, Python, Scratch)..."
+            placeholder="Search project code, title, tools..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
@@ -126,7 +127,7 @@ export const ProjectsPage: React.FC = () => {
           <select
             value={selectedCategoryFilter}
             onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-            className="px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#03A695]"
+            className="w-full sm:w-auto px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#03A695]"
           >
             <option value="ALL">All 6 Categories (24 Projects)</option>
             {competitions.map((comp) => (

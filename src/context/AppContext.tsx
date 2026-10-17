@@ -67,6 +67,7 @@ interface AppContextType {
   leaderboard: LeaderboardItem[];
   scoringActivities: ScoringActivity[];
   notifications: NotificationItem[];
+  announcements: AnnouncementItem[];
   auditLogs: AuditLogItem[];
   dashboardStats: {
     totalTeams: number;
@@ -126,6 +127,7 @@ interface AppContextType {
   setEventStageMode: (stage: EventStage) => void;
   setEventStage: (stage: EventStage) => void;
   addAnnouncement: (announcement: any) => void;
+  createAnnouncement: (ann: { title: string; message: string; priority?: any; targetAudience?: any }) => void;
   // Project Assignment & Registration
   updateParticipantProject: (participantId: string, projectId: string) => { success: boolean; message: string };
   registerTeamWithProject: (params: {
@@ -147,7 +149,7 @@ interface AppContextType {
   toggleJudgeStatus: (id: string, currentStatus: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   updateUserProfile: (updates: { name?: string; email?: string; phone?: string; role?: UserRole }) => Promise<{ success: boolean; error?: string }>;
   changeUserPassword: (passwords: { currentPassword?: string; newPassword: string }) => Promise<{ success: boolean; error?: string }>;
-  refreshData: () => Promise<void>;
+  refreshData: (options?: { silent?: boolean }) => Promise<void>;
   isLoadingData: boolean;
 
   // UI helpers
@@ -300,8 +302,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   } | null>(null);
 
   // Load dynamic data from MongoDB Atlas backend
-  const refreshData = async () => {
-    setIsLoadingData(true);
+  const refreshData = async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setIsLoadingData(true);
+    }
     try {
       const [teamsRes, schoolsRes, catRes, judgesRes, statsRes] = await Promise.allSettled([
         api.getTeams(),
@@ -332,7 +336,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.warn('Backend data sync notice:', e);
     } finally {
-      setIsLoadingData(false);
+      if (!options?.silent) {
+        setIsLoadingData(false);
+      }
     }
   };
 
@@ -822,10 +828,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       judgeAvatar: currentUser.avatar,
       action: 'submitted official marks for',
       participantName: target.teamName || target.name,
+      participantId: target.id,
+      teamId: target.teamId || target.participantId,
+      categoryNumber: target.categoryNumber,
       competitionName: activeComp.name,
       score: totalScore,
       timestamp: nowTime,
-      timeAgo: 'Just now'
+      timeAgo: 'Just now',
+      createdAt: new Date().toISOString()
     };
     const updatedActivities = [newActivity, ...scoringActivities];
     setScoringActivities(updatedActivities);

@@ -52,10 +52,10 @@ export const LoginPage: React.FC = () => {
         <span>TECHNO TALENT FEAST 2026 — LIVE COMPETITION MANAGEMENT PLATFORM</span>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="max-w-5xl w-full bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[620px]">
+      <div className="flex-1 flex items-center justify-center p-3 sm:p-6 lg:p-8">
+        <div className="max-w-5xl w-full bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-0 lg:min-h-[620px]">
           {/* Left Column: Brand Hero Showcase */}
-          <div className="lg:col-span-6 bg-gradient-to-br from-[#03A695] via-[#004899] to-[#0B2545] p-8 lg:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="lg:col-span-6 bg-gradient-to-br from-[#03A695] via-[#004899] to-[#0B2545] p-5 sm:p-8 lg:p-12 text-white flex flex-col justify-between relative overflow-hidden">
             {/* Background Decorative Rings */}
             <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/5 blur-2xl pointer-events-none" />
             <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-[#FD5E01]/15 blur-2xl pointer-events-none" />
@@ -69,21 +69,21 @@ export const LoginPage: React.FC = () => {
                 </span>
               </div>
 
-              <div className="mt-10">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/10 text-orange-200 border border-white/15 text-xs font-bold tracking-wide uppercase mb-4">
+              <div className="mt-6 sm:mt-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/10 text-orange-200 border border-white/15 text-xs font-bold tracking-wide uppercase mb-3 sm:mb-4">
                   <Sparkles className="w-3.5 h-3.5 text-[#FD5E01]" />
                   Powered by TechnoSchool
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
                   TECHNO TALENT <span className="text-[#FD5E01]">FEAST</span>
                 </h1>
-                <p className="text-blue-100 text-sm mt-3 leading-relaxed">
+                <p className="text-blue-100 text-xs sm:text-sm mt-2 sm:mt-3 leading-relaxed">
                   Manage competitions, evaluate student talent with dynamic rubrics, and track leaderboard rankings in real time.
                 </p>
               </div>
 
-              {/* Key Features List */}
-              <div className="mt-8 space-y-3">
+              {/* Key Features List (hidden on small mobile screens to bring form into immediate view) */}
+              <div className="mt-6 sm:mt-8 space-y-2.5 sm:space-y-3 hidden sm:block">
                 {[
                   'Live multi-criteria scoring with automatic 100-point calculation',
                   'Instant real-time leaderboard and administrator review',
@@ -99,24 +99,24 @@ export const LoginPage: React.FC = () => {
             </div>
 
             {/* Bottom Stat Ticker */}
-            <div className="mt-8 pt-6 border-t border-white/15 grid grid-cols-3 gap-4 text-center">
+            <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/15 grid grid-cols-3 gap-2 sm:gap-4 text-center">
               <div>
-                <p className="text-2xl font-black text-white">1,248</p>
-                <p className="text-[11px] text-blue-200 font-medium mt-0.5">Participants</p>
+                <p className="text-xl sm:text-2xl font-black text-white">1,248</p>
+                <p className="text-[10px] sm:text-[11px] text-blue-200 font-medium mt-0.5">Participants</p>
               </div>
               <div>
-                <p className="text-2xl font-black text-[#FD5E01]">42</p>
-                <p className="text-[11px] text-blue-200 font-medium mt-0.5">Schools</p>
+                <p className="text-xl sm:text-2xl font-black text-[#FD5E01]">42</p>
+                <p className="text-[10px] sm:text-[11px] text-blue-200 font-medium mt-0.5">Schools</p>
               </div>
               <div>
-                <p className="text-2xl font-black text-white">12</p>
-                <p className="text-[11px] text-blue-200 font-medium mt-0.5">Competitions</p>
+                <p className="text-xl sm:text-2xl font-black text-white">12</p>
+                <p className="text-[10px] sm:text-[11px] text-blue-200 font-medium mt-0.5">Competitions</p>
               </div>
             </div>
           </div>
 
           {/* Right Column: Login Card & Demo Quick Access */}
-          <div className="lg:col-span-6 p-8 lg:p-12 flex flex-col justify-between bg-white">
+          <div className="lg:col-span-6 p-5 sm:p-8 lg:p-12 flex flex-col justify-between bg-white">
             <div>
               <div className="mb-6">
                 <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
@@ -213,19 +213,19 @@ export const LoginPage: React.FC = () => {
                 <span className="text-[11px] font-semibold text-[#FD5E01]">Atlas MongoDB Connected</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => handlePersonaClick('isravel@gmail.com', '123456')}
-                  className="p-3.5 rounded-2xl border-2 border-teal-200 bg-[#E6F7F5]/80 hover:bg-[#E6F7F5] text-left transition-all group cursor-pointer shadow-xs disabled:opacity-50"
+                  className="p-3 sm:p-3.5 rounded-2xl border-2 border-teal-200 bg-[#E6F7F5]/80 hover:bg-[#E6F7F5] text-left transition-all group cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#03A695] text-white flex items-center justify-center font-bold">
+                    <div className="w-8 h-8 rounded-xl bg-[#03A695] text-white flex items-center justify-center font-bold shrink-0">
                       <ShieldCheck className="w-4 h-4" />
                     </div>
-                    <div>
-                      <span className="text-xs font-black text-[#0B2545] group-hover:text-[#03A695] block">
+                    <div className="min-w-0">
+                      <span className="text-xs font-black text-[#0B2545] group-hover:text-[#03A695] block truncate">
                         ADMINISTRATION
                       </span>
                       <p className="text-[10px] text-slate-500 font-semibold truncate">isravel@gmail.com</p>
@@ -237,14 +237,14 @@ export const LoginPage: React.FC = () => {
                   type="button"
                   disabled={loading}
                   onClick={() => handlePersonaClick('judge@gmail.com', '123456')}
-                  className="p-3.5 rounded-2xl border-2 border-orange-200 bg-[#FFF3EC]/90 hover:bg-[#FFF3EC] text-left transition-all group cursor-pointer shadow-xs disabled:opacity-50"
+                  className="p-3 sm:p-3.5 rounded-2xl border-2 border-orange-200 bg-[#FFF3EC]/90 hover:bg-[#FFF3EC] text-left transition-all group cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#FD5E01] text-white flex items-center justify-center font-bold">
+                    <div className="w-8 h-8 rounded-xl bg-[#FD5E01] text-white flex items-center justify-center font-bold shrink-0">
                       <UserCheck className="w-4 h-4" />
                     </div>
-                    <div>
-                      <span className="text-xs font-black text-amber-950 group-hover:text-[#FD5E01] block">
+                    <div className="min-w-0">
+                      <span className="text-xs font-black text-amber-950 group-hover:text-[#FD5E01] block truncate">
                         JUDGE ROLE
                       </span>
                       <p className="text-[10px] text-slate-500 font-semibold truncate">judge@gmail.com</p>

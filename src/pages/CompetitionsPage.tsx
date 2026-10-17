@@ -58,10 +58,10 @@ export const CompetitionsPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-card">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Competitions & Categories
             </h1>
             <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] border border-teal-200 text-xs font-bold">
@@ -73,15 +73,16 @@ export const CompetitionsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant="outline"
             size="sm"
             icon={<RefreshCw className={`w-3.5 h-3.5 text-[#03A695] ${isLoadingData ? 'animate-spin' : ''}`} />}
             onClick={() => refreshData()}
-            className="cursor-pointer"
+            className="cursor-pointer text-xs"
           >
-            <span>{isLoadingData ? 'Syncing...' : 'Sync Live Data'}</span>
+            <span className="hidden sm:inline">{isLoadingData ? 'Syncing...' : 'Sync Live Data'}</span>
+            <span className="sm:hidden">{isLoadingData ? '...' : 'Sync'}</span>
           </Button>
 
           <Button
@@ -89,15 +90,16 @@ export const CompetitionsPage: React.FC = () => {
             size="sm"
             icon={<Plus className="w-4 h-4" />}
             onClick={() => setShowCreateModal(true)}
-            className="cursor-pointer shadow-xs"
+            className="cursor-pointer shadow-xs text-xs"
           >
-            Create Category
+            <span className="hidden sm:inline">Create Category</span>
+            <span className="sm:hidden">+ Category</span>
           </Button>
         </div>
       </div>
 
       {/* Competitions Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {competitions.map((comp) => {
           // Dynamic team calculations for this specific track
           const catTeams = participants.filter(
@@ -127,7 +129,7 @@ export const CompetitionsPage: React.FC = () => {
             <div
               key={comp.id}
               onClick={() => navigate('competition-detail', { compId: comp.id })}
-              className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-300 transition-all p-6 cursor-pointer flex flex-col justify-between group"
+              className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-300 transition-all p-4 sm:p-6 cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 {/* Top Row */}

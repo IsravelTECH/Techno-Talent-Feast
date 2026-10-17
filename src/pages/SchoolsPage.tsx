@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
@@ -9,211 +9,1074 @@ import {
   Users,
   Search,
   MapPin,
-  Mail,
-  Phone,
-  User,
-  Plus,
   Medal,
-  ChevronRight
+  ChevronRight,
+  CheckCircle2,
+  Clock,
+  FolderKanban,
+  Award,
+  Filter,
+  Sparkles,
+  ArrowRight,
+  Crown,
+  RotateCcw,
+  GraduationCap,
+  Layers
 } from 'lucide-react';
+import { Participant } from '../types';
+import {
+  calculateCategorySchoolStandings,
+  calculateOverallSchoolStandings
+} from '../utils/trophyCalculator';
 
 export const SchoolsPage: React.FC = () => {
-  const { schools, participants, navigate } = useApp();
+  const { schools, participants, competitions, navigate } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSchool, setSelectedSchool] = useState<any | null>(null);
+  const [selectedTrophy, setSelectedTrophy] = useState<string>('ALL');
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
 
-  const filteredSchools = schools.filter(
-    (s) =>
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.principalName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // In-modal filter states
+  const [modalSearch, setModalSearch] = useState('');
+  const [modalCategoryFilter, setModalCategoryFilter] = useState<number | 'ALL'>('ALL');
+
+  // Dynamic trophy calculations based on live participant data
+  const overallSchoolStandings = useMemo(() => {
+    return calculateOverallSchoolStandings(participants);
+  }, [participants]);
+
+  const categorySchoolStandings = useMemo(() => {
+    return calculateCategorySchoolStandings(participants);
+  }, [participants]);
+
+  // Helper to accurately count students in a team (Team Lead + Team Members)
+  const getTeamStudentsCount = (p: Participant): number => {
+    if (p.teamSize && p.teamSize > 0) return p.teamSize;
+    const membersCount = p.teamMembers?.length || 0;
+    return membersCount > 0 ? membersCount + 1 : 1;
+  };
+
+  // Dynamically enrich every school with live participant data, student grades, averages, and ranks
+  const dynamicSchools = useMemo(() => {
+    const enriched = schools.map((school) => {
+      // Find all teams belonging to this school
+      const schoolTeams = participants.filter(
+        (p) =>
+          p.schoolId === school.id ||
+          (p.schoolName && school.name && p.schoolName.trim().toLowerCase() === school.name.trim().toLowerCase())
+      );
+
+      // Accurate students headcount: sum of all students across all teams
+      const totalStudents = schoolTeams.reduce((sum, t) => sum + getTeamStudentsCount(t), 0);
+      const totalTeams = schoolTeams.length;
+
+      // Extract unique participating grades
+      const participatingGrades = Array.from(
+        new Set(schoolTeams.map((t) => t.grade).filter(Boolean))
+      ).sort((a, b) => (Number(a) || 0) - (Number(b) || 0)) as number[];
+
+      // Detailed student headcount breakdown by grade
+      const gradeDistribution = participatingGrades.map((g) => {
+        const gradeTeams = schoolTeams.filter((t) => t.grade === g);
+        const studentCount = gradeTeams.reduce((sum, t) => sum + getTeamStudentsCount(t), 0);
+        return {
+          grade: g,
+          studentCount: studentCount > 0 ? studentCount : gradeTeams.length,
+          teamCount: gradeTeams.length
+        };
+      });
+
+      // Evaluated teams
+      const evaluatedTeams = schoolTeams.filter(
+        (p) => (p.finalScore && p.finalScore > 0) || p.status === 'SUBMITTED' || p.status === 'EVALUATED' || p.status === 'COMPLETED'
+      );
+      const completedEvaluations = evaluatedTeams.length;
+      const pendingEvaluations = Math.max(0, totalTeams - completedEvaluations);
+      const evaluationProgress = totalTeams > 0 ? Math.round((completedEvaluations / totalTeams) * 100) : 0;
+
+      // Dynamic average score from evaluated teams
+      const dynamicAvg = evaluatedTeams.length > 0
+        ? Math.round(evaluatedTeams.reduce((sum, t) => sum + (t.finalScore || 0), 0) / evaluatedTeams.length)
+        : (school.averageScore || 0);
+
+      // Distinct championship categories
+      const distinctCategories = Array.from(
+        new Set(schoolTeams.map((t) => t.categoryNumber || t.competitionId).filter(Boolean))
+      ).length || school.totalCompetitions || 0;
+
+      // Dynamic medal counts
+      const goldMedals = evaluatedTeams.filter((t) => (t.finalScore || 0) >= 95).length;
+      const silverMedals = evaluatedTeams.filter((t) => (t.finalScore || 0) >= 90 && (t.finalScore || 0) < 95).length;
+      const bronzeMedals = evaluatedTeams.filter((t) => (t.finalScore || 0) >= 85 && (t.finalScore || 0) < 90).length;
+
+      // Match trophies won
+      const standing = overallSchoolStandings.find(
+        (s) => s.schoolName.trim().toLowerCase() === school.name.trim().toLowerCase()
+      );
+      const trophiesWon = standing?.trophiesWon || [];
+
+      return {
+        ...school,
+        teams: schoolTeams,
+        totalStudents: totalStudents > 0 ? totalStudents : (school.totalParticipants || 12),
+        totalTeams,
+        participatingGrades,
+        gradeDistribution,
+        completedEvaluations,
+        pendingEvaluations,
+        evaluationProgress,
+        averageScore: dynamicAvg,
+        distinctCategories,
+        goldMedals: goldMedals || school.goldMedals || 0,
+        silverMedals: silverMedals || school.silverMedals || 0,
+        bronzeMedals: bronzeMedals || school.bronzeMedals || 0,
+        trophiesWon
+      };
+    });
+
+    // Sort by averageScore descending, then by gold medals
+    enriched.sort((a, b) => {
+      if (b.averageScore !== a.averageScore) {
+        return b.averageScore - a.averageScore;
+      }
+      return b.goldMedals - a.goldMedals;
+    });
+
+    // Assign dynamic computed ranks
+    return enriched.map((s, idx) => ({
+      ...s,
+      computedRank: idx + 1
+    }));
+  }, [schools, participants, overallSchoolStandings]);
+
+  // Filtered schools for search query and selected trophy
+  const filteredSchools = useMemo(() => {
+    return dynamicSchools.filter((s) => {
+      // 1. Search query filter (name, city, code, or grade)
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        s.name.toLowerCase().includes(q) ||
+        s.city.toLowerCase().includes(q) ||
+        s.code.toLowerCase().includes(q) ||
+        s.participatingGrades.some((g) => `grade ${g}`.includes(q) || `gr ${g}`.includes(q) || String(g) === q);
+
+      // 2. Trophy select box / chip filter
+      let matchesTrophy = true;
+      if (selectedTrophy !== 'ALL') {
+        if (selectedTrophy === 'OVERALL') {
+          matchesTrophy =
+            s.trophiesWon.some((t) => t.includes('Titans of Technology') || t.includes('Champion School Overall')) ||
+            s.computedRank === 1;
+        } else if (selectedTrophy === 'AWARDS') {
+          matchesTrophy = s.trophiesWon.length > 0;
+        } else if (selectedTrophy.startsWith('cat-')) {
+          const catNum = parseInt(selectedTrophy.replace('cat-', ''), 10);
+          const catKeywords: Record<number, string> = {
+            1: 'Tiny Titan of ICT',
+            2: 'Titan of Code',
+            3: 'Titan of Creative Tech',
+            4: 'Titan of AI',
+            5: 'Titan of Digital Solutions',
+            6: 'Titan of Innovation'
+          };
+          const keyword = catKeywords[catNum];
+          const wonTrophy = s.trophiesWon.some((t) => keyword && t.includes(keyword));
+          const catLeader = categorySchoolStandings[catNum]?.[0]?.schoolName;
+          const isCatLeader = catLeader && s.name.trim().toLowerCase() === catLeader.trim().toLowerCase();
+          matchesTrophy = wonTrophy || !!isCatLeader;
+        }
+      }
+
+      return matchesSearch && matchesTrophy;
+    });
+  }, [dynamicSchools, searchQuery, selectedTrophy, categorySchoolStandings]);
+
+  // Grand Champion Leader (Rank #1)
+  const championSchool = useMemo(() => {
+    return dynamicSchools.find((s) => s.computedRank === 1) || dynamicSchools[0] || null;
+  }, [dynamicSchools]);
+
+  // Check if we should render Champion Spotlight view (Default view without search)
+  const showSpotlight = !searchQuery && selectedTrophy === 'ALL' && championSchool;
+  const secondarySchools = showSpotlight
+    ? filteredSchools.filter((s) => s.id !== championSchool.id)
+    : filteredSchools;
+
+  // Selected school for detail modal
+  const selectedSchool = dynamicSchools.find((s) => s.id === selectedSchoolId) || null;
+
+  // Selected school's teams filtered by in-modal search and category filter
+  const modalFilteredTeams = useMemo(() => {
+    if (!selectedSchool) return [];
+    return selectedSchool.teams.filter((team) => {
+      const matchesCategory =
+        modalCategoryFilter === 'ALL' || team.categoryNumber === modalCategoryFilter;
+      const q = modalSearch.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        team.name.toLowerCase().includes(q) ||
+        (team.teamName && team.teamName.toLowerCase().includes(q)) ||
+        (team.teamId && team.teamId.toLowerCase().includes(q)) ||
+        (team.participantId && team.participantId.toLowerCase().includes(q)) ||
+        (team.projectTitle && team.projectTitle.toLowerCase().includes(q)) ||
+        (team.grade && `grade ${team.grade}`.includes(q)) ||
+        (team.teamMembers && team.teamMembers.some((m) => (typeof m === 'string' ? m : m.name).toLowerCase().includes(q)));
+      return matchesCategory && matchesSearch;
+    });
+  }, [selectedSchool, modalSearch, modalCategoryFilter]);
+
+  // Quick filter chips
+  const quickFilterChips = [
+    { id: 'ALL', label: 'All Schools', count: dynamicSchools.length },
+    { id: 'OVERALL', label: '🏆 Grand Champion', count: 1 },
+    {
+      id: 'AWARDS',
+      label: 'Award Winners',
+      count: dynamicSchools.filter((s) => s.trophiesWon && s.trophiesWon.length > 0).length
+    }
+  ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
-              School Management
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-bold">
-              {schools.length} Schools Registered
-            </span>
+    <div className="space-y-6 animate-fade-in pb-12">
+      {/* SECTION 1: HEADER & UNIFIED CONTROL BAR */}
+      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-card space-y-4">
+        {/* Top Header Row */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="w-10 h-10 rounded-2xl bg-[#03A695]/10 text-[#03A695] border border-teal-200 flex items-center justify-center shrink-0">
+                <GraduationCap className="w-5 h-5" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                School Management
+              </h1>
+              <span className="px-3 py-1 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-black border border-teal-200 shadow-xs">
+                {dynamicSchools.length} Enrolled Schools
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 max-w-xl">
+              Official participating educational institutions, student delegations, and grade-level representations.
+            </p>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Registered educational institutions, overall rankings, and student delegations
-          </p>
+
+          {/* Right Toolbar: Trophies Dropdown & Search Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
+            {/* All Trophies & Awards Dropdown */}
+            <div className="relative w-full sm:w-60">
+              <select
+                value={selectedTrophy}
+                onChange={(e) => setSelectedTrophy(e.target.value)}
+                className="w-full pl-3 pr-8 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-[#03A695] shadow-xs cursor-pointer truncate"
+                title="Filter by Trophy or Award"
+              >
+                <option value="ALL">All Trophies & Awards</option>
+                <option value="OVERALL">🏆 Titans of Technology (Grand Champion)</option>
+                <option value="AWARDS">All Category Award Winners</option>
+                <option value="cat-1">Cat 1: Tiny Titan of ICT – Best School</option>
+                <option value="cat-2">Cat 2: Titan of Code – Best School</option>
+                <option value="cat-3">Cat 3: Titan of Creative Tech – Best School</option>
+                <option value="cat-4">Cat 4: Titan of AI – Best School</option>
+                <option value="cat-5">Cat 5: Titan of Digital Solutions – Best School</option>
+                <option value="cat-6">Cat 6: Titan of Innovation – Best School</option>
+              </select>
+            </div>
+
+            {/* Live Search Input */}
+            <div className="relative w-full sm:w-64">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search school name, city, grade..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-8 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#03A695] shadow-xs"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search school name or city..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
-            />
+        {/* Quick Filter Chips & Active Filter Indicator */}
+        <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
+              <Filter className="w-3 h-3 text-slate-400" />
+              Quick:
+            </span>
+            {quickFilterChips.map((chip) => {
+              const isActive = selectedTrophy === chip.id;
+              return (
+                <button
+                  key={chip.id}
+                  onClick={() => setSelectedTrophy(chip.id)}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
+                    isActive
+                      ? 'bg-[#03A695] text-white shadow-xs'
+                      : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600 border border-slate-200/60'
+                  }`}
+                >
+                  <span>{chip.label}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+                    }`}
+                  >
+                    {chip.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
+
+          {(selectedTrophy !== 'ALL' || searchQuery) && (
+            <button
+              onClick={() => {
+                setSelectedTrophy('ALL');
+                setSearchQuery('');
+              }}
+              className="self-start sm:self-auto text-xs font-bold text-[#FD5E01] hover:text-[#e05300] flex items-center gap-1.5 cursor-pointer py-1"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Reset All Filters
+            </button>
+          )}
         </div>
       </div>
 
-      {/* School Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredSchools.map((school) => (
-          <div
-            key={school.id}
-            onClick={() => setSelectedSchool(school)}
-            className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-300 transition-all p-6 cursor-pointer flex flex-col justify-between group"
-          >
-            <div>
-              {/* Header */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#F7FCFB] border border-slate-200/90 flex items-center justify-center p-2 group-hover:scale-105 transition-transform">
-                    <img
-                      src={school.logo}
-                      alt={school.name}
-                      className="w-full h-full object-contain"
-                      onError={(e: any) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                    <Building2 className="w-6 h-6 text-[#03A695]" />
+      {/* SECTION 2: TOURNAMENT GRAND CHAMPION SPOTLIGHT (Rank #1 Hero Card - NO LOGO, NO PRINCIPAL) */}
+      {showSpotlight && (
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/10 via-amber-50/50 to-teal-500/10 border-2 border-amber-300/80 shadow-lg p-5 sm:p-7">
+          {/* Subtle Background Glow Accent */}
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            {/* Left Column: School Name, Grades & Standings (Logo & Principal removed) */}
+            <div className="space-y-3 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1">
+                  <Crown className="w-3.5 h-3.5 fill-current" />
+                  Tournament Rank #1 • Grand Champion School
+                </span>
+                <span className="font-mono text-xs font-bold text-slate-600 bg-white/80 px-2.5 py-0.5 rounded-md border border-amber-200">
+                  {championSchool.code}
+                </span>
+              </div>
+
+              <div>
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
+                  {championSchool.name}
+                </h2>
+                <p className="text-xs text-slate-600 flex items-center gap-1.5 mt-1">
+                  <MapPin className="w-3.5 h-3.5 text-[#FD5E01] shrink-0" />
+                  <span className="font-medium">{championSchool.city}, {championSchool.state || 'UAE'}</span>
+                </p>
+              </div>
+
+              {/* Student Grades Representation Strip */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block flex items-center gap-1">
+                  <GraduationCap className="w-3.5 h-3.5 text-[#03A695]" />
+                  Enrolled Students by Grade:
+                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {championSchool.gradeDistribution && championSchool.gradeDistribution.length > 0 ? (
+                    championSchool.gradeDistribution.map((item: any, idx: number) => (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-1 rounded-xl bg-white border border-teal-200 text-slate-800 text-xs font-bold shadow-xs flex items-center gap-1.5"
+                      >
+                        <span className="px-1.5 py-0.2 rounded bg-teal-50 text-[#03A695] font-black text-[10px]">
+                          Grade {item.grade}
+                        </span>
+                        <span className="font-extrabold text-slate-900">{item.studentCount} Students</span>
+                      </span>
+                    ))
+                  ) : (
+                    championSchool.participatingGrades.map((g: number, idx: number) => (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-1 rounded-xl bg-white border border-teal-200 text-[#03A695] text-xs font-bold shadow-xs"
+                      >
+                        Grade {g}
+                      </span>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Trophies Awarded Showcase */}
+              {championSchool.trophiesWon && championSchool.trophiesWon.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap pt-1">
+                  {championSchool.trophiesWon.map((trophy: string, idx: number) => (
+                    <span
+                      key={idx}
+                      className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-100 to-amber-200/90 text-amber-950 font-black text-xs border border-amber-300 shadow-xs flex items-center gap-1.5"
+                    >
+                      <Trophy className="w-3.5 h-3.5 text-amber-700 fill-current" />
+                      <span>{trophy}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column: Key Delegation Metrics Strip & Action */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 lg:gap-4 shrink-0">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 bg-white/90 backdrop-blur-sm p-3.5 rounded-2xl border border-amber-200 shadow-xs text-center">
+                <div className="px-2">
+                  <span className="text-base sm:text-xl font-black text-slate-900 block">
+                    {championSchool.totalStudents}
+                  </span>
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                    Total Students
+                  </span>
+                </div>
+                <div className="px-2 border-x border-slate-100">
+                  <span className="text-base sm:text-xl font-black text-slate-700 block">
+                    {championSchool.totalTeams}
+                  </span>
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                    Teams
+                  </span>
+                </div>
+                <div className="px-2">
+                  <span className="text-base sm:text-xl font-black text-[#03A695] block">
+                    {championSchool.averageScore}%
+                  </span>
+                  <span className="text-[10px] font-extrabold text-[#03A695] uppercase tracking-wider">
+                    Avg Score
+                  </span>
+                </div>
+              </div>
+
+              {/* View Roster Button */}
+              <button
+                onClick={() => {
+                  setSelectedSchoolId(championSchool.id);
+                  setModalSearch('');
+                  setModalCategoryFilter('ALL');
+                }}
+                className="px-4 py-3 rounded-2xl bg-slate-900 hover:bg-[#03A695] text-white font-black text-xs tracking-wide shadow-md transition-all flex items-center justify-center gap-2 group cursor-pointer"
+              >
+                <span>Inspect Student Roster</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 3: INSTITUTIONAL SCHOOLS GRID (NO LOGO, NO PRINCIPAL, ONLY STUDENTS & GRADES) */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
+              {showSpotlight
+                ? `Participating Schools (${secondarySchools.length})`
+                : `Participating Institutions (${filteredSchools.length})`}
+            </h2>
+            {selectedTrophy !== 'ALL' && (
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold border border-amber-300">
+                Filtered by Trophy
+              </span>
+            )}
+          </div>
+          <span className="text-xs text-slate-400 font-medium">
+            Click any school card to inspect student grades & roster
+          </span>
+        </div>
+
+        {filteredSchools.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-slate-800">No schools match the selected criteria</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Try adjusting your search terms or award filter to see participating educational institutions.
+            </p>
+            <button
+              onClick={() => {
+                setSelectedTrophy('ALL');
+                setSearchQuery('');
+              }}
+              className="mt-2 px-4 py-2 rounded-xl bg-[#03A695] text-white text-xs font-bold shadow-xs hover:bg-[#028b7d] transition-colors cursor-pointer"
+            >
+              Reset Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {secondarySchools.map((school) => {
+              const rank = school.computedRank;
+              return (
+                <div
+                  key={school.id}
+                  onClick={() => {
+                    setSelectedSchoolId(school.id);
+                    setModalSearch('');
+                    setModalCategoryFilter('ALL');
+                  }}
+                  className="bg-white rounded-3xl border border-slate-200/90 shadow-card hover:shadow-card-hover hover:border-teal-300 transition-all p-5 flex flex-col justify-between group cursor-pointer h-full"
+                >
+                  <div className="space-y-4">
+                    {/* Top School Header (Clean Typographic Identity, Logo removed) */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
+                            {school.code}
+                          </span>
+                          <span className="text-[11px] text-slate-400 flex items-center gap-1 truncate">
+                            <MapPin className="w-3 h-3 text-[#FD5E01] shrink-0" />
+                            <span className="truncate">{school.city}, {school.state || 'UAE'}</span>
+                          </span>
+                        </div>
+                        <h3 className="text-base font-black text-slate-900 group-hover:text-[#03A695] transition-colors mt-1 truncate">
+                          {school.name}
+                        </h3>
+                      </div>
+
+                      {/* Rank Badge */}
+                      <div
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 shadow-xs border ${
+                          rank === 1
+                            ? 'bg-amber-100 text-amber-900 border-amber-300'
+                            : rank === 2
+                            ? 'bg-slate-200 text-slate-800 border-slate-300'
+                            : rank === 3
+                            ? 'bg-orange-100 text-orange-900 border-orange-300'
+                            : 'bg-slate-50 text-slate-600 border-slate-200'
+                        }`}
+                      >
+                        {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`}
+                      </div>
+                    </div>
+
+                    {/* FOCUS: STUDENT GRADES REPRESENTATION (Replaces Principal & Teacher gray box) */}
+                    <div className="p-3.5 rounded-2xl bg-[#F7FCFB] border border-slate-200/80 space-y-2">
+                      <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                        <span className="flex items-center gap-1 text-[#03A695]">
+                          <GraduationCap className="w-3.5 h-3.5" />
+                          Student Grades in School
+                        </span>
+                        <span className="font-bold text-slate-400">
+                          {school.participatingGrades.length} {school.participatingGrades.length === 1 ? 'Grade' : 'Grades'}
+                        </span>
+                      </div>
+
+                      {/* Grade Pills Breakdown */}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {school.gradeDistribution && school.gradeDistribution.length > 0 ? (
+                          school.gradeDistribution.map((item: any, idx: number) => (
+                            <span
+                              key={idx}
+                              className="px-2.5 py-1 rounded-xl bg-white border border-slate-200/90 text-slate-800 text-[11px] font-bold shadow-2xs flex items-center gap-1.5"
+                            >
+                              <span className="font-black text-[#03A695]">Gr {item.grade}</span>
+                              <span className="text-slate-400 font-normal">•</span>
+                              <span className="text-slate-700">{item.studentCount} {item.studentCount === 1 ? 'Student' : 'Students'}</span>
+                            </span>
+                          ))
+                        ) : (
+                          school.participatingGrades.map((g: number, idx: number) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-slate-700 font-bold text-[11px]"
+                            >
+                              Grade {g}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Consolidated 3-Column Delegation Strip */}
+                    <div className="grid grid-cols-3 gap-2 p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center text-xs">
+                      <div>
+                        <span className="block font-black text-slate-900 text-sm">
+                          {school.totalStudents}
+                        </span>
+                        <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider block mt-0.5">
+                          Total Students
+                        </span>
+                      </div>
+                      <div className="border-x border-slate-200/60">
+                        <span className="block font-black text-slate-700 text-sm">
+                          {school.totalTeams}
+                        </span>
+                        <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider block mt-0.5">
+                          Teams
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block font-black text-[#03A695] text-sm">
+                          {school.averageScore}%
+                        </span>
+                        <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider block mt-0.5">
+                          Avg Score
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Trophies & Awards (if won) */}
+                    {school.trophiesWon && school.trophiesWon.length > 0 && (
+                      <div className="space-y-1 pt-1">
+                        {school.trophiesWon.map((trophy: string, idx: number) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/90 text-amber-950 font-bold text-[11px]"
+                          >
+                            <Trophy className="w-3.5 h-3.5 text-amber-600 shrink-0 fill-current" />
+                            <span className="truncate">{trophy}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Medals Row */}
+                    <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100">
+                      <span className="text-slate-400 text-[11px] font-semibold">Medals Earned</span>
+                      <span className="font-bold flex items-center gap-1.5">
+                        <span className="text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[11px]">
+                          🥇 {school.goldMedals}
+                        </span>
+                        <span className="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 text-[11px]">
+                          🥈 {school.silverMedals}
+                        </span>
+                        <span className="text-amber-800 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200 text-[11px]">
+                          🥉 {school.bronzeMedals}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bottom Action Footer */}
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#03A695] group-hover:text-slate-900 transition-colors">
+                    <span>Inspect Student Roster ({school.totalStudents} Students)</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* SECTION 4: ENHANCED STUDENT-FOCUSED DELEGATION MODAL */}
+      {selectedSchool && (
+        <Modal
+          isOpen={!!selectedSchool}
+          onClose={() => setSelectedSchoolId(null)}
+          title={selectedSchool.name}
+          subtitle={`School Code: ${selectedSchool.code} • ${selectedSchool.city}, ${selectedSchool.state || 'UAE'} • Enrolled Student Grades Roster`}
+          maxWidth="4xl"
+        >
+          <div className="space-y-6 text-xs animate-fade-in">
+            {/* Trophies & Awards Banner in Modal */}
+            {selectedSchool.trophiesWon && selectedSchool.trophiesWon.length > 0 && (
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-50 to-orange-50 border border-amber-300 shadow-xs flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Trophy className="w-5 h-5 fill-current" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-slate-900 group-hover:text-[#03A695] transition-colors line-clamp-1">
-                      {school.name}
-                    </h3>
-                    <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-3 h-3 text-[#FD5E01]" />
-                      <span>{school.city}, {school.state}</span>
-                    </p>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 block">
+                      Official Tournament Awards Won
+                    </span>
+                    <div className="flex items-center gap-2 flex-wrap mt-1">
+                      {selectedSchool.trophiesWon.map((t: string, idx: number) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-950 font-black text-xs border border-amber-300 flex items-center gap-1.5"
+                        >
+                          <Trophy className="w-3.5 h-3.5 text-amber-600 fill-current" />
+                          <span>{t}</span>
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
+              </div>
+            )}
 
-                <div
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
-                    school.rank === 1
-                      ? 'bg-amber-100 text-amber-800'
-                      : school.rank === 2
-                      ? 'bg-slate-200 text-slate-700'
-                      : school.rank === 3
-                      ? 'bg-orange-100 text-orange-800'
-                      : 'bg-slate-100 text-slate-600'
-                  }`}
-                >
-                  #{school.rank}
-                </div>
+            {/* 5 Dynamic KPI Metric Cards (Responsive 2 / 3 / 5 Grid) */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200/80 text-center">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#03A695] block">
+                  Total Students
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 block mt-0.5">
+                  {selectedSchool.totalStudents}
+                </span>
+                <span className="text-[10px] text-slate-500 font-medium">Headcount in arena</span>
               </div>
 
-              {/* Stats Bar */}
-              <div className="grid grid-cols-3 gap-2 mt-5 p-3 rounded-2xl bg-[#F7FCFB] text-center text-xs">
-                <div>
-                  <span className="block font-black text-slate-900">
-                    {school.totalParticipants}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-semibold">Students</span>
-                </div>
-                <div>
-                  <span className="block font-black text-[#03A695]">
-                    {school.totalCompetitions}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-semibold">Arenas</span>
-                </div>
-                <div>
-                  <span className="block font-black text-[#FD5E01]">
-                    {school.averageScore}%
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-semibold">Avg Score</span>
-                </div>
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200/80 text-center">
+                <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 block">
+                  Total Teams
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 block mt-0.5">
+                  {selectedSchool.totalTeams}
+                </span>
+                <span className="text-[10px] text-slate-500 font-medium">Project entries</span>
               </div>
 
-              {/* Medals Row */}
-              <div className="mt-4 flex items-center justify-between text-xs pt-3 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">Medal Tally</span>
-                <span className="font-bold flex items-center gap-2">
-                  <span className="text-amber-500">🥇 {school.goldMedals}</span>
-                  <span className="text-slate-400">🥈 {school.silverMedals}</span>
-                  <span className="text-amber-700">🥉 {school.bronzeMedals}</span>
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-purple-50/70 border border-purple-200/80 text-center">
+                <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 block">
+                  Grades Enrolled
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 block mt-0.5">
+                  {selectedSchool.participatingGrades.length} Grades
+                </span>
+                <span className="text-[10px] text-slate-500 font-medium">Gr {selectedSchool.participatingGrades.join(', ')}</span>
+              </div>
+
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-center">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 block">
+                  Scoring Progress
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 block mt-0.5">
+                  {selectedSchool.completedEvaluations}/{selectedSchool.totalTeams}
+                </span>
+                <span className="text-[10px] font-bold text-amber-700">
+                  {selectedSchool.evaluationProgress}% Scored
+                </span>
+              </div>
+
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 text-center col-span-2 sm:col-span-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 block">
+                  School Average
+                </span>
+                <span className="text-lg sm:text-xl font-black text-[#03A695] block mt-0.5">
+                  {selectedSchool.averageScore}%
+                </span>
+                <span className="text-[10px] text-emerald-700 font-bold">
+                  Rank #{selectedSchool.computedRank}
                 </span>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#03A695] group-hover:text-[#0B2545]">
-              <span>View Registered Delegation</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* School Delegation Detail Modal */}
-      {selectedSchool && (
-        <Modal
-          isOpen={!!selectedSchool}
-          onClose={() => setSelectedSchool(null)}
-          title={selectedSchool.name}
-          subtitle={`School Code: ${selectedSchool.code} • ${selectedSchool.city}, ${selectedSchool.state}`}
-          maxWidth="2xl"
-        >
-          <div className="space-y-6 text-xs">
-            {/* Principal / Coordinator info */}
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-[#F7FCFB] border border-slate-100">
-              <div>
-                <span className="text-[10px] font-bold uppercase text-slate-400">Principal</span>
-                <p className="font-bold text-slate-900 mt-0.5">{selectedSchool.principalName}</p>
-                <p className="text-slate-500">{selectedSchool.email}</p>
+            {/* DEDICATED STUDENT GRADES DISTRIBUTION STRIP (Replaces Principal & Teacher Cards) */}
+            <div className="p-4 rounded-2xl bg-[#F7FCFB] border border-slate-200/80 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                  <GraduationCap className="w-4 h-4 text-[#03A695]" />
+                  <span>Student Headcount by Grade Level</span>
+                </h4>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {selectedSchool.totalStudents} total students enrolled from this institution
+                </span>
               </div>
-              <div>
-                <span className="text-[10px] font-bold uppercase text-slate-400">Teacher Coordinator</span>
-                <p className="font-bold text-slate-900 mt-0.5">{selectedSchool.coordinatorName}</p>
-                <p className="text-slate-500">{selectedSchool.contactNumber}</p>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 pt-1">
+                {selectedSchool.gradeDistribution && selectedSchool.gradeDistribution.length > 0 ? (
+                  selectedSchool.gradeDistribution.map((item: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-xl bg-white border border-slate-200 text-center shadow-2xs"
+                    >
+                      <span className="px-2 py-0.5 rounded-md bg-teal-50 text-[#03A695] font-black text-xs border border-teal-200 inline-block">
+                        Grade {item.grade}
+                      </span>
+                      <span className="text-base font-black text-slate-900 block mt-1.5">
+                        {item.studentCount}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-semibold block">
+                        {item.teamCount} {item.teamCount === 1 ? 'Team' : 'Teams'}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-slate-400 text-xs py-2">
+                    Grades participating: {selectedSchool.participatingGrades.join(', ')}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Student Roster Table */}
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                Registered Students in Techno Talent Feast
-              </h4>
-              <div className="rounded-2xl border border-slate-200 overflow-hidden">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold">
-                    <tr>
-                      <th className="p-3">Student</th>
-                      <th className="p-3">Competition</th>
-                      <th className="p-3">Grade</th>
-                      <th className="p-3 text-right">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {participants
-                      .filter((p) => p.schoolId === selectedSchool.id || p.schoolName === selectedSchool.name)
-                      .map((p) => (
-                        <tr key={p.id} className="hover:bg-slate-50">
-                          <td className="p-3 font-bold text-slate-900">{p.name}</td>
-                          <td className="p-3 text-[#03A695] font-semibold">{p.competitionName}</td>
-                          <td className="p-3 text-slate-600">Grade {p.grade}</td>
-                          <td className="p-3 text-right">
-                            <Badge variant={p.status === 'SUBMITTED' ? 'success' : 'orange'} size="sm">
-                              {p.status === 'SUBMITTED' ? `Scored (${p.finalScore}%)` : 'Pending'}
-                            </Badge>
+            {/* Student & Team Delegation Section Header */}
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-100">
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-[#03A695]" />
+                    <span>Registered Students Roster & Projects</span>
+                    <span className="px-2 py-0.5 rounded-full bg-teal-50 text-[#03A695] text-[10px] font-bold border border-teal-200">
+                      {modalFilteredTeams.length} Teams • {modalFilteredTeams.reduce((acc, t) => acc + getTeamStudentsCount(t), 0)} Students
+                    </span>
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Verified student names, assigned grades, project titles, and evaluation status
+                  </p>
+                </div>
+
+                {/* Filter / Search within School */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search student or grade..."
+                      value={modalSearch}
+                      onChange={(e) => setModalSearch(e.target.value)}
+                      className="pl-8 pr-3 py-1.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695] w-full sm:w-48 shadow-xs"
+                    />
+                  </div>
+
+                  <select
+                    value={modalCategoryFilter}
+                    onChange={(e) =>
+                      setModalCategoryFilter(e.target.value === 'ALL' ? 'ALL' : Number(e.target.value))
+                    }
+                    className="py-1.5 px-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-[#03A695]"
+                  >
+                    <option value="ALL">All Arenas</option>
+                    <option value="1">Cat 1 - AI & Robotics</option>
+                    <option value="2">Cat 2 - Web & Cloud</option>
+                    <option value="3">Cat 3 - Mobile Apps</option>
+                    <option value="4">Cat 4 - Cyber Security</option>
+                    <option value="5">Cat 5 - Game Dev</option>
+                    <option value="6">Cat 6 - Clean Energy</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* VIEW MODE 1: DESKTOP & TABLET TABLE (hidden on mobile < 640px) */}
+              <div className="hidden sm:block rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+                <div className="overflow-x-auto max-h-[380px]">
+                  <table className="w-full text-left text-xs min-w-[580px]">
+                    <thead className="bg-slate-50/90 sticky top-0 z-10 border-b border-slate-200 text-slate-600 font-bold">
+                      <tr>
+                        <th className="p-3">Team & Project</th>
+                        <th className="p-3">Student Delegation & Assigned Grade</th>
+                        <th className="p-3 text-center">Headcount</th>
+                        <th className="p-3">Competition Arena</th>
+                        <th className="p-3 text-right">Evaluation Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {modalFilteredTeams.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-8 text-center text-slate-400">
+                            No teams or students match the filter criteria.
                           </td>
                         </tr>
-                      ))}
-                  </tbody>
-                </table>
+                      ) : (
+                        modalFilteredTeams.map((team) => {
+                          const studentHeadcount = getTeamStudentsCount(team);
+                          const isEvaluated =
+                            (team.finalScore && team.finalScore > 0) ||
+                            team.status === 'SUBMITTED' ||
+                            team.status === 'EVALUATED' ||
+                            team.status === 'COMPLETED';
+
+                          return (
+                            <tr key={team.id} className="hover:bg-slate-50/80 transition-colors">
+                              {/* Team & Project */}
+                              <td className="p-3">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-mono text-[10px] font-black bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
+                                    {team.teamId || team.participantId}
+                                  </span>
+                                  <span className="font-bold text-slate-900 truncate max-w-[180px]">
+                                    {team.projectTitle || team.selectedProjectTitle || 'Championship Project'}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] text-slate-400 block mt-0.5 truncate max-w-[200px]">
+                                  {team.teamName || `${team.name} & Delegation`}
+                                </span>
+                              </td>
+
+                              {/* Student Composition: Team Lead + Members with Grade Badges */}
+                              <td className="p-3">
+                                <div>
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="font-black text-slate-900">
+                                      {team.name}
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded-md bg-teal-50 text-[#03A695] text-[10px] font-black border border-teal-200">
+                                      Grade {team.grade}
+                                    </span>
+                                    <span className="text-[10px] text-slate-400 font-bold">(Team Lead)</span>
+                                  </div>
+
+                                  {/* Team Members List */}
+                                  {team.teamMembers && team.teamMembers.length > 0 && (
+                                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                                      <span className="text-[10px] text-slate-400 font-semibold">Members:</span>
+                                      {team.teamMembers.map((m, idx) => (
+                                        <span
+                                          key={idx}
+                                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-medium"
+                                        >
+                                          {typeof m === 'string' ? m : m.name}
+                                          <span className="text-slate-400 font-semibold">
+                                            (Gr {typeof m === 'object' && m.grade ? m.grade : team.grade})
+                                          </span>
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+
+                              {/* Student Headcount */}
+                              <td className="p-3 text-center">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-black text-[11px] bg-slate-100 text-slate-800">
+                                  <Users className="w-3 h-3 text-slate-500" />
+                                  {studentHeadcount} {studentHeadcount === 1 ? 'Student' : 'Students'}
+                                </span>
+                              </td>
+
+                              {/* Competition Arena */}
+                              <td className="p-3">
+                                <span className="inline-block px-2 py-0.5 rounded-md font-bold text-[10px] bg-[#E6F7F5] text-[#03A695] border border-teal-100 truncate max-w-[150px]">
+                                  #{team.categoryNumber} {team.categoryName || team.competitionName}
+                                </span>
+                              </td>
+
+                              {/* Evaluation Status */}
+                              <td className="p-3 text-right">
+                                {isEvaluated ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                    Scored ({team.finalScore || team.percentage}%)
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                    <Clock className="w-3 h-3 text-amber-600" />
+                                    Pending
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* VIEW MODE 2: MOBILE STACKED CARDS (visible on mobile < 640px) */}
+              <div className="block sm:hidden space-y-3 max-h-[380px] overflow-y-auto">
+                {modalFilteredTeams.length === 0 ? (
+                  <div className="p-6 text-center text-slate-400 border border-slate-200 rounded-2xl">
+                    No teams or students match the filter criteria.
+                  </div>
+                ) : (
+                  modalFilteredTeams.map((team) => {
+                    const studentHeadcount = getTeamStudentsCount(team);
+                    const isEvaluated =
+                      (team.finalScore && team.finalScore > 0) ||
+                      team.status === 'SUBMITTED' ||
+                      team.status === 'EVALUATED' ||
+                      team.status === 'COMPLETED';
+
+                    return (
+                      <div
+                        key={team.id}
+                        className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2.5"
+                      >
+                        {/* Team & Status Header */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-mono text-[10px] font-black bg-white text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
+                                {team.teamId || team.participantId}
+                              </span>
+                              <span className="font-bold text-slate-900 text-xs">
+                                {team.projectTitle || team.selectedProjectTitle || 'Championship Project'}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-slate-400 block mt-0.5">
+                              {team.teamName || `${team.name} & Delegation`}
+                            </span>
+                          </div>
+
+                          {isEvaluated ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                              {team.finalScore || team.percentage}%
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                              Pending
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Category & Headcount */}
+                        <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200/60">
+                          <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-[#E6F7F5] text-[#03A695] border border-teal-100 truncate max-w-[180px]">
+                            #{team.categoryNumber} {team.categoryName || team.competitionName}
+                          </span>
+                          <span className="font-black text-slate-700 flex items-center gap-1 text-[10px]">
+                            <Users className="w-3 h-3 text-slate-400" />
+                            {studentHeadcount} Students
+                          </span>
+                        </div>
+
+                        {/* Students Composition with Grade Badges */}
+                        <div className="pt-1.5 border-t border-slate-200/60 space-y-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase">Lead:</span>
+                            <span className="font-black text-slate-900">{team.name}</span>
+                            <span className="px-1.5 py-0.2 rounded bg-teal-50 text-[#03A695] font-black text-[10px] border border-teal-200">
+                              Grade {team.grade}
+                            </span>
+                          </div>
+
+                          {team.teamMembers && team.teamMembers.length > 0 && (
+                            <div className="flex items-center gap-1 flex-wrap pt-0.5">
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">Members:</span>
+                              {team.teamMembers.map((m, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-1.5 py-0.5 rounded bg-white text-slate-700 text-[10px] border border-slate-200"
+                                >
+                                  {typeof m === 'string' ? m : m.name} (Gr {typeof m === 'object' && m.grade ? m.grade : team.grade})
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-              <Button variant="outline" size="sm" onClick={() => setSelectedSchool(null)}>
-                Close
-              </Button>
+            {/* Modal Footer */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+              <span className="text-slate-400 text-[11px]">
+                Showing {modalFilteredTeams.reduce((sum, t) => sum + getTeamStudentsCount(t), 0)} of {selectedSchool.totalStudents} students registered across {selectedSchool.totalTeams} project teams.
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    navigate('participants');
+                    setSelectedSchoolId(null);
+                  }}
+                  icon={<ArrowRight className="w-3.5 h-3.5" />}
+                  iconPosition="right"
+                >
+                  Manage in Participants Arena
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => setSelectedSchoolId(null)}>
+                  Done
+                </Button>
+              </div>
             </div>
           </div>
         </Modal>

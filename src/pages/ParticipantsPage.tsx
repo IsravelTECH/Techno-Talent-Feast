@@ -25,7 +25,11 @@ import {
   Plus,
   BookOpen,
   Sparkles,
-  Edit3
+  Edit3,
+  MapPin,
+  RotateCcw,
+  ChevronLeft,
+  GraduationCap
 } from 'lucide-react';
 import {
   CATEGORY_CATALOG,
@@ -67,17 +71,17 @@ export const ParticipantsPage: React.FC = () => {
   const [formGrade, setFormGrade] = useState<number>(1);
   const [formProjectId, setFormProjectId] = useState<string>('c1-p1');
 
-  // Derive Category from Grade (Grade 1-2: Cat 1, 3-4: Cat 2, 5-6: Cat 3, 7-8: Cat 4, 9-10: Cat 5, 11-12: Cat 6)
+  // Derive Category from Grade
   const currentCategoryInfo = useMemo(() => {
     return getCategoryForGrade(formGrade);
   }, [formGrade]);
 
-  // The 4 available projects for the selected grade/category
+  // Available projects for the selected grade/category
   const availableCategoryProjects = useMemo(() => {
     return currentCategoryInfo?.projects || [];
   }, [currentCategoryInfo]);
 
-  // When grade changes, ensure selected project defaults to first of that category if invalid
+  // When grade changes, ensure selected project defaults to first of that category
   const handleGradeChange = (newGrade: number) => {
     setFormGrade(newGrade);
     const cat = getCategoryForGrade(newGrade);
@@ -111,11 +115,33 @@ export const ParticipantsPage: React.FC = () => {
     setShowRegisterModal(false);
   };
 
+  // High-Level Live KPI Metrics
+  const kpiMetrics = useMemo(() => {
+    const totalTeams = participants.length;
+    const evaluatedTeams = participants.filter(
+      (p) => (p.finalScore && p.finalScore > 0) || p.status === 'SUBMITTED' || p.status === 'EVALUATED'
+    );
+    const evaluatedCount = evaluatedTeams.length;
+    const pendingCount = Math.max(0, totalTeams - evaluatedCount);
+
+    const scores = evaluatedTeams
+      .map((p) => p.finalScore || p.percentage || 0)
+      .filter((s) => s > 0);
+    const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+
+    return {
+      totalTeams,
+      evaluatedCount,
+      pendingCount,
+      avgScore
+    };
+  }, [participants]);
+
   // Filtered Participants from real dynamic context
   const filteredParticipants = useMemo(() => {
     return (participants || []).filter((p) => {
       if (!p) return false;
-      const q = (searchQuery || '').toLowerCase();
+      const q = (searchQuery || '').toLowerCase().trim();
       const matchesSearch =
         !q ||
         (p.name || '').toLowerCase().includes(q) ||
@@ -123,7 +149,8 @@ export const ParticipantsPage: React.FC = () => {
         (p.teamId && p.teamId.toLowerCase().includes(q)) ||
         (p.teamName && p.teamName.toLowerCase().includes(q)) ||
         (p.schoolName && p.schoolName.toLowerCase().includes(q)) ||
-        (p.projectTitle && p.projectTitle.toLowerCase().includes(q));
+        (p.projectTitle && p.projectTitle.toLowerCase().includes(q)) ||
+        (p.teamMembers && p.teamMembers.some((m) => (typeof m === 'string' ? m : m.name).toLowerCase().includes(q)));
 
       const matchesSchool =
         selectedSchoolFilter === 'ALL' || p.schoolId === selectedSchoolFilter || p.schoolName === selectedSchoolFilter;
@@ -136,9 +163,8 @@ export const ParticipantsPage: React.FC = () => {
 
       const matchesStatus =
         selectedStatusFilter === 'ALL' ||
-        (selectedStatusFilter === 'SUBMITTED' && (p.status === 'SUBMITTED' || p.status === 'EVALUATED')) ||
-        (selectedStatusFilter === 'PENDING' && (p.status === 'PENDING' || p.status === 'PENDING_EVALUATION' || !p.status)) ||
-        (selectedStatusFilter === 'DRAFT' && p.status === 'DRAFT');
+        (selectedStatusFilter === 'SUBMITTED' && (p.status === 'SUBMITTED' || p.status === 'EVALUATED' || (p.finalScore && p.finalScore > 0))) ||
+        (selectedStatusFilter === 'PENDING' && (p.status !== 'SUBMITTED' && p.status !== 'EVALUATED' && (!p.finalScore || p.finalScore === 0)));
 
       return matchesSearch && matchesSchool && matchesComp && matchesStatus;
     });
@@ -197,24 +223,30 @@ export const ParticipantsPage: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  const hasActiveFilters = searchQuery || selectedSchoolFilter !== 'ALL' || selectedCompFilter !== 'ALL' || selectedStatusFilter !== 'ALL';
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
+    <div className="space-y-5 sm:space-y-6 animate-fade-in pb-12">
+      {/* SECTION 1: HEADER & ACTIONS BAR */}
+      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="w-10 h-10 rounded-2xl bg-[#03A695]/10 text-[#03A695] border border-teal-200 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5" />
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Registered Teams & Projects
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] border border-teal-200 text-xs font-bold">
+            <span className="px-3 py-1 rounded-full bg-[#E6F7F5] text-[#03A695] text-xs font-black border border-teal-200 shadow-xs">
               {participants.length} Active Teams
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Official roster across 6 Categories (Grades 1 to 12) • Each team chooses 1 of 4 official projects
+          <p className="text-xs text-slate-500 max-w-xl">
+            Official roster across 6 Categories (Grades 1 to 12) • Each team chooses 1 of 4 standardized rubric projects
           </p>
         </div>
 
+        {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant="orange"
@@ -224,9 +256,9 @@ export const ParticipantsPage: React.FC = () => {
               if (schools.length > 0 && !formSchoolId) setFormSchoolId(schools[0].id);
               setShowRegisterModal(true);
             }}
-            className="cursor-pointer shadow-xs"
+            className="cursor-pointer shadow-xs text-xs font-bold w-full sm:w-auto justify-center"
           >
-            Register Team (Choose Project)
+            <span>Register Team (Choose Project)</span>
           </Button>
 
           <Button
@@ -234,7 +266,8 @@ export const ParticipantsPage: React.FC = () => {
             size="sm"
             icon={<RefreshCw className={`w-3.5 h-3.5 text-[#03A695] ${isLoadingData ? 'animate-spin' : ''}`} />}
             onClick={() => refreshData()}
-            className="cursor-pointer"
+            className="cursor-pointer text-xs flex-1 sm:flex-initial justify-center"
+            title="Synchronize live MongoDB Atlas data"
           >
             <span>{isLoadingData ? 'Syncing...' : 'Sync Data'}</span>
           </Button>
@@ -242,114 +275,285 @@ export const ParticipantsPage: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            icon={<Upload className="w-3.5 h-3.5" />}
+            icon={<Upload className="w-3.5 h-3.5 text-slate-500" />}
             onClick={() => setShowImportModal(true)}
-            className="cursor-pointer"
+            className="cursor-pointer text-xs flex-1 sm:flex-initial justify-center"
+            title="Import Excel or CSV roster"
           >
-            Import CSV
+            <span>Import</span>
           </Button>
 
           <Button
-            variant="primary"
+            variant="outline"
             size="sm"
-            icon={<Download className="w-3.5 h-3.5" />}
+            icon={<Download className="w-3.5 h-3.5 text-slate-500" />}
             onClick={handleExportCSV}
-            className="cursor-pointer shadow-xs"
+            className="cursor-pointer text-xs flex-1 sm:flex-initial justify-center"
+            title="Export filtered records as CSV"
           >
-            Export CSV ({filteredParticipants.length})
+            <span>Export ({filteredParticipants.length})</span>
           </Button>
         </div>
       </div>
 
-      {/* Filter Toolbar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Search Input */}
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search student, team ID, project..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPageNum(1);
-            }}
-            className="w-full pl-9 pr-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
-          />
+      {/* SECTION 2: LIVE KPI METRICS STRIP */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* KPI 1: Total Enrolled */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-[#03A695] flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block truncate">
+              Total Teams
+            </span>
+            <span className="text-xl sm:text-2xl font-black text-slate-900 block leading-tight">
+              {kpiMetrics.totalTeams}
+            </span>
+            <span className="text-[10px] text-teal-700 font-semibold block truncate">
+              6 Categories active
+            </span>
+          </div>
         </div>
 
-        {/* School Filter */}
-        <select
-          value={selectedSchoolFilter}
-          onChange={(e) => {
-            setSelectedSchoolFilter(e.target.value);
-            setCurrentPageNum(1);
-          }}
-          className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#03A695]"
-        >
-          <option value="ALL">All Schools ({schools.length})</option>
-          {schools.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
+        {/* KPI 2: Evaluated & Locked */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block truncate">
+              Evaluated & Scored
+            </span>
+            <span className="text-xl sm:text-2xl font-black text-slate-900 block leading-tight">
+              {kpiMetrics.evaluatedCount}
+            </span>
+            <span className="text-[10px] text-emerald-700 font-semibold block truncate">
+              {kpiMetrics.totalTeams > 0 ? Math.round((kpiMetrics.evaluatedCount / kpiMetrics.totalTeams) * 100) : 0}% locked in
+            </span>
+          </div>
+        </div>
 
-        {/* Competition Filter */}
-        <select
-          value={selectedCompFilter}
-          onChange={(e) => {
-            setSelectedCompFilter(e.target.value);
-            setCurrentPageNum(1);
-          }}
-          className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#03A695]"
-        >
-          <option value="ALL">All Categories ({competitions.length})</option>
-          {competitions.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        {/* KPI 3: Pending Defense */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block truncate">
+              Awaiting Evaluation
+            </span>
+            <span className="text-xl sm:text-2xl font-black text-slate-900 block leading-tight">
+              {kpiMetrics.pendingCount}
+            </span>
+            <span className="text-[10px] text-amber-700 font-semibold block truncate">
+              Jury queue ready
+            </span>
+          </div>
+        </div>
 
-        {/* Status Filter */}
-        <select
-          value={selectedStatusFilter}
-          onChange={(e) => {
-            setSelectedStatusFilter(e.target.value);
-            setCurrentPageNum(1);
-          }}
-          className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#03A695]"
-        >
-          <option value="ALL">All Statuses ({participants.length})</option>
-          <option value="SUBMITTED">
-            Evaluated & Locked ({participants.filter(p => p.status === 'SUBMITTED' || p.status === 'EVALUATED').length})
-          </option>
-          <option value="PENDING">
-            Pending Evaluation ({participants.filter(p => p.status !== 'SUBMITTED' && p.status !== 'EVALUATED').length})
-          </option>
-        </select>
+        {/* KPI 4: Arena Average */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center shrink-0">
+            <Award className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block truncate">
+              Arena Average
+            </span>
+            <span className="text-xl sm:text-2xl font-black text-[#03A695] block leading-tight">
+              {kpiMetrics.avgScore}%
+            </span>
+            <span className="text-[10px] text-purple-700 font-semibold block truncate">
+              Official rubric scale
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Participants Table */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+      {/* SECTION 3: SMART FILTER & STATUS CHIPS */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+        {/* Top Filter Row: Search & Dropdowns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search team, student leader, ID, project..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPageNum(1);
+              }}
+              className="w-full pl-9 pr-8 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#03A695]"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* School Filter */}
+          <select
+            value={selectedSchoolFilter}
+            onChange={(e) => {
+              setSelectedSchoolFilter(e.target.value);
+              setCurrentPageNum(1);
+            }}
+            className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#03A695] truncate"
+          >
+            <option value="ALL">All Schools ({schools.length})</option>
+            {schools.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Competition / Category Filter */}
+          <select
+            value={selectedCompFilter}
+            onChange={(e) => {
+              setSelectedCompFilter(e.target.value);
+              setCurrentPageNum(1);
+            }}
+            className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#03A695] truncate"
+          >
+            <option value="ALL">All Categories (1 to 6)</option>
+            {competitions.map((c) => (
+              <option key={c.id} value={c.id}>
+                #{c.categoryNumber || c.id} {c.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Status Dropdown */}
+          <select
+            value={selectedStatusFilter}
+            onChange={(e) => {
+              setSelectedStatusFilter(e.target.value);
+              setCurrentPageNum(1);
+            }}
+            className="w-full px-3 py-2 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-[#03A695] truncate"
+          >
+            <option value="ALL">All Statuses ({participants.length})</option>
+            <option value="SUBMITTED">Evaluated & Locked ({kpiMetrics.evaluatedCount})</option>
+            <option value="PENDING">Pending Evaluation ({kpiMetrics.pendingCount})</option>
+          </select>
+        </div>
+
+        {/* Quick Status Chips & Clear Action */}
+        <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
+              <Filter className="w-3 h-3 text-slate-400" />
+              Status:
+            </span>
+
+            {/* Chip: All */}
+            <button
+              onClick={() => {
+                setSelectedStatusFilter('ALL');
+                setCurrentPageNum(1);
+              }}
+              className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
+                selectedStatusFilter === 'ALL'
+                  ? 'bg-[#03A695] text-white shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600 border border-slate-200/60'
+              }`}
+            >
+              <span>All Teams</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                selectedStatusFilter === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+              }`}>
+                {participants.length}
+              </span>
+            </button>
+
+            {/* Chip: Evaluated */}
+            <button
+              onClick={() => {
+                setSelectedStatusFilter('SUBMITTED');
+                setCurrentPageNum(1);
+              }}
+              className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
+                selectedStatusFilter === 'SUBMITTED'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600 border border-slate-200/60'
+              }`}
+            >
+              <span>Evaluated</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                selectedStatusFilter === 'SUBMITTED' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+              }`}>
+                {kpiMetrics.evaluatedCount}
+              </span>
+            </button>
+
+            {/* Chip: Pending */}
+            <button
+              onClick={() => {
+                setSelectedStatusFilter('PENDING');
+                setCurrentPageNum(1);
+              }}
+              className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
+                selectedStatusFilter === 'PENDING'
+                  ? 'bg-amber-600 text-white shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600 border border-slate-200/60'
+              }`}
+            >
+              <span>Pending</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                selectedStatusFilter === 'PENDING' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+              }`}>
+                {kpiMetrics.pendingCount}
+              </span>
+            </button>
+          </div>
+
+          {hasActiveFilters && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedSchoolFilter('ALL');
+                setSelectedCompFilter('ALL');
+                setSelectedStatusFilter('ALL');
+                setCurrentPageNum(1);
+              }}
+              className="self-start sm:self-auto text-xs font-bold text-[#FD5E01] hover:text-[#e05300] flex items-center gap-1.5 cursor-pointer py-1"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Reset All Filters
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* SECTION 4: DATA VIEW (DESKTOP TABLE & MOBILE CARDS) */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
+        {/* VIEW 1: DESKTOP & TABLET DATA TABLE (hidden on screens < 768px) */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left text-xs min-w-[780px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider">
-                <th className="py-3.5 pl-6">Participant / Team</th>
-                <th className="py-3.5 px-4">School</th>
-                <th className="py-3.5 px-4">Grade & Category</th>
-                <th className="py-3.5 px-4">Selected Project (1 of 4)</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4 text-center">Score</th>
-                <th className="py-3.5 pr-6 text-right">Actions</th>
+                <th className="py-3.5 pl-4 sm:pl-6 min-w-[200px]">Participant / Team</th>
+                <th className="py-3.5 px-3 min-w-[140px]">School</th>
+                <th className="py-3.5 px-3 min-w-[120px]">Grade & Category</th>
+                <th className="py-3.5 px-3 min-w-[180px]">Selected Project (1 of 4)</th>
+                <th className="py-3.5 px-3 min-w-[110px]">Status</th>
+                <th className="py-3.5 px-3 text-center min-w-[90px]">Score</th>
+                <th className="py-3.5 pr-4 sm:pr-6 text-right min-w-[160px]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {paginatedParticipants.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={7} className="py-14 text-center text-slate-400">
                     <Users className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#03A695]" />
                     <p className="font-bold text-sm text-slate-700">No matching participants found</p>
                     <p className="text-xs text-slate-400 mt-1">Try clearing your filters or search keywords</p>
@@ -357,7 +561,7 @@ export const ParticipantsPage: React.FC = () => {
                 </tr>
               ) : (
                 paginatedParticipants.map((p) => {
-                  const isSubmitted = p.status === 'SUBMITTED' || p.status === 'EVALUATED';
+                  const isSubmitted = (p.finalScore && p.finalScore > 0) || p.status === 'SUBMITTED' || p.status === 'EVALUATED';
                   const scoreVal = p.finalScore || p.percentage || 0;
                   const projectCode = `P${p.categoryNumber || 1}-0${p.projectNumber || 1}`;
 
@@ -370,25 +574,25 @@ export const ParticipantsPage: React.FC = () => {
                       <td className="py-4 pl-6">
                         <div className="flex items-center gap-3">
                           <UserAvatar name={p.name} size="sm" variant="color" />
-                          <div>
+                          <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-mono text-[10px] font-bold text-[#03A695] bg-[#E6F7F5] px-1.5 py-0.5 rounded border border-teal-200">
+                              <span className="font-mono text-[10px] font-bold text-[#03A695] bg-[#E6F7F5] px-1.5 py-0.5 rounded border border-teal-200 shrink-0">
                                 {p.teamId || p.participantId}
                               </span>
-                              <span className="font-bold text-slate-900 group-hover:text-[#03A695] transition-colors">
+                              <span className="font-bold text-slate-900 group-hover:text-[#03A695] transition-colors truncate">
                                 {p.teamName || p.name}
                               </span>
                             </div>
-                            <span className="text-[11px] text-slate-500 font-medium block mt-0.5">
+                            <span className="text-[11px] text-slate-500 font-medium block mt-0.5 truncate">
                               Leader: {p.name}
                             </span>
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-slate-700 font-semibold max-w-[180px] truncate">
+                      <td className="py-4 px-3 text-slate-700 font-semibold max-w-[180px] truncate">
                         {p.schoolName}
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-3">
                         <span className="font-bold text-slate-900 block">Grade {p.grade || 1}</span>
                         <span className="text-[11px] text-[#03A695] font-semibold">
                           Category {p.categoryNumber || 1}
@@ -396,9 +600,9 @@ export const ParticipantsPage: React.FC = () => {
                       </td>
 
                       {/* Selected Project (1 of 4) */}
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-3">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-mono text-[10px] font-black text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-300">
+                          <span className="font-mono text-[10px] font-black text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-300 shrink-0">
                             {projectCode}
                           </span>
                           <span className="font-bold text-slate-900 text-xs line-clamp-1">
@@ -407,7 +611,7 @@ export const ParticipantsPage: React.FC = () => {
                         </div>
                       </td>
 
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-3">
                         <Badge
                           variant={isSubmitted ? 'success' : 'orange'}
                           size="sm"
@@ -415,9 +619,9 @@ export const ParticipantsPage: React.FC = () => {
                           {isSubmitted ? 'Evaluated' : 'Pending Evaluation'}
                         </Badge>
                       </td>
-                      <td className="py-4 px-4 text-center">
+                      <td className="py-4 px-3 text-center">
                         {isSubmitted ? (
-                          <span className="inline-flex items-center gap-1 font-black text-slate-900 text-sm bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200 shadow-xs">
+                          <span className="inline-flex items-center gap-1 font-black text-slate-900 text-xs bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200 shadow-xs">
                             {scoreVal} / 100
                           </span>
                         ) : (
@@ -432,7 +636,7 @@ export const ParticipantsPage: React.FC = () => {
                             e.stopPropagation();
                             setProjectChangeParticipant(p);
                           }}
-                          className="text-xs"
+                          className="text-xs cursor-pointer"
                         >
                           <Edit3 className="w-3.5 h-3.5 text-slate-500" />
                           <span>Change Project</span>
@@ -445,6 +649,7 @@ export const ParticipantsPage: React.FC = () => {
                             e.stopPropagation();
                             navigate('participant-detail', { partId: p.id, compId: p.competitionId });
                           }}
+                          className="text-xs cursor-pointer font-bold"
                         >
                           <FileCheck2 className="w-3.5 h-3.5" />
                           <span>Dossier</span>
@@ -458,41 +663,155 @@ export const ParticipantsPage: React.FC = () => {
           </table>
         </div>
 
-        {/* Dynamic Footer Pagination */}
-        <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <span>
+        {/* VIEW 2: MOBILE INTERACTIVE TEAM DOSSIER CARDS (visible on screens < 768px) */}
+        <div className="block md:hidden p-3.5 space-y-3.5">
+          {paginatedParticipants.length === 0 ? (
+            <div className="py-12 text-center text-slate-400">
+              <Users className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#03A695]" />
+              <p className="font-bold text-sm text-slate-700">No matching participants found</p>
+              <p className="text-xs text-slate-400 mt-1">Try clearing your search or status filters</p>
+            </div>
+          ) : (
+            paginatedParticipants.map((p) => {
+              const isSubmitted = (p.finalScore && p.finalScore > 0) || p.status === 'SUBMITTED' || p.status === 'EVALUATED';
+              const scoreVal = p.finalScore || p.percentage || 0;
+              const projectCode = `P${p.categoryNumber || 1}-0${p.projectNumber || 1}`;
+
+              return (
+                <div
+                  key={p.id}
+                  onClick={() => navigate('participant-detail', { partId: p.id })}
+                  className="bg-[#F7FCFB] rounded-2xl border border-slate-200/90 p-4 space-y-3 shadow-xs hover:border-teal-300 transition-all cursor-pointer"
+                >
+                  {/* Card Header: Avatar, Team Name, ID & Status Badge */}
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <UserAvatar name={p.name} size="sm" variant="color" />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-mono text-[10px] font-black bg-white text-[#03A695] px-1.5 py-0.5 rounded border border-teal-200 shrink-0">
+                            {p.teamId || p.participantId}
+                          </span>
+                          <span className="font-black text-slate-900 text-xs truncate">
+                            {p.teamName || p.name}
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-slate-500 font-medium block mt-0.5 truncate">
+                          Leader: <strong className="text-slate-800">{p.name}</strong>
+                        </span>
+                      </div>
+                    </div>
+
+                    {isSubmitted ? (
+                      <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                        {scoreVal}%
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                        Pending
+                      </span>
+                    )}
+                  </div>
+
+                  {/* School & Grade Strip */}
+                  <div className="flex items-center justify-between text-[11px] text-slate-600 pt-2 border-t border-slate-200/70">
+                    <div className="flex items-center gap-1 truncate max-w-[65%]">
+                      <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="font-semibold truncate">{p.schoolName}</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-white text-[#03A695] border border-teal-200 shrink-0">
+                      Grade {p.grade || 1} • Cat {p.categoryNumber || 1}
+                    </span>
+                  </div>
+
+                  {/* Project Showcase Box */}
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono text-[10px] font-black text-amber-900 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-300 shrink-0">
+                        {projectCode}
+                      </span>
+                      <p className="font-bold text-slate-900 text-xs truncate">
+                        {p.projectTitle || 'Selected Project'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Mobile Action Buttons */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-200/70">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProjectChangeParticipant(p);
+                      }}
+                      className="flex-1 py-1.5 px-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Change Project</span>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate('participant-detail', { partId: p.id, compId: p.competitionId });
+                      }}
+                      className="flex-1 py-1.5 px-3 rounded-xl bg-[#FD5E01] hover:bg-[#e05300] text-white text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <FileCheck2 className="w-3.5 h-3.5" />
+                      <span>View Dossier</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* SECTION 5: ADAPTIVE RESPONSIVE PAGINATION */}
+        <div className="p-4 bg-slate-50 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+          <span className="text-center sm:text-left">
             Showing <strong className="text-slate-800">{paginatedParticipants.length}</strong> of{' '}
-            <strong className="text-slate-800">{filteredParticipants.length}</strong> filtered entries ({participants.length} total registered)
+            <strong className="text-slate-800">{filteredParticipants.length}</strong> filtered entries ({participants.length} total enrolled)
           </span>
 
           {totalPages > 1 && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 w-full sm:w-auto justify-center">
               <button
                 disabled={currentPageNum === 1}
-                onClick={() => setCurrentPageNum(prev => Math.max(1, prev - 1))}
-                className="px-3 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
+                onClick={() => setCurrentPageNum((prev) => Math.max(1, prev - 1))}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 cursor-pointer font-medium flex items-center gap-1"
               >
-                Previous
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Prev</span>
               </button>
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button
-                  key={i + 1}
-                  onClick={() => setCurrentPageNum(i + 1)}
-                  className={`px-3 py-1 rounded-lg font-bold cursor-pointer transition-colors ${
-                    currentPageNum === i + 1
-                      ? 'bg-[#03A695] text-white shadow-xs'
-                      : 'border border-slate-200 bg-white hover:bg-slate-100 text-slate-700'
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+
+              {/* Numbered pills on desktop / tablet */}
+              <div className="hidden sm:flex items-center gap-1">
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setCurrentPageNum(i + 1)}
+                    className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-colors ${
+                      currentPageNum === i + 1
+                        ? 'bg-[#03A695] text-white shadow-xs'
+                        : 'border border-slate-200 bg-white hover:bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+
+              {/* Compact page indicator on mobile */}
+              <span className="sm:hidden px-3 py-1 font-bold text-slate-700">
+                Page {currentPageNum} of {totalPages}
+              </span>
+
               <button
                 disabled={currentPageNum === totalPages}
-                onClick={() => setCurrentPageNum(prev => Math.min(totalPages, prev + 1))}
-                className="px-3 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
+                onClick={() => setCurrentPageNum((prev) => Math.min(totalPages, prev + 1))}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 cursor-pointer font-medium flex items-center gap-1"
               >
-                Next
+                <span>Next</span>
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
@@ -695,7 +1014,7 @@ export const ParticipantsPage: React.FC = () => {
                 Available Projects in Category {projectChangeParticipant.categoryNumber || 1} (Choose 1):
               </label>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto p-1">
                 {getProjectsForCategory(projectChangeParticipant.categoryNumber || 1).map((proj) => {
                   const isCurrent = projectChangeParticipant.projectId === proj.id || projectChangeParticipant.projectNumber === proj.projectNumber;
                   const code = `P${proj.categoryNumber}-0${proj.projectNumber}`;
@@ -767,7 +1086,7 @@ export const ParticipantsPage: React.FC = () => {
         </Modal>
       )}
 
-      {/* CSV Import Modal */}
+      {/* MODAL 3: CSV IMPORT MODAL */}
       <Modal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
@@ -843,19 +1162,20 @@ export const ParticipantDetailPage: React.FC = () => {
     );
   }
 
-  const isSubmitted = participant.status === 'SUBMITTED' || participant.status === 'EVALUATED';
+  const isSubmitted = (participant.finalScore && participant.finalScore > 0) || participant.status === 'SUBMITTED' || participant.status === 'EVALUATED';
   const scoreVal = participant.finalScore || participant.percentage || 0;
   const projectCode = `P${participant.categoryNumber || 1}-0${participant.projectNumber || 1}`;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pb-12">
       {/* Top Breadcrumb & Action */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <button
           onClick={() => navigate('participants')}
           className="text-xs font-bold text-[#03A695] hover:underline flex items-center gap-1 cursor-pointer"
         >
-          ← Back to Participants Roster
+          <ChevronLeft className="w-4 h-4" />
+          <span>Back to Participants Roster</span>
         </button>
 
         <div className="flex items-center gap-2">
@@ -864,7 +1184,7 @@ export const ParticipantDetailPage: React.FC = () => {
             size="sm"
             icon={<Printer className="w-3.5 h-3.5" />}
             onClick={() => window.print()}
-            className="cursor-pointer"
+            className="cursor-pointer text-xs"
           >
             Print Dossier
           </Button>
@@ -873,7 +1193,7 @@ export const ParticipantDetailPage: React.FC = () => {
             size="sm"
             icon={<FileCheck2 className="w-3.5 h-3.5" />}
             onClick={() => navigate('results')}
-            className="cursor-pointer"
+            className="cursor-pointer text-xs font-bold"
           >
             Championship Results
           </Button>
@@ -881,13 +1201,13 @@ export const ParticipantDetailPage: React.FC = () => {
       </div>
 
       {/* Profile Hero Card */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card p-6 lg:p-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 justify-between border-b border-slate-100 pb-6">
-          <div className="flex items-center gap-5">
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card p-5 sm:p-7 lg:p-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between border-b border-slate-100 pb-6">
+          <div className="flex items-center gap-4 sm:gap-5 min-w-0">
             <UserAvatar name={participant.name} size="xl" variant="color" />
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                   {participant.teamName || participant.name}
                 </h1>
                 <Badge
@@ -907,7 +1227,7 @@ export const ParticipantDetailPage: React.FC = () => {
                 <span className="text-xs font-mono font-bold text-[#03A695] bg-[#E6F7F5] px-2 py-0.5 rounded border border-teal-200">
                   ID: {participant.teamId || participant.participantId}
                 </span>
-                <span className="text-xs text-slate-600 font-semibold">
+                <span className="text-xs text-slate-600 font-semibold truncate">
                   {participant.schoolName} • Grade {participant.grade || 1}
                 </span>
               </div>
@@ -915,7 +1235,7 @@ export const ParticipantDetailPage: React.FC = () => {
           </div>
 
           {/* Score Highlight Box */}
-          <div className="bg-gradient-to-br from-[#0B2545] to-[#03A695] text-white p-4 rounded-2xl text-center min-w-[170px] shadow-md">
+          <div className="bg-gradient-to-br from-[#0B2545] to-[#03A695] text-white p-4 rounded-2xl text-center min-w-[170px] shadow-md w-full md:w-auto">
             <span className="text-[11px] font-bold uppercase tracking-wider text-teal-100">
               Official Rubric Score
             </span>
@@ -937,7 +1257,7 @@ export const ParticipantDetailPage: React.FC = () => {
             </h3>
             <div className="space-y-1.5 text-xs text-slate-700">
               <p><strong className="text-slate-900">Student Leader:</strong> {participant.name}</p>
-              <p><strong className="text-slate-900">Team Size:</strong> {participant.teamSize || (participant.teamMembers ? participant.teamMembers.length : 1)} Finalists</p>
+              <p><strong className="text-slate-900">Team Size:</strong> {participant.teamSize || (participant.teamMembers ? participant.teamMembers.length + 1 : 1)} Finalists</p>
               {participant.teamMembers && participant.teamMembers.length > 0 && (
                 <p>
                   <strong className="text-slate-900">Members:</strong>{' '}
@@ -981,10 +1301,10 @@ export const ParticipantDetailPage: React.FC = () => {
 
             <div className="p-3.5 rounded-2xl bg-[#F7FCFB] border border-teal-100/70 text-xs space-y-1.5">
               <div className="flex items-center gap-1.5">
-                <span className="font-mono text-[10px] font-black text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-300">
+                <span className="font-mono text-[10px] font-black text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-300 shrink-0">
                   {projectCode}
                 </span>
-                <p className="font-bold text-slate-900">{participant.projectTitle || 'Selected Project'}</p>
+                <p className="font-bold text-slate-900 truncate">{participant.projectTitle || 'Selected Project'}</p>
               </div>
               <p className="text-slate-600 mt-1 leading-relaxed text-[11px]">
                 {participant.projectSummary || 'Autonomous and innovative technical design built for the official Techno Talent Feast 2026 rubric criteria.'}
@@ -1063,7 +1383,7 @@ export const ParticipantDetailPage: React.FC = () => {
           maxWidth="2xl"
         >
           <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[320px] overflow-y-auto p-1">
               {getProjectsForCategory(participant.categoryNumber || 1).map((proj) => {
                 const isCurrent = participant.projectId === proj.id || participant.projectNumber === proj.projectNumber;
                 const code = `P${proj.categoryNumber}-0${proj.projectNumber}`;

@@ -16,7 +16,7 @@ interface HeaderProps {
   isSidebarOpen: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
+export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }) => {
   const {
     currentUser,
     currentRole,
@@ -50,14 +50,15 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   }, []);
 
   return (
-    <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-30 shadow-xs">
-      <div className="px-4 lg:px-6 h-16 flex items-center justify-between gap-4">
+    <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-30 shadow-xs shrink-0">
+      <div className="px-3 sm:px-4 lg:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Mobile Toggle & Brand */}
-        <div className="flex items-center gap-3 lg:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 min-w-0">
           <button
             onClick={onToggleSidebar}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-            title="Toggle Navigation Sidebar"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0 cursor-pointer"
+            title={isSidebarOpen ? 'Collapse Navigation Sidebar' : 'Open Navigation Sidebar'}
+            aria-label={isSidebarOpen ? 'Collapse Navigation Sidebar' : 'Open Navigation Sidebar'}
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -65,16 +66,17 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           {/* Techno Talent Feast 2026 Branding */}
           <div
             onClick={() => navigate(currentRole === 'judge' ? 'judge-dashboard' : 'dashboard')}
-            className="cursor-pointer flex items-center gap-2.5 select-none"
+            className="cursor-pointer flex items-center gap-2 select-none min-w-0"
           >
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#03A695] to-[#0B2545] flex items-center justify-center text-white font-extrabold text-xs shadow-md shadow-teal-500/15 shrink-0">
               <span className="text-[#FD5E01]">T</span>T
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none">
-                TECHNO TALENT FEAST
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-sm sm:text-lg font-black text-slate-900 tracking-tight leading-none truncate">
+                <span className="hidden sm:inline">TECHNO TALENT FEAST</span>
+                <span className="sm:hidden font-black">TTF</span>
               </span>
-              <span className="text-xs font-black px-2 py-0.5 rounded-md bg-[#FD5E01] text-white leading-none shadow-xs">
+              <span className="text-[10px] sm:text-xs font-black px-1.5 sm:px-2 py-0.5 rounded-md bg-[#FD5E01] text-white leading-none shadow-xs shrink-0">
                 2026
               </span>
             </div>
@@ -82,30 +84,34 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </div>
 
         {/* Right: Role Switcher Pill + Notifications + Profile */}
-        <div className="flex items-center gap-2 lg:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
           {/* Quick Role Switcher for Management Review */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200/80">
+          <div className="flex items-center bg-slate-100 p-0.5 sm:p-1 rounded-2xl border border-slate-200/80">
             <button
               onClick={() => loginAs('admin')}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2 sm:px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
                 currentRole === 'admin'
                   ? 'bg-[#03A695] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
+              title="Switch to Admin Console"
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Admin</span>
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Admin</span>
+              <span className="sm:hidden text-[11px] font-extrabold">Admin</span>
             </button>
             <button
               onClick={() => loginAs('judge')}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2 sm:px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
                 currentRole === 'judge'
                   ? 'bg-[#FD5E01] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
+              title="Switch to Judge Portal"
             >
-              <KeyRound className="w-3.5 h-3.5" />
-              <span>Judge</span>
+              <KeyRound className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Judge</span>
+              <span className="sm:hidden text-[11px] font-extrabold">Judge</span>
             </button>
           </div>
 
@@ -113,8 +119,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+              className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
               title="Notifications"
+              aria-label="Notifications"
             >
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
@@ -124,7 +131,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
             {/* Notification Dropdown */}
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden z-50 animate-scale-up">
+              <div className="fixed sm:absolute right-2 sm:right-0 mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-sm bg-white rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden z-50 animate-scale-up">
                 <div className="px-4 py-3 bg-[#F7FCFB] border-b border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm text-slate-900">Notifications</span>

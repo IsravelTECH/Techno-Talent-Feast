@@ -20,14 +20,18 @@ import { ScoringPanelPage } from './pages/ScoringPanelPage';
 import { JudgeCompletedPage } from './pages/JudgeCompletedPage';
 import { LiveLeaderboardPage } from './pages/LiveLeaderboardPage';
 import { ResultsPage } from './pages/ResultsPage';
-import { ReportsPage } from './pages/ReportsPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { JudgeSinglePageScoring } from './pages/JudgeSinglePageScoring';
 
 export const App: React.FC = () => {
   const { currentPage, currentRole } = useApp();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
 
   // 1. Standalone Login Page
   if (currentPage === 'login') {
@@ -66,8 +70,6 @@ export const App: React.FC = () => {
         return <JudgeAssignmentPage />;
       case 'results':
         return <ResultsPage />;
-      case 'reports':
-        return <ReportsPage />;
       case 'settings':
         return <ProfilePage />;
       case 'rubrics':
@@ -76,6 +78,7 @@ export const App: React.FC = () => {
         return <UserRolesPage />;
 
       // Redirect removed Admin pages and obsolete live route to fallback Admin Dashboard
+      case 'reports':
       case 'live':
       case 'event-overview':
       case 'finalists':
@@ -109,35 +112,33 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7FCFB] flex flex-col selection:bg-[#03A695] selection:text-white">
-      <div className="flex-1 flex flex-row relative">
-        {/* Sidebar */}
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
+    <div className="h-screen w-screen overflow-hidden bg-[#F7FCFB] flex selection:bg-[#03A695] selection:text-white">
+      {/* Sidebar - Fixed to left viewport, never scrolls up with main content */}
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+
+      {/* Main Workspace Content Area - Independent Vertical Scrolling Container */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto overflow-x-hidden">
+        <Header
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
 
-        {/* Main Workspace Content Area */}
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header
-            isSidebarOpen={isSidebarOpen}
-            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-          />
+        <main className="flex-1 p-3 sm:p-5 lg:p-8 max-w-7xl w-full mx-auto min-w-0">
+          {renderCurrentPage()}
+        </main>
 
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
-            {renderCurrentPage()}
-          </main>
-
-          {/* Footer */}
-          <footer className="py-4 px-6 border-t border-[#E2E8F0] bg-white text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span className="font-semibold text-slate-700">
-              TECHNO TALENT FEAST 2026 — Powered by TechnoSchool
-            </span>
-            <span>
-              Dubai Grand Finale (4 Nov 2026 at EIBFS) • 2-Role Event Management & Scoring Engine
-            </span>
-          </footer>
-        </div>
+        {/* Footer */}
+        <footer className="py-4 px-4 sm:px-6 border-t border-[#E2E8F0] bg-white text-center text-[11px] sm:text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-2 shrink-0">
+          <span className="font-semibold text-slate-700">
+            TECHNO TALENT FEAST 2026 — Powered by TechnoSchool
+          </span>
+          <span className="text-slate-400 sm:text-slate-500">
+            Dubai Grand Finale (4 Nov 2026 at EIBFS) • 2-Role Event Management & Scoring Engine
+          </span>
+        </footer>
       </div>
     </div>
   );

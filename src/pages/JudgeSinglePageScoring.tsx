@@ -359,14 +359,14 @@ export const JudgeSinglePageScoring: React.FC = () => {
           </div>
 
           {/* Quick Helper Badges for Registered Teams */}
-          <div className="flex items-center gap-1.5 flex-wrap pt-0.5 text-xs">
-            <span className="text-[11px] font-semibold text-[#5B6B7C]">Samples:</span>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 text-xs">
+            <span className="text-[11px] font-semibold text-[#5B6B7C] shrink-0">Samples:</span>
             {['TTF26-TEAM-001', 'TTF26-TEAM-002', 'TTF26-TEAM-003', 'TTF26-TEAM-008'].map((id) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => handleQuickSelect(id)}
-                className="px-2.5 py-1 rounded-lg bg-[#F8FAFC] hover:bg-[#E6F7F5] hover:text-[#03A695] hover:border-teal-300 border border-[#CBD5E1] text-[#5B6B7C] font-mono text-[11px] font-semibold transition-all cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-[#F8FAFC] hover:bg-[#E6F7F5] hover:text-[#03A695] hover:border-teal-300 border border-[#CBD5E1] text-[#5B6B7C] font-mono text-[11px] font-semibold transition-all cursor-pointer shrink-0"
               >
                 {id}
               </button>
@@ -533,7 +533,7 @@ export const JudgeSinglePageScoring: React.FC = () => {
                             handleScoreChange(criterion.id, e.target.value, criterion.maxMarks)
                           }
                           aria-label={`Score for ${criterion.name}`}
-                          className={`w-28 sm:w-32 h-11 text-center font-bold font-mono text-base rounded-xl bg-white border-2 focus:outline-none transition-all ${
+                          className={`w-28 sm:w-32 h-12 text-center font-bold font-mono text-lg rounded-xl bg-white border-2 focus:outline-none transition-all ${
                             isInvalid
                               ? 'border-red-400 text-red-600 focus:border-red-600 focus:ring-2 focus:ring-red-100'
                               : val !== ''

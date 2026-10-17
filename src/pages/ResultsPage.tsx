@@ -111,10 +111,11 @@ export const ResultsPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header and Dual Select Toolbar */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header and Dual Select Toolbar */}
+      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Official Championship Results
             </h1>
           </div>
@@ -124,12 +125,12 @@ export const ResultsPage: React.FC = () => {
         </div>
 
         {/* View Mode Toggle & Dual Select Boxes */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full md:w-auto">
           {/* Quick Tab Toggle */}
-          <div className="flex items-center bg-[#F7FCFB] p-1 rounded-2xl border border-slate-200">
+          <div className="flex items-center bg-[#F7FCFB] p-1 rounded-2xl border border-slate-200 shrink-0">
             <button
               onClick={() => setViewMode('STUDENTS')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 viewMode === 'STUDENTS'
                   ? 'bg-white text-[#0B2545] shadow-xs border border-slate-200/80 font-black'
                   : 'text-slate-500 hover:text-slate-800'
@@ -140,7 +141,7 @@ export const ResultsPage: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('SCHOOLS')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 viewMode === 'SCHOOLS'
                   ? 'bg-white text-[#0B2545] shadow-xs border border-slate-200/80 font-black'
                   : 'text-slate-500 hover:text-slate-800'
@@ -155,7 +156,7 @@ export const ResultsPage: React.FC = () => {
           <select
             value={selectedComp}
             onChange={(e) => handleCompetitionChange(e.target.value)}
-            className={`px-3.5 py-2.5 bg-[#F7FCFB] border rounded-xl text-xs font-bold transition-all focus:outline-none ${
+            className={`w-full sm:w-auto max-w-full sm:max-w-[220px] truncate px-3 py-2 bg-[#F7FCFB] border rounded-xl text-xs font-bold transition-all focus:outline-none cursor-pointer ${
               viewMode === 'STUDENTS'
                 ? 'border-[#03A695] text-[#03A695] ring-2 ring-teal-500/10'
                 : 'border-slate-200 text-slate-700'
@@ -173,20 +174,20 @@ export const ResultsPage: React.FC = () => {
           <select
             value={selectedTrophy}
             onChange={(e) => handleTrophyChange(e.target.value)}
-            className={`px-3.5 py-2.5 bg-[#F7FCFB] border rounded-xl text-xs font-bold transition-all focus:outline-none ${
+            className={`w-full sm:w-auto max-w-full sm:max-w-[220px] truncate px-3 py-2 bg-[#F7FCFB] border rounded-xl text-xs font-bold transition-all focus:outline-none cursor-pointer ${
               viewMode === 'SCHOOLS'
                 ? 'border-[#03A695] text-[#0B2545] ring-2 ring-teal-500/10'
                 : 'border-slate-200 text-slate-700'
             }`}
           >
             <option value="ALL">All Trophies & Awards</option>
-            <option value="cat-1">Tiny Titan of ICT – Best School Best School Award 1</option>
-            <option value="cat-2">Titan of Code – Best School Best School Award 1</option>
-            <option value="cat-3">Titan of Creative Tech – Best School Best School Award 1</option>
-            <option value="cat-4">Titan of AI – Best School Best School Award 1</option>
-            <option value="cat-5">Titan of Digital Solutions – Best School Best School Award 1</option>
-            <option value="cat-6">Titan of Innovation – Best School Best School Award 1</option>
-            <option value="OVERALL">Titans of Technology – Champion School Overall Trophy 1</option>
+            <option value="cat-1">Tiny Titan of ICT – Best School</option>
+            <option value="cat-2">Titan of Code – Best School</option>
+            <option value="cat-3">Titan of Creative Tech – Best School</option>
+            <option value="cat-4">Titan of AI – Best School</option>
+            <option value="cat-5">Titan of Digital Solutions – Best School</option>
+            <option value="cat-6">Titan of Innovation – Best School</option>
+            <option value="OVERALL">Titans of Technology – Champion Overall</option>
           </select>
         </div>
       </div>
@@ -196,9 +197,9 @@ export const ResultsPage: React.FC = () => {
         <div className="space-y-6">
           {/* DEDICATED SEPARATE SECTION: OVERALL CHAMPION SCHOOL TROPHY */}
           {showOverallTrophy && grandChampionSchool && (
-            <div className="bg-white rounded-3xl border-2 border-amber-300 shadow-card p-6 relative overflow-hidden">
+            <div className="bg-white rounded-2xl sm:rounded-3xl border-2 border-amber-300 shadow-card p-4 sm:p-6 relative overflow-hidden">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
                       <Trophy className="w-3.5 h-3.5 text-amber-600 fill-current" />
@@ -209,14 +210,14 @@ export const ResultsPage: React.FC = () => {
                     </span>
                   </div>
 
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight break-words">
                     Titans of Technology – Champion School Overall Trophy 1
                   </h2>
 
                   <div className="flex items-center gap-2 text-sm font-bold text-slate-700 pt-1">
-                    <Building2 className="w-4 h-4 text-[#03A695]" />
+                    <Building2 className="w-4 h-4 text-[#03A695] shrink-0" />
                     <span>Winner: </span>
-                    <span className="text-base font-black text-[#0B2545]">{grandChampionSchool.schoolName}</span>
+                    <span className="text-sm sm:text-base font-black text-[#0B2545] truncate">{grandChampionSchool.schoolName}</span>
                   </div>
                 </div>
 
