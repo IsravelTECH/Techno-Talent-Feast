@@ -23,6 +23,8 @@ import { ResultsPage } from './pages/ResultsPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { JudgeSinglePageScoring } from './pages/JudgeSinglePageScoring';
+import { ScoreRequestsPage } from './pages/ScoreRequestsPage';
+import { TieBreaksPage } from './pages/TieBreaksPage';
 
 export const App: React.FC = () => {
   const { currentPage, currentRole } = useApp();
@@ -76,6 +78,10 @@ export const App: React.FC = () => {
         return <RubricBuilderPage />;
       case 'roles':
         return <UserRolesPage />;
+      case 'score-requests':
+        return <ScoreRequestsPage />;
+      case 'tie-breaks':
+        return <TieBreaksPage />;
 
       // Redirect removed Admin pages and obsolete live route to fallback Admin Dashboard
       case 'reports':
@@ -133,7 +139,7 @@ export const App: React.FC = () => {
         {/* Footer */}
         <footer className="py-4 px-4 sm:px-6 border-t border-[#E2E8F0] bg-white text-center text-[11px] sm:text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-2 shrink-0">
           <span className="font-semibold text-slate-700">
-            TECHNO TALENT FEAST 2026 — Powered by TechnoSchool
+            TECHNO TALENT FEST 2026 — Powered by TechnoSchool
           </span>
           <span className="text-slate-400 sm:text-slate-500">
             Dubai Grand Finale (4 Nov 2026 at EIBFS) • 2-Role Event Management & Scoring Engine

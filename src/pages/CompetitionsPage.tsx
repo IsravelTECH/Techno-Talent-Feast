@@ -369,7 +369,7 @@ export const CompetitionsPage: React.FC = () => {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         title="Register Competition Category"
-        subtitle="Add a new talent evaluation track to Techno Talent Feast 2026"
+        subtitle="Add a new talent evaluation track to Techno Talent Fest 2026"
       >
         <form onSubmit={handleCreateComp} className="space-y-4 text-xs">
           <div>

@@ -55,7 +55,7 @@ registerRoutes('/api');
 app.get(['/health', '/api/health'], (req, res) => {
   res.json({
     status: 'ok',
-    message: 'Techno Talent Feast 2026 API on Vercel is running',
+    message: 'Techno Talent Fest 2026 API on Vercel is running',
     timestamp: new Date().toISOString()
   });
 });
@@ -63,7 +63,7 @@ app.get(['/health', '/api/health'], (req, res) => {
 app.get(['/', '/api'], (req, res) => {
   res.json({
     status: 'ok',
-    message: 'Techno Talent Feast 2026 API Server is operational',
+    message: 'Techno Talent Fest 2026 API Server is operational',
     timestamp: new Date().toISOString()
   });
 });

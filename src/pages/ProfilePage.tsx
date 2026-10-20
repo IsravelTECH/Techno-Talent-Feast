@@ -348,7 +348,7 @@ export const ProfilePage: React.FC = () => {
           </div>
 
           <div className="text-[11px] text-slate-400 font-medium">
-            Techno Talent Feast 2026 Security Layer
+            Techno Talent Fest 2026 Security Layer
           </div>
         </div>
       </div>

@@ -79,6 +79,14 @@ export const ScoreReviewPage: React.FC = () => {
 
         <div className="flex items-center gap-2.5">
           <Button
+            variant="secondary"
+            size="sm"
+            icon={<FileCheck2 className="w-4 h-4 text-[#03A695]" />}
+            onClick={() => navigate('score-requests')}
+          >
+            Juror Edit Requests
+          </Button>
+          <Button
             variant="outline"
             size="sm"
             icon={<Download className="w-4 h-4" />}

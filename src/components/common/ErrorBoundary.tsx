@@ -59,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </div>
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-[#FD5E01] block">
-                  Techno Talent Feast 2026 • Runtime Guardian
+                  Techno Talent Fest 2026 • Runtime Guardian
                 </span>
                 <h2 className="text-xl font-black text-slate-900 tracking-tight">
                   Application View Recovered

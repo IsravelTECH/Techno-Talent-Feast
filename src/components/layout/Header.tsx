@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserAvatar } from '../common/UserAvatar';
 import { formatRelativeTime } from '../../utils/time';
@@ -33,7 +33,33 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const userNotifications = useMemo(() => {
+    return notifications.filter((n) => {
+      const role = (n.recipientRole || 'ALL').trim().toLowerCase();
+      if (role === 'all') return true;
+
+      if (currentRole === 'admin') {
+        return role === 'admin';
+      }
+
+      if (currentRole === 'judge') {
+        if (role === 'judge') return true;
+        const currentJudgeId = (currentUser?.judgeId || '').trim().toLowerCase();
+        const currentUserId = (currentUser?.id || '').trim().toLowerCase();
+        if (role === currentJudgeId || role === currentUserId) return true;
+        const digitsRole = role.replace(/\D/g, '');
+        const digitsJudge = currentJudgeId.replace(/\D/g, '');
+        if (digitsRole && digitsJudge && parseInt(digitsRole, 10) === parseInt(digitsJudge, 10)) {
+          return true;
+        }
+        return false;
+      }
+
+      return true;
+    });
+  }, [notifications, currentRole, currentUser]);
+
+  const unreadCount = userNotifications.filter((n) => !n.isRead).length;
 
   // Refresh relative timestamps every 5 seconds
   useEffect(() => {
@@ -68,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Techno Talent Feast 2026 Branding */}
+          {/* Techno Talent Fest 2026 Branding */}
           <div
             onClick={() => navigate(currentRole === 'judge' ? 'judge-dashboard' : 'dashboard')}
             className="cursor-pointer flex items-center gap-2 select-none min-w-0"
@@ -78,7 +104,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
             </div>
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="text-sm sm:text-lg font-black text-slate-900 tracking-tight leading-none truncate">
-                <span className="hidden sm:inline">TECHNO TALENT FEAST</span>
+                <span className="hidden sm:inline">TECHNO TALENT FEST</span>
                 <span className="sm:hidden font-black">TTF</span>
               </span>
               <span className="text-[10px] sm:text-xs font-black px-1.5 sm:px-2 py-0.5 rounded-md bg-[#FD5E01] text-white leading-none shadow-xs shrink-0">
@@ -128,12 +154,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
                 </div>
 
                 <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
-                  {notifications.length === 0 ? (
+                  {userNotifications.length === 0 ? (
                     <div className="p-6 text-center text-xs text-slate-500">
                       No notifications right now.
                     </div>
                   ) : (
-                    notifications.map((notif) => (
+                    userNotifications.map((notif) => (
                       <div
                         key={notif.id}
                         onClick={() => {

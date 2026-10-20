@@ -136,6 +136,39 @@ const TeamSchema = new mongoose.Schema({
   submissionTimestamp: {
     type: String,
     default: null
+  },
+  isScoreLocked: {
+    type: Boolean,
+    default: false
+  },
+  oneTimeEditAllowed: {
+    type: Boolean,
+    default: false
+  },
+  scoreEditRequest: {
+    id: { type: String, default: null },
+    status: {
+      type: String,
+      enum: ['NONE', 'PENDING', 'APPROVED', 'REJECTED', 'COMPLETED'],
+      default: 'NONE'
+    },
+    requestedByJudgeId: { type: String, default: null },
+    requestedByJudgeName: { type: String, default: null },
+    reason: { type: String, default: '' },
+    requestedAt: { type: String, default: null },
+    reviewedBy: { type: String, default: null },
+    reviewedAt: { type: String, default: null },
+    reviewRemarks: { type: String, default: '' }
+  },
+  tieBreakNotice: {
+    active: { type: Boolean, default: false },
+    targetJudgeId: { type: String, default: null },
+    targetJudgeName: { type: String, default: null },
+    tiedScore: { type: Number, default: null },
+    adminMessage: { type: String, default: '' },
+    notifiedAt: { type: String, default: null },
+    notifiedBy: { type: String, default: 'Administration' },
+    categoryNumber: { type: Number, default: null }
   }
 }, {
   timestamps: true

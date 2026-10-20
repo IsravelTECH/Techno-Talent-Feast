@@ -9,9 +9,16 @@ import {
   Search,
   Trash2,
   Edit3,
-  AlertTriangle
+  AlertTriangle,
+  Key,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  Sparkles
 } from 'lucide-react';
 import { Judge } from '../types';
+import { generateJudgePassword } from '../utils/judgeCredentials';
 
 export const JudgeAssignmentPage: React.FC = () => {
   const {
@@ -24,12 +31,14 @@ export const JudgeAssignmentPage: React.FC = () => {
   } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
 
   // Create Judge Modal State
   const [isCreateJudgeOpen, setIsCreateJudgeOpen] = useState(false);
   const [newJudgeName, setNewJudgeName] = useState('');
   const [newJudgeEmail, setNewJudgeEmail] = useState('');
-  const [newJudgePassword, setNewJudgePassword] = useState('123456');
+  const [newJudgePassword, setNewJudgePassword] = useState('');
   const [isCreatingJudge, setIsCreatingJudge] = useState(false);
 
   // Edit Judge Modal State
@@ -56,19 +65,33 @@ export const JudgeAssignmentPage: React.FC = () => {
            jId.toLowerCase().includes(q);
   });
 
+  // Copy password handler
+  const handleCopyPassword = (judgeId: string, pass: string) => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(pass);
+      setCopiedId(judgeId);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
+
   // Create Submit
   const handleCreateJudgeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newJudgeName.trim() || !newJudgeEmail.trim()) {
-      addToast('Please enter judge full name and valid email address.', 'error');
       return;
     }
+
+    const predictedId = `JDG-${String(judges.length + 1).padStart(2, '0')}`;
+    const autoPass = generateJudgePassword(predictedId, newJudgeName);
+    const finalPass = newJudgePassword.trim() && newJudgePassword.trim() !== '123456'
+      ? newJudgePassword.trim()
+      : autoPass;
 
     setIsCreatingJudge(true);
     const res = await createJudge({
       name: newJudgeName.trim(),
       email: newJudgeEmail.trim().toLowerCase(),
-      password: newJudgePassword.trim() || '123456'
+      password: finalPass
     });
 
     setIsCreatingJudge(false);
@@ -76,7 +99,7 @@ export const JudgeAssignmentPage: React.FC = () => {
       setIsCreateJudgeOpen(false);
       setNewJudgeName('');
       setNewJudgeEmail('');
-      setNewJudgePassword('123456');
+      setNewJudgePassword('');
     }
   };
 
@@ -194,12 +217,13 @@ export const JudgeAssignmentPage: React.FC = () => {
           </div>
         ) : (
           <div className="overflow-x-auto -mx-1 sm:mx-0">
-            <table className="w-full text-left text-xs min-w-[620px]">
+            <table className="w-full text-left text-xs min-w-[720px]">
               <thead>
                 <tr className="border-b border-slate-100 text-slate-400 uppercase text-[10px] tracking-wider font-bold">
-                  <th className="py-3 px-3">Juror / Judge ID</th>
+                  <th className="py-3 px-3">Username (Judge ID)</th>
                   <th className="py-3 px-3">Full Name</th>
                   <th className="py-3 px-3">Email Address</th>
+                  <th className="py-3 px-3">Login Password</th>
                   <th className="py-3 px-3 text-center">Status</th>
                   <th className="py-3 px-3 text-right">Actions</th>
                 </tr>
@@ -209,13 +233,21 @@ export const JudgeAssignmentPage: React.FC = () => {
                   const jName = judge.name || (judge as any).judgeName || 'Juror';
                   const jId = judge.judgeId || judge.id || 'JDG-00';
                   const isActive = judge.status === 'ACTIVE';
+                  const displayPass = judge.password && judge.password !== '123456'
+                    ? judge.password
+                    : generateJudgePassword(jId, jName);
+                  const isVisible = !!visiblePasswords[judge.id];
+                  const isCopied = copiedId === judge.id;
 
                   return (
                     <tr key={judge.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="py-3 px-3">
-                        <span className="font-mono font-bold text-[#03A695] text-xs bg-[#E6F7F5] px-2 py-1 rounded-md">
-                          {jId}
-                        </span>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-mono font-extrabold text-[#03A695] text-xs bg-[#E6F7F5] border border-teal-200 px-2 py-0.5 rounded-md w-fit">
+                            {jId}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-semibold">Login Username</span>
+                        </div>
                       </td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-2.5">
@@ -225,6 +257,36 @@ export const JudgeAssignmentPage: React.FC = () => {
                       </td>
                       <td className="py-3 px-3">
                         <span className="text-slate-600 font-medium">{judge.email}</span>
+                      </td>
+                      <td className="py-3 px-3">
+                        <div className="inline-flex items-center gap-1.5 bg-[#F8FAFC] border border-slate-200 rounded-lg px-2.5 py-1">
+                          <Key className="w-3.5 h-3.5 text-[#FD5E01] shrink-0" />
+                          <span className="font-mono font-bold text-xs text-[#0B2545] tracking-wide select-all min-w-[95px]">
+                            {isVisible ? displayPass : '••••••••••••'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setVisiblePasswords((prev) => ({ ...prev, [judge.id]: !prev[judge.id] }))
+                            }
+                            className="p-1 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                            title={isVisible ? 'Hide Password' : 'Show Password'}
+                          >
+                            {isVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyPassword(judge.id, displayPass)}
+                            className="p-1 text-slate-400 hover:text-[#03A695] transition-colors cursor-pointer"
+                            title="Copy Password"
+                          >
+                            {isCopied ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
                       </td>
                       <td className="py-3 px-3 text-center">
                         <button
@@ -250,7 +312,7 @@ export const JudgeAssignmentPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(judge)}
-                            className="p-1.5 text-slate-500 hover:text-[#03A695] hover:bg-[#E6F7F5] rounded-lg transition-colors"
+                            className="p-1.5 text-slate-500 hover:text-[#03A695] hover:bg-[#E6F7F5] rounded-lg transition-colors cursor-pointer"
                             title="Edit Judge"
                           >
                             <Edit3 className="w-4 h-4" />
@@ -258,7 +320,7 @@ export const JudgeAssignmentPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenDelete(judge)}
-                            className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                             title="Delete Judge"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -275,11 +337,12 @@ export const JudgeAssignmentPage: React.FC = () => {
       </div>
 
       {/* Create New Judge Modal */}
+      {/* Create New Judge Modal */}
       <Modal
         isOpen={isCreateJudgeOpen}
         onClose={() => setIsCreateJudgeOpen(false)}
         title="Register Official Competition Judge"
-        subtitle="Create a new verified Judge with name, email, and password."
+        subtitle="Create a new verified Judge with Judge ID and formatted credentials."
         maxWidth="md"
       >
         <form onSubmit={handleCreateJudgeSubmit} className="space-y-4">
@@ -288,7 +351,7 @@ export const JudgeAssignmentPage: React.FC = () => {
             <input
               type="text"
               required
-              placeholder="e.g. Dr. Rajesh Khanna"
+              placeholder="e.g. Eng. Marcus Vance"
               value={newJudgeName}
               onChange={(e) => setNewJudgeName(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695]"
@@ -300,7 +363,7 @@ export const JudgeAssignmentPage: React.FC = () => {
             <input
               type="email"
               required
-              placeholder="judge@technoschool.in"
+              placeholder="marcus.vance@technoschool.in"
               value={newJudgeEmail}
               onChange={(e) => setNewJudgeEmail(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695]"
@@ -308,14 +371,35 @@ export const JudgeAssignmentPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1">Password</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-bold text-slate-700 block">Password</label>
+              <span className="text-[10px] text-[#03A695] font-bold bg-[#E6F7F5] px-2 py-0.5 rounded-full border border-teal-200">
+                JDG-XX-firstname Format
+              </span>
+            </div>
             <input
               type="text"
-              placeholder="123456"
+              placeholder={generateJudgePassword(
+                `JDG-${String(judges.length + 1).padStart(2, '0')}`,
+                newJudgeName || 'Eng. Marcus Vance'
+              )}
               value={newJudgePassword}
               onChange={(e) => setNewJudgePassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695]"
+              className="w-full px-3.5 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695]"
             />
+            <p className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#FD5E01] shrink-0" />
+              <span>
+                Auto-assigned credential:{' '}
+                <strong className="text-[#03A695] font-mono">
+                  {generateJudgePassword(
+                    `JDG-${String(judges.length + 1).padStart(2, '0')}`,
+                    newJudgeName || 'Eng. Marcus Vance'
+                  )}
+                </strong>{' '}
+                <span className="text-slate-400">(leave blank to use auto format)</span>
+              </span>
+            </p>
           </div>
 
           <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
@@ -345,7 +429,7 @@ export const JudgeAssignmentPage: React.FC = () => {
         isOpen={isEditJudgeOpen}
         onClose={() => setIsEditJudgeOpen(false)}
         title={`Edit Judge: ${editingJudge?.name || ''}`}
-        subtitle={`Update details for ${editingJudge?.judgeId || 'Judge'}.`}
+        subtitle={`Update details and credentials for ${editingJudge?.judgeId || 'Judge'}.`}
         maxWidth="md"
       >
         <form onSubmit={handleEditJudgeSubmit} className="space-y-4">
@@ -373,14 +457,20 @@ export const JudgeAssignmentPage: React.FC = () => {
 
           <div>
             <label className="text-xs font-bold text-slate-700 block mb-1">
-              New Password <span className="text-slate-400 font-normal">(Leave blank to keep unchanged)</span>
+              Password <span className="text-slate-400 font-normal">(Leave blank to keep unchanged)</span>
             </label>
             <input
               type="text"
-              placeholder="Enter new password if changing..."
+              placeholder={
+                editingJudge
+                  ? (editingJudge.password && editingJudge.password !== '123456'
+                    ? editingJudge.password
+                    : generateJudgePassword(editingJudge.judgeId || editingJudge.id, editingJudge.name))
+                  : 'Enter new password...'
+              }
               value={editJudgePassword}
               onChange={(e) => setEditJudgePassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695]"
+              className="w-full px-3.5 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-mono font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695]"
             />
           </div>
 

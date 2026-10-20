@@ -21,7 +21,8 @@ import {
   Sparkles,
   Layers,
   MapPin,
-  ExternalLink
+  ExternalLink,
+  Scale
 } from 'lucide-react';
 
 function formatRelativeTime(dateStrOrTimestamp?: string): string {
@@ -280,6 +281,23 @@ export const AdminDashboardPage: React.FC = () => {
     return leaderboard.slice(0, 3);
   }, [participants, leaderboard]);
 
+  // Real-time calculation of tied teams count
+  const tiedTeamsCount = useMemo(() => {
+    const map = new Map<string, number>();
+    participants.forEach((p) => {
+      const isSub = p.status === 'SUBMITTED' || p.isScoreLocked;
+      if (isSub && typeof p.finalScore === 'number' && p.finalScore > 0) {
+        const k = `${p.categoryNumber || 1}_${p.finalScore}`;
+        map.set(k, (map.get(k) || 0) + 1);
+      }
+    });
+    let count = 0;
+    map.forEach((cnt) => {
+      if (cnt >= 2) count += cnt;
+    });
+    return count;
+  }, [participants]);
+
   return (
     <div className="space-y-5 sm:space-y-6 animate-fade-in">
       {/* 1. EXECUTIVE LIVE HERO BANNER */}
@@ -299,7 +317,7 @@ export const AdminDashboardPage: React.FC = () => {
               </span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 mt-1 text-xs text-slate-600 flex-wrap">
-              <span className="font-extrabold text-[#03A695] truncate">{selectedEvent?.name || 'Techno Talent Feast 2026'}</span>
+              <span className="font-extrabold text-[#03A695] truncate">{selectedEvent?.name || 'Techno Talent Fest 2026'}</span>
               <span className="text-slate-300">•</span>
               <span className="inline-flex items-center gap-1 text-slate-500 font-medium shrink-0">
                 <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -331,6 +349,37 @@ export const AdminDashboardPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Sleek Tie Alert Pill (Only shown if ties exist) */}
+      {tiedTeamsCount > 0 && (
+        <div className="bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border border-amber-400/80 rounded-2xl p-3.5 sm:p-4 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Scale className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-black uppercase tracking-wider text-amber-950">
+                  Same-Category Tie Alert
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-mono font-black text-[10px]">
+                  {tiedTeamsCount} Finalists Tied
+                </span>
+              </div>
+              <p className="text-xs text-slate-700 mt-0.5">
+                Identical marks detected across competition categories. Administrative action available to review and notify Jurors.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('tie-breaks')}
+            className="px-4 py-2 rounded-xl bg-[#0B2545] hover:bg-[#172B4D] text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs shrink-0 self-stretch sm:self-auto justify-center cursor-pointer active:scale-95"
+          >
+            <span>Review & Resolve Ties ({tiedTeamsCount})</span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#FD5E01]" />
+          </button>
+        </div>
+      )}
 
       {/* 2. BALANCED 4-CARD RESPONSIVE KPI STRIP (2x2 on Mobile, 4x1 on Desktop) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">

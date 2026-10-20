@@ -173,6 +173,29 @@ export interface TeamMember {
   role?: string;
 }
 
+export interface ScoreEditRequest {
+  id: string;
+  status: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
+  requestedByJudgeId?: string;
+  requestedByJudgeName?: string;
+  reason: string;
+  requestedAt: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewRemarks?: string;
+}
+
+export interface TieBreakNotice {
+  active: boolean;
+  targetJudgeId?: string;
+  targetJudgeName?: string;
+  tiedScore?: number;
+  adminMessage?: string;
+  notifiedAt?: string;
+  notifiedBy?: string;
+  categoryNumber?: number;
+}
+
 export interface Participant {
   id: string;
   participantId: string; // e.g. TTF-2026-00421
@@ -221,6 +244,10 @@ export interface Participant {
   evaluatedByJudgeId?: string;
   evaluatedByJudgeName?: string;
   judgeRemarks?: string;
+  isScoreLocked?: boolean;
+  oneTimeEditAllowed?: boolean;
+  scoreEditRequest?: ScoreEditRequest;
+  tieBreakNotice?: TieBreakNotice;
 }
 
 export interface Judge {
@@ -229,6 +256,7 @@ export interface Judge {
   name: string;
   judgeName?: string;
   email: string;
+  password?: string;
   role?: string;
   phone: string;
   avatar: string;
@@ -336,10 +364,11 @@ export interface NotificationItem {
   message: string;
   timestamp: string;
   timeAgo: string;
-  type: 'score' | 'competition' | 'assignment' | 'announcement' | 'system' | 'result';
+  type: 'score' | 'competition' | 'assignment' | 'announcement' | 'system' | 'result' | 'tie-alert';
   isRead: boolean;
   actionLink?: string;
   createdAt?: string;
+  recipientRole?: string;
 }
 
 export interface AuditLogItem {

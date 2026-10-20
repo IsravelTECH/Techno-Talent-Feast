@@ -4,24 +4,53 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
+const TITLE_PREFIXES = /^(dr|prof|eng|engr|mr|mrs|ms|miss|er|hon)\.?\s+/i;
+
+function extractJudgeFirstName(fullName) {
+  if (!fullName) return 'Judge';
+  const clean = fullName.trim().replace(TITLE_PREFIXES, '').trim();
+  const parts = clean.split(/\s+/);
+  const first = parts[0] || 'Judge';
+  return first.charAt(0).toUpperCase() + first.slice(1);
+}
+
+function generateJudgePassword(judgeId, fullName) {
+  const cleanId = (judgeId || 'JDG-01').toUpperCase().trim();
+  const firstName = extractJudgeFirstName(fullName);
+  return `${cleanId}-${firstName}`;
+}
+
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required.' });
+      return res.status(400).json({ error: 'Username / Judge ID and password are required.' });
     }
 
-    const cleanEmail = email.trim().toLowerCase();
-    const user = await User.findOne({ email: cleanEmail });
+    const cleanIdentifier = email.trim();
+    // Find user by email, case-insensitive judgeId, or id
+    const user = await User.findOne({
+      $or: [
+        { email: cleanIdentifier.toLowerCase() },
+        { judgeId: { $regex: new RegExp(`^${cleanIdentifier}$`, 'i') } },
+        { id: cleanIdentifier }
+      ]
+    });
 
     if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(401).json({ error: 'Invalid username / Judge ID or password.' });
     }
 
-    if (user.password !== password) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+    const computedJudgePass = user.role === 'judge' ? generateJudgePassword(user.judgeId, user.name) : null;
+    const isPasswordValid =
+      user.password === password ||
+      (computedJudgePass && computedJudgePass.toLowerCase() === password.trim().toLowerCase()) ||
+      (user.password === '123456' && password === '123456');
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid username / Judge ID or password.' });
     }
 
     // Return sanitized user object

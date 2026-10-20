@@ -1344,7 +1344,7 @@ export const ParticipantDetailPage: React.FC = () => {
                 <p className="font-bold text-slate-900 truncate">{participant.projectTitle || 'Selected Project'}</p>
               </div>
               <p className="text-slate-600 mt-1 leading-relaxed text-[11px]">
-                {participant.projectSummary || 'Autonomous and innovative technical design built for the official Techno Talent Feast 2026 rubric criteria.'}
+                {participant.projectSummary || 'Autonomous and innovative technical design built for the official Techno Talent Fest 2026 rubric criteria.'}
               </p>
             </div>
           </div>

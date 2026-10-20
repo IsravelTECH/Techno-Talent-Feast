@@ -62,7 +62,7 @@ export const UserRolesPage: React.FC = () => {
     role: 'admin',
     roleTitle: 'Chief Convener & Grand Director (Administration)',
     organization: 'TechnoSchool UAE Central Directorate',
-    assignedEvent: selectedEvent?.name || 'Techno Talent Feast 2026 (Grand Finale)',
+    assignedEvent: selectedEvent?.name || 'Techno Talent Fest 2026 (Grand Finale)',
     assignedEventDate: selectedEvent?.date || '4 November 2026',
     assignedVenue: selectedEvent?.venue || 'EIBFS (Academic City, Dubai, UAE)',
     assignedTracks: ['All 6 Categories (24 Projects)', '12 Finalists Quota Verification', 'Rubric Lock & Result Publishing'],
@@ -99,7 +99,7 @@ export const UserRolesPage: React.FC = () => {
           role: 'judge' as const,
           roleTitle: judge.title || `${judge.specialization || 'Technical'} Juror`,
           organization: judge.organization || 'Dubai Tech Jurors Panel',
-          assignedEvent: selectedEvent?.name || 'Techno Talent Feast 2026 (Grand Finale)',
+          assignedEvent: selectedEvent?.name || 'Techno Talent Fest 2026 (Grand Finale)',
           assignedEventDate: selectedEvent?.date || '4 November 2026',
           assignedVenue: selectedEvent?.venue || 'EIBFS (Academic City, Dubai, UAE)',
           assignedTracks: (judge.assignedCategoryNames && judge.assignedCategoryNames.length > 0)

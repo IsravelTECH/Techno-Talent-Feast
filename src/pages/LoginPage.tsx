@@ -79,7 +79,7 @@ export const LoginPage: React.FC = () => {
       {/* Top Banner */}
       <div className="bg-[#0B2545] text-white py-2 px-4 text-center text-xs font-semibold flex items-center justify-center gap-2">
         <span className="w-2 h-2 rounded-full bg-[#FD5E01] animate-pulse" />
-        <span>TECHNO TALENT FEAST 2026 — LIVE COMPETITION MANAGEMENT PLATFORM</span>
+        <span>TECHNO TALENT FEST 2026 — LIVE COMPETITION MANAGEMENT PLATFORM</span>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-3 sm:p-6 lg:p-8">
@@ -105,7 +105,7 @@ export const LoginPage: React.FC = () => {
                   Powered by TechnoSchool
                 </div>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
-                  TECHNO TALENT <span className="text-[#FD5E01]">FEAST</span>
+                  TECHNO TALENT <span className="text-[#FD5E01]">FEST</span>
                 </h1>
                 <p className="text-blue-100 text-xs sm:text-sm mt-2 sm:mt-3 leading-relaxed">
                   Manage competitions, evaluate student talent with dynamic rubrics, and track leaderboard rankings in real time.
@@ -173,16 +173,16 @@ export const LoginPage: React.FC = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Email / Username
+                    Username (Judge ID) or Email
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
-                      type="email"
+                      type="text"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695] transition-all"
-                      placeholder="isravel@gmail.com"
+                      placeholder="e.g. JDG-12, JDG-01 or isravel@gmail.com"
                       required
                     />
                   </div>
@@ -193,7 +193,7 @@ export const LoginPage: React.FC = () => {
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                       Password
                     </label>
-                    <span className="text-[11px] text-slate-400 font-medium">Default: 123456</span>
+                    <span className="text-[10px] text-slate-400 font-medium">Judge format: JDG-XX-firstname</span>
                   </div>
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -202,7 +202,7 @@ export const LoginPage: React.FC = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695] transition-all"
-                      placeholder="••••••"
+                      placeholder="••••••••••••"
                       required
                     />
                   </div>
@@ -272,7 +272,7 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="button"
                   disabled={loading}
-                  onClick={() => handlePersonaClick('judge@gmail.com', '123456')}
+                  onClick={() => handlePersonaClick('JDG-01', 'JDG-01-Priya')}
                   className="p-3 sm:p-3.5 rounded-2xl border-2 border-orange-200 bg-[#FFF3EC]/90 hover:bg-[#FFF3EC] text-left transition-all group cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   <div className="flex items-center gap-2.5">
@@ -283,7 +283,9 @@ export const LoginPage: React.FC = () => {
                       <span className="text-xs font-black text-amber-950 group-hover:text-[#FD5E01] block truncate">
                         JUDGE ROLE
                       </span>
-                      <p className="text-[10px] text-slate-500 font-semibold truncate">judge@gmail.com</p>
+                      <p className="text-[10px] text-slate-500 font-semibold truncate font-mono">
+                        JDG-01 • JDG-01-Priya
+                      </p>
                     </div>
                   </div>
                 </button>
@@ -295,7 +297,7 @@ export const LoginPage: React.FC = () => {
 
       {/* Footer */}
       <div className="py-4 text-center text-xs text-slate-500 border-t border-slate-200/60 bg-white">
-        © 2026 TechnoSchool. All rights reserved. Techno Talent Feast Platform.
+        © 2026 TechnoSchool. All rights reserved. Techno Talent Fest Platform.
       </div>
     </div>
   );

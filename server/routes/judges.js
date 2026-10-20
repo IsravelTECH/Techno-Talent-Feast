@@ -10,10 +10,34 @@ const getJudgeQuery = (id) => {
     : { $or: [{ id }, { judgeId: id }] };
 };
 
+const TITLE_PREFIXES = /^(dr|prof|eng|engr|mr|mrs|ms|miss|er|hon)\.?\s+/i;
+
+function extractJudgeFirstName(fullName) {
+  if (!fullName) return 'Judge';
+  const clean = fullName.trim().replace(TITLE_PREFIXES, '').trim();
+  const parts = clean.split(/\s+/);
+  const first = parts[0] || 'Judge';
+  return first.charAt(0).toUpperCase() + first.slice(1);
+}
+
+function generateJudgePassword(judgeId, fullName) {
+  const cleanId = (judgeId || 'JDG-01').toUpperCase().trim();
+  const firstName = extractJudgeFirstName(fullName);
+  return `${cleanId}-${firstName}`;
+}
+
 // GET /api/judges - list all judges
 router.get('/', async (req, res) => {
   try {
-    const judges = await User.find({ role: 'judge' }).sort({ createdAt: -1 });
+    const rawJudges = await User.find({ role: 'judge' }).sort({ createdAt: -1 });
+    const judges = rawJudges.map((j) => {
+      const obj = j.toObject ? j.toObject() : { ...j };
+      const generatedPass = generateJudgePassword(obj.judgeId, obj.name);
+      if (!obj.password || obj.password === '123456') {
+        obj.password = generatedPass;
+      }
+      return obj;
+    });
     res.json({
       success: true,
       count: judges.length,
@@ -31,7 +55,7 @@ router.post('/', async (req, res) => {
     const {
       name,
       email,
-      password = '123456'
+      password
     } = req.body;
 
     if (!name || !name.trim()) {
@@ -52,13 +76,15 @@ router.post('/', async (req, res) => {
     const count = await User.countDocuments({ role: 'judge' });
     const judgeId = `JDG-${String(count + 1).padStart(2, '0')}`;
     const id = `jdg-${Date.now()}`;
+    const generatedPass = generateJudgePassword(judgeId, name);
+    const finalPassword = password && password.trim() !== '123456' ? password.trim() : generatedPass;
 
     const newJudge = new User({
       id,
       judgeId,
       name: name.trim(),
       email: cleanEmail,
-      password: password.trim() || '123456',
+      password: finalPassword,
       role: 'judge',
       status: 'ACTIVE'
     });

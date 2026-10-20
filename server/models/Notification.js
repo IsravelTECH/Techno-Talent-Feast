@@ -9,7 +9,7 @@ const notificationSchema = new mongoose.Schema(
     timeAgo: { type: String, default: 'Just now' },
     type: {
       type: String,
-      enum: ['score', 'competition', 'assignment', 'announcement', 'system', 'result'],
+      enum: ['score', 'competition', 'assignment', 'announcement', 'system', 'result', 'tie-alert', 'tie_alert'],
       default: 'system'
     },
     isRead: { type: Boolean, default: false },

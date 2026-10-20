@@ -18,7 +18,8 @@ import {
   ShieldCheck,
   KeyRound,
   FileCheck2,
-  Award
+  Award,
+  Scale
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -40,13 +41,69 @@ interface NavItem {
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { currentUser, currentPage, currentRole, navigate, logout, notifications, assignments, participants } = useApp();
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const userNotifications = React.useMemo(() => {
+    return notifications.filter((n) => {
+      const role = (n.recipientRole || 'ALL').trim().toLowerCase();
+      if (role === 'all') return true;
+      if (currentRole === 'admin') return role === 'admin';
+      if (currentRole === 'judge') {
+        if (role === 'judge') return true;
+        const currentJudgeId = (currentUser?.judgeId || '').trim().toLowerCase();
+        const currentUserId = (currentUser?.id || '').trim().toLowerCase();
+        if (role === currentJudgeId || role === currentUserId) return true;
+        const digitsRole = role.replace(/\D/g, '');
+        const digitsJudge = currentJudgeId.replace(/\D/g, '');
+        if (digitsRole && digitsJudge && parseInt(digitsRole, 10) === parseInt(digitsJudge, 10)) {
+          return true;
+        }
+        return false;
+      }
+      return true;
+    });
+  }, [notifications, currentRole, currentUser]);
+
+  const unreadCount = userNotifications.filter((n) => !n.isRead).length;
   const pendingJudgeCount = assignments.filter((a) => a.status === 'ASSIGNED' || a.status === 'IN_PROGRESS').length;
 
-  // STRICT ADMINISTRATION NAVIGATION (9 Items - Clean without counts)
+  const pendingRequestsCount = participants.filter(
+    (p) => p.scoreEditRequest && p.scoreEditRequest.status === 'PENDING'
+  ).length;
+
+  // Real-time calculation of tied teams count
+  const tiedTeamsCount = React.useMemo(() => {
+    const map = new Map<string, number>();
+    participants.forEach((p) => {
+      const isSub = p.status === 'SUBMITTED' || p.isScoreLocked;
+      if (isSub && typeof p.finalScore === 'number' && p.finalScore > 0) {
+        const k = `${p.categoryNumber || 1}_${p.finalScore}`;
+        map.set(k, (map.get(k) || 0) + 1);
+      }
+    });
+    let count = 0;
+    map.forEach((cnt) => {
+      if (cnt >= 2) count += cnt;
+    });
+    return count;
+  }, [participants]);
+
+  // STRICT ADMINISTRATION NAVIGATION (Clean without counts)
   const adminNavItems: NavItem[] = [
     { id: 'dashboard', label: 'Admin Dashboard', icon: LayoutDashboard, badge: 'LIVE' },
-    { id: 'assignments', label: 'Judge Roaster', icon: ClipboardList, highlight: true },
+    {
+      id: 'score-requests',
+      label: 'Score Edit Requests',
+      icon: FileCheck2,
+      badge: pendingRequestsCount > 0 ? `${pendingRequestsCount} NEW` : undefined,
+      highlight: pendingRequestsCount > 0
+    },
+    {
+      id: 'tie-breaks',
+      label: 'Tie-Break Alerts',
+      icon: Scale,
+      badge: tiedTeamsCount > 0 ? `${tiedTeamsCount} TIED` : undefined,
+      highlight: tiedTeamsCount > 0
+    },
+    { id: 'assignments', label: 'Judge Roaster', icon: ClipboardList, highlight: false },
     { id: 'schools', label: 'Schools', icon: Building2 },
     { id: 'participants', label: 'Participants', icon: Users },
     { id: 'categories', label: 'Categories', icon: Trophy },

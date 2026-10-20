@@ -10,6 +10,7 @@
     "seed": "node server/seed.js",
     "start": "node server/server.js",
     "build": "node ./node_modules/vite/bin/vite.js build",
+    "test": "node --experimental-strip-types tests/full-flow.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -9,6 +9,17 @@
   }
 }
 
+/* Disable spin buttons & wheel auto-scroll on numeric input boxes */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* Custom Scrollbars */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;

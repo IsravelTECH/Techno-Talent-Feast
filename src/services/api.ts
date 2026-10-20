@@ -1,5 +1,5 @@
 /**
- * Techno Talent Feast 2026 - Central API Client
+ * Techno Talent Fest 2026 - Central API Client
  * Connects frontend to Express + MongoDB Atlas backend
  */
 
@@ -265,6 +265,33 @@ class ApiService {
   async deleteNotification(id: string) {
     return this.request<{ success: boolean; message: string }>(`/notifications/${encodeURIComponent(id)}`, {
       method: 'DELETE'
+    });
+  }
+
+  // Score Edit Requests API
+  async requestScoreEdit(payload: { teamId: string; judgeId?: string; judgeName?: string; reason: string }) {
+    return this.request<{ success: boolean; message: string; team: any; notification?: any }>('/evaluations/request-edit', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async getScoreEditRequests() {
+    return this.request<{ success: boolean; count: number; requests: any[] }>('/evaluations/requests');
+  }
+
+  async respondToScoreEditRequest(teamId: string, payload: { action: 'APPROVE' | 'REJECT'; remarks?: string; adminName?: string }) {
+    return this.request<{ success: boolean; message: string; team: any }>(`/evaluations/requests/${encodeURIComponent(teamId)}/respond`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  // Tie-Break Alerts API
+  async sendTieBreakAlert(payload: { teamId: string; judgeId?: string; judgeName?: string; message?: string; adminName?: string }) {
+    return this.request<{ success: boolean; message: string; team: any; notification?: any }>('/evaluations/send-tie-alert', {
+      method: 'POST',
+      body: JSON.stringify(payload)
     });
   }
 }

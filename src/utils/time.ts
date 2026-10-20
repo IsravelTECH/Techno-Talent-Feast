@@ -1,5 +1,5 @@
 /**
- * Compact relative time formatter for Techno Talent Feast 2026.
+ * Compact relative time formatter for Techno Talent Fest 2026.
  * Format examples requested:
  * - < 60s: '1sec', '15sec'
  * - < 60m: '1min', '10 min', '45 min'

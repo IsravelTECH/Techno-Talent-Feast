@@ -273,7 +273,7 @@ export const EventOverviewPage: React.FC = () => {
         isOpen={isTransitionModalOpen}
         onClose={() => setIsTransitionModalOpen(false)}
         title="Transition Competition Stage"
-        subtitle="Update the active operational phase for Techno Talent Feast 2026"
+        subtitle="Update the active operational phase for Techno Talent Fest 2026"
         footer={
           <div className="flex items-center justify-end gap-3">
             <Button variant="secondary" onClick={() => setIsTransitionModalOpen(false)}>

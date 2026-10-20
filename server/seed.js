@@ -15,6 +15,22 @@ try {
   console.warn('DNS server override warning:', e.message);
 }
 
+const TITLE_PREFIXES = /^(dr|prof|eng|engr|mr|mrs|ms|miss|er|hon)\.?\s+/i;
+
+function extractJudgeFirstName(fullName) {
+  if (!fullName) return 'Judge';
+  const clean = fullName.trim().replace(TITLE_PREFIXES, '').trim();
+  const parts = clean.split(/\s+/);
+  const first = parts[0] || 'Judge';
+  return first.charAt(0).toUpperCase() + first.slice(1);
+}
+
+function generateJudgePassword(judgeId, fullName) {
+  const cleanId = (judgeId || 'JDG-01').toUpperCase().trim();
+  const firstName = extractJudgeFirstName(fullName);
+  return `${cleanId}-${firstName}`;
+}
+
 const seedDatabase = async () => {
   try {
     await connectDB();
@@ -47,7 +63,7 @@ const seedDatabase = async () => {
         judgeId: 'JDG-01',
         name: 'Official Competition Judge',
         email: 'judge@gmail.com',
-        password: '123456',
+        password: 'JDG-01-Official',
         role: 'judge',
         title: 'Senior ICT & Robotics Juror',
         organization: 'TechnoSchool Judging Panel',
@@ -73,12 +89,14 @@ const seedDatabase = async () => {
       mockData.MOCK_JUDGES.forEach((j, index) => {
         // avoid duplicate email if already in usersToInsert
         if (j.email !== 'judge@gmail.com' && j.email !== 'isravel@gmail.com') {
+          const jId = j.judgeId || `JDG-0${index + 2}`;
+          const jPass = j.password && j.password !== '123456' ? j.password : generateJudgePassword(jId, j.name);
           usersToInsert.push({
             id: j.id || `usr-judge-mock-${index + 2}`,
-            judgeId: j.judgeId || `JDG-0${index + 2}`,
+            judgeId: jId,
             name: j.name,
             email: j.email,
-            password: '123456',
+            password: jPass,
             role: 'judge',
             title: j.title || 'Official Juror',
             organization: j.organization || 'TechnoSchool Jurors Panel',

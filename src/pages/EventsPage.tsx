@@ -49,7 +49,7 @@ export const EventsPage: React.FC = () => {
     },
     {
       id: 'ttf-2025',
-      name: 'Techno Talent Feast 2025 (Archive)',
+      name: 'Techno Talent Fest 2025 (Archive)',
       edition: '6th Edition',
       theme: 'NextGen Innovators',
       date: '15 October 2025',
@@ -60,7 +60,7 @@ export const EventsPage: React.FC = () => {
       totalSchools: 36,
       totalJudges: 24,
       totalCompetitions: 10,
-      description: 'Historical archive of the 6th edition of Techno Talent Feast.',
+      description: 'Historical archive of the 6th edition of Techno Talent Fest.',
       bannerImage: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80',
       scoringProgress: 100
     }
@@ -72,7 +72,7 @@ export const EventsPage: React.FC = () => {
     addToast({
       type: 'success',
       title: 'Event Created Successfully',
-      message: 'New Techno Talent Feast event draft created in system.'
+      message: 'New Techno Talent Fest event draft created in system.'
     });
   };
 
@@ -318,7 +318,7 @@ export const EventsPage: React.FC = () => {
       <Modal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        title="Create Techno Talent Feast Event"
+        title="Create Techno Talent Fest Event"
         subtitle="Initialize new inter-school championship portal"
         maxWidth="lg"
       >
@@ -329,7 +329,7 @@ export const EventsPage: React.FC = () => {
             </label>
             <input
               type="text"
-              defaultValue="Techno Talent Feast 2027"
+              defaultValue="Techno Talent Fest 2027"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
               required
             />

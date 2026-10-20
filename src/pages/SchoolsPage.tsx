@@ -31,6 +31,7 @@ import {
   calculateCategorySchoolStandings,
   calculateOverallSchoolStandings
 } from '../utils/trophyCalculator';
+import { getNormalizedTeamMembers } from '../utils/studentUtils';
 
 export const SchoolsPage: React.FC = () => {
   const { schools, participants, competitions, navigate, createSchool, addToast } = useApp();
@@ -253,6 +254,7 @@ export const SchoolsPage: React.FC = () => {
       const matchesCategory =
         modalCategoryFilter === 'ALL' || team.categoryNumber === modalCategoryFilter;
       const q = modalSearch.toLowerCase().trim();
+      const members = getNormalizedTeamMembers(team);
       const matchesSearch =
         !q ||
         team.name.toLowerCase().includes(q) ||
@@ -261,7 +263,7 @@ export const SchoolsPage: React.FC = () => {
         (team.participantId && team.participantId.toLowerCase().includes(q)) ||
         (team.projectTitle && team.projectTitle.toLowerCase().includes(q)) ||
         (team.grade && `grade ${team.grade}`.includes(q)) ||
-        (team.teamMembers && team.teamMembers.some((m) => (typeof m === 'string' ? m : m.name).toLowerCase().includes(q)));
+        members.some((m) => m.name.toLowerCase().includes(q) || (m.grade && `grade ${m.grade}`.includes(q)));
       return matchesCategory && matchesSearch;
     });
   }, [selectedSchool, modalSearch, modalCategoryFilter]);
@@ -869,7 +871,7 @@ export const SchoolsPage: React.FC = () => {
           onClose={() => setSelectedSchoolId(null)}
           title={selectedSchool.name}
           subtitle={`School Code: ${selectedSchool.code} • ${selectedSchool.city}, ${selectedSchool.state || 'UAE'} • Enrolled Student Grades Roster`}
-          maxWidth="4xl"
+          maxWidth="5xl"
         >
           <div className="space-y-6 text-xs animate-fade-in">
             {/* Trophies & Awards Banner in Modal */}
@@ -1042,28 +1044,28 @@ export const SchoolsPage: React.FC = () => {
               </div>
 
               {/* VIEW MODE 1: DESKTOP & TABLET TABLE (hidden on mobile < 640px) */}
-              <div className="hidden sm:block rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-                <div className="overflow-x-auto max-h-[380px]">
-                  <table className="w-full text-left text-xs min-w-[580px]">
-                    <thead className="bg-slate-50/90 sticky top-0 z-10 border-b border-slate-200 text-slate-600 font-bold">
+              <div className="hidden sm:block rounded-2xl border border-slate-200 overflow-hidden shadow-xs bg-white">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs min-w-[700px]">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase text-[10px] tracking-wider">
                       <tr>
-                        <th className="p-3">Team & Project</th>
-                        <th className="p-3">Student Delegation & Assigned Grade</th>
-                        <th className="p-3 text-center">Headcount</th>
-                        <th className="p-3">Competition Arena</th>
-                        <th className="p-3 text-right">Evaluation Status</th>
+                        <th className="py-3 px-4 min-w-[210px]">Team & Project</th>
+                        <th className="py-3 px-4 min-w-[170px]">Competition Arena</th>
+                        <th className="py-3 px-4 min-w-[220px]">Student(s) Roster</th>
+                        <th className="py-3 px-4 text-center min-w-[90px]">Grade</th>
+                        <th className="py-3 px-4 text-right min-w-[130px]">Status & Score</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-medium">
                       {modalFilteredTeams.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="py-8 text-center text-slate-400">
+                          <td colSpan={5} className="py-10 text-center text-slate-400">
                             No teams or students match the filter criteria.
                           </td>
                         </tr>
                       ) : (
                         modalFilteredTeams.map((team) => {
-                          const studentHeadcount = getTeamStudentsCount(team);
+                          const members = getNormalizedTeamMembers(team);
                           const isEvaluated =
                             (team.finalScore && team.finalScore > 0) ||
                             team.status === 'SUBMITTED' ||
@@ -1071,82 +1073,98 @@ export const SchoolsPage: React.FC = () => {
                             team.status === 'COMPLETED';
 
                           return (
-                            <tr key={team.id} className="hover:bg-slate-50/80 transition-colors">
-                              {/* Team & Project */}
-                              <td className="p-3">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-mono text-[10px] font-black bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
-                                    {team.teamId || team.participantId}
-                                  </span>
-                                  <span className="font-bold text-slate-900 truncate max-w-[180px]">
-                                    {team.projectTitle || team.selectedProjectTitle || 'Championship Project'}
-                                  </span>
-                                </div>
-                                <span className="text-[10px] text-slate-400 block mt-0.5 truncate max-w-[200px]">
+                            <tr key={team.id || team.teamId} className="hover:bg-slate-50/80 transition-colors">
+                              {/* 1. Team & Project */}
+                              <td className="py-3.5 px-4 align-top">
+                                <span className="font-mono font-black text-xs text-[#03A695] bg-[#E6F7F5] px-2 py-0.5 rounded-md border border-teal-200/80 inline-block">
+                                  {team.teamId || team.participantId}
+                                </span>
+                                <h5 className="font-bold text-slate-900 text-xs mt-1 leading-snug">
+                                  {team.projectTitle || team.selectedProjectTitle || 'Championship Project'}
+                                </h5>
+                                <p className="text-[11px] text-slate-400 mt-0.5 font-medium">
                                   {team.teamName || `${team.name} & Delegation`}
+                                </p>
+                              </td>
+
+                              {/* 2. Competition Arena */}
+                              <td className="py-3.5 px-4 align-top">
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-[#03A695] shrink-0" />
+                                  <span className="font-black text-xs text-slate-800 shrink-0">
+                                    Cat {team.categoryNumber || 1}
+                                  </span>
+                                  <span className="text-[11px] font-medium text-slate-500 truncate max-w-[130px]">
+                                    {team.categoryName || team.competitionName}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] font-mono text-slate-400 block mt-1">
+                                  P{team.categoryNumber || 1}-0{team.projectNumber || 1}
                                 </span>
                               </td>
 
-                              {/* Student Composition: Team Lead + Members with Grade Badges */}
-                              <td className="p-3">
-                                <div>
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="font-black text-slate-900">
-                                      {team.name}
+                              {/* 3. Student(s) Roster - ONLY Student Names */}
+                              <td className="py-3.5 px-4 align-top">
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center justify-between gap-1 mb-1">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                      <Users className="w-3 h-3 text-slate-400" />
+                                      <span>{members.length} {members.length === 1 ? 'Student' : 'Students'}</span>
                                     </span>
-                                    <span className="px-2 py-0.5 rounded-md bg-teal-50 text-[#03A695] text-[10px] font-black border border-teal-200">
-                                      Grade {team.grade}
-                                    </span>
-                                    <span className="text-[10px] text-slate-400 font-bold">(Team Lead)</span>
                                   </div>
-
-                                  {/* Team Members List */}
-                                  {team.teamMembers && team.teamMembers.length > 0 && (
-                                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                                      <span className="text-[10px] text-slate-400 font-semibold">Members:</span>
-                                      {team.teamMembers.map((m, idx) => (
-                                        <span
-                                          key={idx}
-                                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-medium"
-                                        >
-                                          {typeof m === 'string' ? m : m.name}
-                                          <span className="text-slate-400 font-semibold">
-                                            (Gr {typeof m === 'object' && m.grade ? m.grade : team.grade})
-                                          </span>
+                                  <div className="space-y-1">
+                                    {members.map((m, idx) => (
+                                      <div key={idx} className="flex items-center gap-1.5 text-xs">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#03A695] shrink-0" />
+                                        <span className="font-bold text-slate-800 leading-snug">
+                                          {m.name}
                                         </span>
-                                      ))}
-                                    </div>
-                                  )}
+                                        {m.grade && m.grade !== team.grade && (
+                                          <span className="text-[9px] font-mono font-medium text-slate-400">
+                                            (Gr {m.grade})
+                                          </span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               </td>
 
-                              {/* Student Headcount */}
-                              <td className="p-3 text-center">
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-black text-[11px] bg-slate-100 text-slate-800">
-                                  <Users className="w-3 h-3 text-slate-500" />
-                                  {studentHeadcount} {studentHeadcount === 1 ? 'Student' : 'Students'}
+                              {/* 4. Grade */}
+                              <td className="py-3.5 px-4 align-top text-center">
+                                <span className="px-2 py-0.5 rounded-md bg-teal-50 text-[#03A695] text-xs font-black border border-teal-200 inline-block">
+                                  Grade {team.grade || members[0]?.grade || '11'}
                                 </span>
                               </td>
 
-                              {/* Competition Arena */}
-                              <td className="p-3">
-                                <span className="inline-block px-2 py-0.5 rounded-md font-bold text-[10px] bg-[#E6F7F5] text-[#03A695] border border-teal-100 truncate max-w-[150px]">
-                                  #{team.categoryNumber} {team.categoryName || team.competitionName}
-                                </span>
-                              </td>
-
-                              {/* Evaluation Status */}
-                              <td className="p-3 text-right">
+                              {/* 5. Evaluation Status & Score */}
+                              <td className="py-3.5 px-4 align-top text-right whitespace-nowrap">
                                 {isEvaluated ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                    Scored ({team.finalScore || team.percentage}%)
-                                  </span>
+                                  <div className="inline-flex flex-col items-end">
+                                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200/90 shadow-2xs">
+                                      <span className="font-mono font-black text-sm text-[#0B2545]">
+                                        {team.finalScore ?? team.percentage ?? 0}
+                                      </span>
+                                      <span className="font-mono text-xs font-semibold text-slate-400">
+                                        / 100
+                                      </span>
+                                      <span className="text-[9px] font-black uppercase tracking-wider text-[#03A695] bg-[#E6F7F5] px-1 py-0.5 rounded border border-teal-200">
+                                        PTS
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 mt-1">
+                                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                      <span>Evaluated</span>
+                                    </span>
+                                  </div>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                                    <Clock className="w-3 h-3 text-amber-600" />
-                                    Pending
-                                  </span>
+                                  <div className="inline-flex flex-col items-end">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">
+                                      <Clock className="w-3 h-3 text-amber-600" />
+                                      <span>Pending</span>
+                                    </span>
+                                    <span className="text-[10px] text-slate-400 mt-1 font-medium">In Queue</span>
+                                  </div>
                                 )}
                               </td>
                             </tr>
@@ -1159,14 +1177,14 @@ export const SchoolsPage: React.FC = () => {
               </div>
 
               {/* VIEW MODE 2: MOBILE STACKED CARDS (visible on mobile < 640px) */}
-              <div className="block sm:hidden space-y-3 max-h-[380px] overflow-y-auto">
+              <div className="block sm:hidden space-y-3">
                 {modalFilteredTeams.length === 0 ? (
-                  <div className="p-6 text-center text-slate-400 border border-slate-200 rounded-2xl">
+                  <div className="p-6 text-center text-slate-400 border border-slate-200 rounded-2xl bg-slate-50">
                     No teams or students match the filter criteria.
                   </div>
                 ) : (
                   modalFilteredTeams.map((team) => {
-                    const studentHeadcount = getTeamStudentsCount(team);
+                    const members = getNormalizedTeamMembers(team);
                     const isEvaluated =
                       (team.finalScore && team.finalScore > 0) ||
                       team.status === 'SUBMITTED' ||
@@ -1175,70 +1193,62 @@ export const SchoolsPage: React.FC = () => {
 
                     return (
                       <div
-                        key={team.id}
-                        className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2.5"
+                        key={team.id || team.teamId}
+                        className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3"
                       >
-                        {/* Team & Status Header */}
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-mono text-[10px] font-black bg-white text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
-                                {team.teamId || team.participantId}
-                              </span>
-                              <span className="font-bold text-slate-900 text-xs">
-                                {team.projectTitle || team.selectedProjectTitle || 'Championship Project'}
-                              </span>
-                            </div>
-                            <span className="text-[10px] text-slate-400 block mt-0.5">
-                              {team.teamName || `${team.name} & Delegation`}
-                            </span>
-                          </div>
-
+                        {/* Header: ID & Score */}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono font-black text-xs text-[#03A695] bg-[#E6F7F5] px-2 py-0.5 rounded-md border border-teal-200/80">
+                            {team.teamId || team.participantId}
+                          </span>
                           {isEvaluated ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
-                              {team.finalScore || team.percentage}%
-                            </span>
+                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+                              <span className="font-mono font-black text-slate-900">{team.finalScore ?? team.percentage ?? 0}</span>
+                              <span className="text-[10px] text-slate-400 font-semibold">/ 100</span>
+                              <span className="text-[8px] font-black uppercase text-[#03A695] bg-[#E6F7F5] px-1 py-0.2 rounded">PTS</span>
+                            </div>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">
                               Pending
                             </span>
                           )}
                         </div>
 
-                        {/* Category & Headcount */}
-                        <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200/60">
-                          <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-[#E6F7F5] text-[#03A695] border border-teal-100 truncate max-w-[180px]">
-                            #{team.categoryNumber} {team.categoryName || team.competitionName}
-                          </span>
-                          <span className="font-black text-slate-700 flex items-center gap-1 text-[10px]">
-                            <Users className="w-3 h-3 text-slate-400" />
-                            {studentHeadcount} Students
-                          </span>
-                        </div>
-
-                        {/* Students Composition with Grade Badges */}
-                        <div className="pt-1.5 border-t border-slate-200/60 space-y-1">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] text-slate-400 font-bold uppercase">Lead:</span>
-                            <span className="font-black text-slate-900">{team.name}</span>
-                            <span className="px-1.5 py-0.2 rounded bg-teal-50 text-[#03A695] font-black text-[10px] border border-teal-200">
-                              Grade {team.grade}
+                        {/* Project Title & Arena */}
+                        <div>
+                          <h5 className="font-bold text-slate-900 text-xs leading-snug">
+                            {team.projectTitle || team.selectedProjectTitle || 'Championship Project'}
+                          </h5>
+                          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
+                              Cat {team.categoryNumber || 1} • {team.categoryName || team.competitionName}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded bg-teal-50 text-[#03A695] text-[10px] font-black border border-teal-200">
+                              Grade {team.grade || members[0]?.grade || '11'}
                             </span>
                           </div>
+                        </div>
 
-                          {team.teamMembers && team.teamMembers.length > 0 && (
-                            <div className="flex items-center gap-1 flex-wrap pt-0.5">
-                              <span className="text-[10px] text-slate-400 font-bold uppercase">Members:</span>
-                              {team.teamMembers.map((m, idx) => (
-                                <span
-                                  key={idx}
-                                  className="px-1.5 py-0.5 rounded bg-white text-slate-700 text-[10px] border border-slate-200"
-                                >
-                                  {typeof m === 'string' ? m : m.name} (Gr {typeof m === 'object' && m.grade ? m.grade : team.grade})
+                        {/* Students Roster (Only Student Names) */}
+                        <div className="p-3 bg-[#F7FCFB] rounded-xl border border-slate-200/80 text-xs space-y-1.5">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                            Student Roster ({members.length})
+                          </span>
+                          <div className="space-y-1">
+                            {members.map((m, idx) => (
+                              <div key={idx} className="flex items-center gap-1.5 text-xs">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#03A695] shrink-0" />
+                                <span className="font-bold text-slate-800">
+                                  {m.name}
                                 </span>
-                              ))}
-                            </div>
-                          )}
+                                {m.grade && m.grade !== team.grade && (
+                                  <span className="text-[10px] font-mono text-slate-400">
+                                    (Gr {m.grade})
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     );
@@ -1279,7 +1289,7 @@ export const SchoolsPage: React.FC = () => {
         isOpen={isAddSchoolOpen}
         onClose={() => setIsAddSchoolOpen(false)}
         title="Enroll Educational Institution"
-        subtitle="Register a new school for Techno Talent Feast 2026 Dubai Grand Finale"
+        subtitle="Register a new school for Techno Talent Fest 2026 Dubai Grand Finale"
       >
         <form onSubmit={handleAddSchoolSubmit} className="space-y-4 text-xs">
           <div>

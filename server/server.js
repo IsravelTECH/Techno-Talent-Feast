@@ -34,7 +34,7 @@ app.use('/api/notifications', notificationRoutes);
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    message: 'Techno Talent Feast 2026 API Server is running',
+    message: 'Techno Talent Fest 2026 API Server is running',
     timestamp: new Date().toISOString()
   });
 });

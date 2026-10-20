@@ -48,12 +48,12 @@ export const TechnoLogo: React.FC<TechnoLogoProps> = ({
         </div>
       )}
 
-      {/* Talent Feast Product Badge */}
+      {/* Talent Fest Product Badge */}
       {variant === 'badge' && (
         <div className="hidden sm:flex items-center gap-1.5 pl-3 border-l-2 border-[#03A695]/30">
           <div className="px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] border border-[#03A695]/30 text-[10px] font-black tracking-wider uppercase flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-[#FD5E01]" />
-            <span>TALENT FEAST 2026</span>
+            <span>TALENT FEST 2026</span>
           </div>
         </div>
       )}
