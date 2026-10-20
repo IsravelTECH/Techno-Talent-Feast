@@ -339,6 +339,7 @@ export interface NotificationItem {
   type: 'score' | 'competition' | 'assignment' | 'announcement' | 'system' | 'result';
   isRead: boolean;
   actionLink?: string;
+  createdAt?: string;
 }
 
 export interface AuditLogItem {

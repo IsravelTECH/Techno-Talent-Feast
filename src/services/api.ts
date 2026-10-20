@@ -126,6 +126,26 @@ class ApiService {
     });
   }
 
+  async createTeam(payload: any) {
+    return this.request<{ success: boolean; team: any }>('/teams', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async updateTeam(id: string, payload: any) {
+    return this.request<{ success: boolean; team: any }>(`/teams/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async deleteTeam(id: string) {
+    return this.request<{ success: boolean; message: string }>(`/teams/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+  }
+
   // Judges (Admin feature)
   async getJudges() {
     return this.request<{ success: boolean; count: number; judges: any[] }>('/judges');
@@ -156,8 +176,48 @@ class ApiService {
     return this.request<{ success: boolean; count: number; schools: any[] }>('/schools');
   }
 
+  async createSchool(payload: any) {
+    return this.request<{ success: boolean; school: any }>('/schools', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async updateSchool(id: string, payload: any) {
+    return this.request<{ success: boolean; school: any }>(`/schools/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async deleteSchool(id: string) {
+    return this.request<{ success: boolean; message: string }>(`/schools/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+  }
+
   async getCategories() {
     return this.request<{ success: boolean; count: number; categories: any[] }>('/categories');
+  }
+
+  async createCategory(payload: any) {
+    return this.request<{ success: boolean; category: any }>('/categories', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async updateCategory(id: string, payload: any) {
+    return this.request<{ success: boolean; category: any }>(`/categories/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async deleteCategory(id: string) {
+    return this.request<{ success: boolean; message: string }>(`/categories/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
   }
 
   // Dashboard Stats & Activities
@@ -176,6 +236,36 @@ class ApiService {
       topTeams: any[];
       recentActivities: any[];
     }>('/dashboard/stats');
+  }
+
+  // Notifications API
+  async getNotifications() {
+    return this.request<{ success: boolean; count: number; notifications: any[] }>('/notifications');
+  }
+
+  async markNotificationRead(id: string) {
+    return this.request<{ success: boolean; message: string; notification: any }>(`/notifications/${encodeURIComponent(id)}/read`, {
+      method: 'PATCH'
+    });
+  }
+
+  async markAllNotificationsRead() {
+    return this.request<{ success: boolean; message: string; updatedCount: number }>('/notifications/mark-all-read', {
+      method: 'PATCH'
+    });
+  }
+
+  async createNotification(payload: { title: string; message: string; type?: string; actionLink?: string; recipientRole?: string }) {
+    return this.request<{ success: boolean; message: string; notification: any }>('/notifications', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async deleteNotification(id: string) {
+    return this.request<{ success: boolean; message: string }>(`/notifications/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
   }
 }
 

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
+import { formatRelativeTime } from '../utils/time';
 import {
   Bell,
   CheckCircle2,
@@ -15,6 +16,13 @@ import {
 export const NotificationsPage: React.FC = () => {
   const { notifications, markNotificationAsRead, markAllNotificationsRead, navigate } = useApp();
   const [filterType, setFilterType] = useState('ALL');
+  const [, setTick] = useState(0);
+
+  // Refresh relative timestamps every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => setTick((t) => t + 1), 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const filteredNotifications = notifications.filter((n) => {
     if (filterType === 'ALL') return true;
@@ -111,9 +119,9 @@ export const NotificationsPage: React.FC = () => {
                   <h4 className="text-xs font-bold text-slate-900">
                     {notif.title}
                   </h4>
-                  <span className="text-[11px] text-slate-400 flex items-center gap-1 shrink-0">
+                  <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1 shrink-0">
                     <Clock className="w-3 h-3" />
-                    {notif.timestamp}
+                    {formatRelativeTime(notif.createdAt || notif.timestamp)}
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 mt-1 leading-relaxed">

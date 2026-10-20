@@ -147,6 +147,12 @@ interface AppContextType {
   updateJudge: (id: string, updates: any) => Promise<{ success: boolean; message?: string; error?: string }>;
   deleteJudge: (id: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   toggleJudgeStatus: (id: string, currentStatus: string) => Promise<{ success: boolean; message?: string; error?: string }>;
+  createSchool: (schoolData: any) => Promise<{ success: boolean; message?: string; error?: string }>;
+  updateSchool: (id: string, updates: any) => Promise<{ success: boolean; message?: string; error?: string }>;
+  deleteSchool: (id: string) => Promise<{ success: boolean; message?: string; error?: string }>;
+  createCategory: (categoryData: any) => Promise<{ success: boolean; message?: string; error?: string }>;
+  updateCategory: (id: string, updates: any) => Promise<{ success: boolean; message?: string; error?: string }>;
+  deleteCategory: (id: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   updateUserProfile: (updates: { name?: string; email?: string; phone?: string; role?: UserRole }) => Promise<{ success: boolean; error?: string }>;
   changeUserPassword: (passwords: { currentPassword?: string; newPassword: string }) => Promise<{ success: boolean; error?: string }>;
   refreshData: (options?: { silent?: boolean }) => Promise<void>;
@@ -157,10 +163,42 @@ interface AppContextType {
   removeToast: (id: string) => void;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsRead: () => void;
+  addNotification: (params: {
+    title: string;
+    message: string;
+    type?: NotificationItem['type'];
+    actionLink?: string;
+    recipientRole?: string;
+  }) => void;
   triggerManagerScenario: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export function deduplicateNotifications(list: NotificationItem[]): NotificationItem[] {
+  const seenKeys = new Set<string>();
+  const seenIds = new Set<string>();
+  const result: NotificationItem[] = [];
+
+  for (const item of list) {
+    if (!item) continue;
+    const itemId = item.id || (item as any)._id;
+    if (itemId && seenIds.has(itemId)) continue;
+
+    // Detect team identifier in message (e.g. TTF26-TEAM-001 or TTF26-PART-001)
+    const teamMatch = (item.message || '').match(/TTF26-(?:TEAM|PART)-\d+/i);
+    const semKey = teamMatch
+      ? `${item.type || 'system'}|${(item.title || '').trim().toLowerCase()}|${teamMatch[0].toUpperCase()}`
+      : `${item.type || 'system'}|${(item.title || '').trim().toLowerCase()}|${(item.message || '').replace(/\s+/g, ' ').trim().toLowerCase()}`;
+
+    if (seenKeys.has(semKey)) continue;
+
+    if (itemId) seenIds.add(itemId);
+    seenKeys.add(semKey);
+    result.push(item);
+  }
+  return result;
+}
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Valid pages recognized by TTF router
@@ -264,7 +302,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {}
     return INITIAL_SCORING_ACTIVITIES;
   });
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('ttf_2026_notifications');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed.every((n) => n && typeof n === 'object')) {
+          return deduplicateNotifications(parsed);
+        }
+      }
+    } catch (e) {}
+    return INITIAL_NOTIFICATIONS;
+  });
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(INITIAL_ANNOUNCEMENTS);
   const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>(MOCK_AUDIT_LOGS);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -307,12 +356,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsLoadingData(true);
     }
     try {
-      const [teamsRes, schoolsRes, catRes, judgesRes, statsRes] = await Promise.allSettled([
+      const [teamsRes, schoolsRes, catRes, judgesRes, statsRes, notifsRes] = await Promise.allSettled([
         api.getTeams(),
         api.getSchools(),
         api.getCategories(),
         api.getJudges(),
-        api.getDashboardStats()
+        api.getDashboardStats(),
+        api.getNotifications()
       ]);
 
       if (teamsRes.status === 'fulfilled' && teamsRes.value.teams?.length > 0) {
@@ -332,6 +382,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (statsRes.value.recentActivities?.length > 0) {
           setScoringActivities(statsRes.value.recentActivities);
         }
+      }
+      if (notifsRes.status === 'fulfilled' && Array.isArray(notifsRes.value.notifications) && notifsRes.value.notifications.length > 0) {
+        setNotifications((prev) => {
+          const readMap = new Map(prev.map((n) => [n.id, n.isRead]));
+          const remoteList = notifsRes.value.notifications.map((n: any) => ({
+            ...n,
+            isRead: readMap.has(n.id) ? (readMap.get(n.id) ?? n.isRead) : n.isRead
+          }));
+          const merged = deduplicateNotifications([...remoteList, ...prev]);
+          try {
+            localStorage.setItem('ttf_2026_notifications', JSON.stringify(merged));
+          } catch (e) {}
+          return merged;
+        });
       }
     } catch (e) {
       console.warn('Backend data sync notice:', e);
@@ -843,20 +907,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem('ttf_2026_activities', JSON.stringify(updatedActivities));
     } catch (e) {}
 
-    // 4. Notification for Admin
-    const newNotif: NotificationItem = {
-      id: 'notif-' + Date.now(),
-      title: 'Score Submitted by Juror',
-      message: `Juror ${currentUser.name} submitted official score: ${totalScore}/${maxScore} (${percentage}%) for Team ${target.teamId || target.participantId} (${target.teamName || target.name}).`,
-      timestamp: 'Just now',
-      timeAgo: '1m',
-      type: 'score',
-      isRead: false,
-      actionLink: 'results'
-    };
-    setNotifications([newNotif, ...notifications]);
-
-    // 5. Update Competition stats
+    // 4. Update Competition stats
     setCompetitions((prev) =>
       prev.map((c) =>
         c.id === target.competitionId
@@ -925,7 +976,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       judgeId: (currentUser as any).judgeId || currentUser.id,
       judgeName: currentUser.name,
       judgeEmail: currentUser.email
-    }).then(() => {
+    }).then((res: any) => {
+      if (res?.notification) {
+        setNotifications((prev) => {
+          const updated = deduplicateNotifications([res.notification, ...prev]);
+          try {
+            localStorage.setItem('ttf_2026_notifications', JSON.stringify(updated));
+          } catch (e) {}
+          return updated;
+        });
+      }
       api.getTeams().then((r) => {
         if (r.teams && r.teams.length > 0) setParticipants(r.teams);
       }).catch(() => {});
@@ -1035,9 +1095,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const verifyParticipantScore = (participantId: string) => {
-    setParticipants((prev) =>
-      prev.map((p) => (p.id === participantId ? { ...p, status: 'VERIFIED' as EvaluationStatus } : p))
-    );
+    let targetName = 'Participant';
+    setParticipants((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === participantId) {
+          targetName = p.teamName || p.name;
+          return { ...p, status: 'VERIFIED' as EvaluationStatus };
+        }
+        return p;
+      });
+      try {
+        localStorage.setItem('ttf_2026_participants', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    createRealNotification({
+      title: 'Score Verified by Convener',
+      message: `Score for ${targetName} was officially verified by Administration.`,
+      type: 'score',
+      actionLink: 'results'
+    });
+
     addToast({
       type: 'success',
       title: 'Score Verified by Admin',
@@ -1046,9 +1125,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const reopenParticipantEvaluation = (participantId: string, reason?: string) => {
-    setParticipants((prev) =>
-      prev.map((p) => (p.id === participantId ? { ...p, status: 'IN_PROGRESS' as EvaluationStatus } : p))
-    );
+    let targetName = 'Participant';
+    setParticipants((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === participantId) {
+          targetName = p.teamName || p.name;
+          return { ...p, status: 'IN_PROGRESS' as EvaluationStatus };
+        }
+        return p;
+      });
+      try {
+        localStorage.setItem('ttf_2026_participants', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    createRealNotification({
+      title: 'Evaluation Reopened',
+      message: reason ? `Evaluation for ${targetName} was reopened: ${reason}` : `Evaluation for ${targetName} was reopened for scoring review.`,
+      type: 'score',
+      actionLink: 'assignments'
+    });
+
     addToast({
       type: 'info',
       title: 'Evaluation Reopened',
@@ -1080,6 +1178,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('ttf_2026_participants', JSON.stringify(updated));
       } catch (e) {}
       return updated;
+    });
+
+    // Persist project assignment update directly to MongoDB Atlas
+    api.updateTeam(participantId, {
+      projectId: project.id,
+      projectNumber: project.projectNumber,
+      projectTitle: project.title,
+      selectedProjectTitle: project.title,
+      projectSummary: project.objective || project.specification,
+      categoryNumber: project.categoryNumber,
+      categoryName: project.categoryName
+    }).then(() => {
+      refreshData({ silent: true });
+    }).catch((err) => {
+      console.warn('Backend team project assignment update notice:', err?.message);
     });
 
     addToast({
@@ -1138,18 +1251,180 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return updated;
     });
 
+    // Persist new team directly to MongoDB Atlas
+    api.createTeam({
+      id: newId,
+      teamId: newTeamCode,
+      participantId: newTeamCode,
+      name: params.name,
+      teamName: newParticipant.teamName,
+      schoolId: params.schoolId,
+      schoolName: params.schoolName,
+      grade: params.grade,
+      categoryNumber: params.categoryNumber,
+      categoryName: project.categoryName,
+      competitionId: `cat-${params.categoryNumber}`,
+      competitionName: project.categoryName,
+      projectNumber: project.projectNumber,
+      projectTitle: project.title,
+      selectedProjectTitle: project.title,
+      projectSummary: project.objective || project.specification,
+      status: 'PENDING',
+      teamMembers: newParticipant.teamMembers,
+      teamSize: newParticipant.teamSize
+    }).then(() => {
+      refreshData({ silent: true });
+    }).catch((err) => {
+      console.warn('Backend team registration sync notice:', err?.message);
+    });
+
     addToast({
       type: 'success',
       title: 'Team Registered with Project',
       message: `${newParticipant.teamName} enrolled in P${project.categoryNumber}-0${project.projectNumber}: ${project.title}`
     });
 
+    createRealNotification({
+      title: 'New Team Registered',
+      message: `Team "${newParticipant.teamName}" registered from ${params.schoolName} for P${project.categoryNumber}-0${project.projectNumber}: ${project.title}.`,
+      type: 'competition',
+      actionLink: 'participants'
+    });
+
     return { success: true, message: 'Team successfully registered.' };
+  };
+
+  const createSchool = async (schoolData: any) => {
+    try {
+      const res = await api.createSchool(schoolData);
+      if (res.success && res.school) {
+        setSchools((prev) => [res.school, ...prev]);
+        addToast({
+          type: 'success',
+          title: 'School Enrolled',
+          message: `Institution "${res.school.name}" registered successfully.`
+        });
+        refreshData({ silent: true });
+        return { success: true, message: 'School created successfully.' };
+      }
+      return { success: false, error: 'Could not create school.' };
+    } catch (err: any) {
+      addToast(err?.message || 'Failed to create school.', 'error');
+      return { success: false, error: err?.message };
+    }
+  };
+
+  const updateSchool = async (id: string, updates: any) => {
+    try {
+      const res = await api.updateSchool(id, updates);
+      if (res.success && res.school) {
+        setSchools((prev) => prev.map((s) => (s.id === id || s.code === id ? res.school : s)));
+        addToast({
+          type: 'success',
+          title: 'School Updated',
+          message: `Details updated for "${res.school.name}".`
+        });
+        refreshData({ silent: true });
+        return { success: true, message: 'School updated successfully.' };
+      }
+      return { success: false, error: 'Could not update school.' };
+    } catch (err: any) {
+      addToast(err?.message || 'Failed to update school.', 'error');
+      return { success: false, error: err?.message };
+    }
+  };
+
+  const deleteSchool = async (id: string) => {
+    try {
+      const res = await api.deleteSchool(id);
+      if (res.success) {
+        setSchools((prev) => prev.filter((s) => s.id !== id && s.code !== id));
+        addToast({
+          type: 'info',
+          title: 'School Removed',
+          message: 'Participating institution removed from schedule.'
+        });
+        refreshData({ silent: true });
+        return { success: true, message: 'School removed.' };
+      }
+      return { success: false, error: 'Could not delete school.' };
+    } catch (err: any) {
+      addToast(err?.message || 'Failed to delete school.', 'error');
+      return { success: false, error: err?.message };
+    }
+  };
+
+  const createCategory = async (catData: any) => {
+    try {
+      const res = await api.createCategory(catData);
+      if (res.success && res.category) {
+        setCompetitions((prev) => [...prev, res.category]);
+        addToast({
+          type: 'success',
+          title: 'Category Created',
+          message: `Competition arena "${res.category.name}" added successfully.`
+        });
+        refreshData({ silent: true });
+        return { success: true, message: 'Category created successfully.' };
+      }
+      return { success: false, error: 'Could not create category.' };
+    } catch (err: any) {
+      addToast(err?.message || 'Failed to create category.', 'error');
+      return { success: false, error: err?.message };
+    }
+  };
+
+  const updateCategory = async (id: string, updates: any) => {
+    try {
+      const res = await api.updateCategory(id, updates);
+      if (res.success && res.category) {
+        setCompetitions((prev) => prev.map((c) => (c.id === id || String(c.categoryNumber) === id ? res.category : c)));
+        addToast({
+          type: 'success',
+          title: 'Category Updated',
+          message: `Competition arena "${res.category.name}" updated.`
+        });
+        refreshData({ silent: true });
+        return { success: true, message: 'Category updated.' };
+      }
+      return { success: false, error: 'Could not update category.' };
+    } catch (err: any) {
+      addToast(err?.message || 'Failed to update category.', 'error');
+      return { success: false, error: err?.message };
+    }
+  };
+
+  const deleteCategory = async (id: string) => {
+    try {
+      const res = await api.deleteCategory(id);
+      if (res.success) {
+        setCompetitions((prev) => prev.filter((c) => c.id !== id && String(c.categoryNumber) !== id));
+        addToast({
+          type: 'info',
+          title: 'Category Removed',
+          message: 'Competition track removed.'
+        });
+        refreshData({ silent: true });
+        return { success: true, message: 'Category removed.' };
+      }
+      return { success: false, error: 'Could not delete category.' };
+    } catch (err: any) {
+      addToast(err?.message || 'Failed to delete category.', 'error');
+      return { success: false, error: err?.message };
+    }
   };
 
   const publishResultsOfficially = () => {
     setSelectedEvent((prev) => ({ ...prev, stage: 'RESULTS_PUBLISHED', scoreboardVisibility: 'PUBLISHED' }));
     setCompetitions((prev) => prev.map((c) => ({ ...c, status: 'COMPLETED' })));
+
+    createRealNotification({
+      title: 'Championship Results Finalized',
+      message: 'Official Grand Finale results and awards across all 6 challenge tracks are now officially published.',
+      type: 'result',
+      actionLink: 'results'
+    });
+
     addToast({
       type: 'success',
       title: 'Official Results Published',
@@ -1175,6 +1450,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  const createRealNotification = (params: {
+    title: string;
+    message: string;
+    type?: NotificationItem['type'];
+    actionLink?: string;
+    recipientRole?: string;
+  }) => {
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const createdAt = new Date().toISOString();
+    const newNotif: NotificationItem = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      title: params.title,
+      message: params.message,
+      timestamp,
+      timeAgo: '1sec',
+      createdAt,
+      type: params.type || 'system',
+      isRead: false,
+      actionLink: params.actionLink || ''
+    };
+
+    setNotifications((prev) => {
+      const updated = deduplicateNotifications([newNotif, ...prev]);
+      try {
+        localStorage.setItem('ttf_2026_notifications', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    api.createNotification({
+      title: params.title,
+      message: params.message,
+      type: params.type || 'system',
+      actionLink: params.actionLink || '',
+      recipientRole: params.recipientRole || 'ALL'
+    }).then((res: any) => {
+      if (res?.notification) {
+        setNotifications((prev) => {
+          const updated = deduplicateNotifications([res.notification, ...prev.filter((n) => n.id !== newNotif.id)]);
+          try { localStorage.setItem('ttf_2026_notifications', JSON.stringify(updated)); } catch (e) {}
+          return updated;
+        });
+      }
+    }).catch((err) => console.warn('Could not sync notification to backend:', err));
+
+    return newNotif;
+  };
+
   const addAnnouncement = (announcement: Omit<AnnouncementItem, 'id' | 'createdAt'>) => {
     const newAnn: AnnouncementItem = {
       ...announcement,
@@ -1182,6 +1505,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', 4 Nov 2026'
     };
     setAnnouncements([newAnn, ...announcements]);
+    createRealNotification({
+      title: `Announcement: ${announcement.title}`,
+      message: announcement.message,
+      type: 'announcement',
+      actionLink: 'dashboard'
+    });
     addToast({
       type: 'success',
       title: 'Announcement Broadcasted',
@@ -1190,11 +1519,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const markNotificationAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+      try {
+        localStorage.setItem('ttf_2026_notifications', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    api.markNotificationRead(id).catch((err) => console.warn('Backend mark read notice:', err));
   };
 
   const markAllNotificationsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    setNotifications((prev) => {
+      const updated = prev.map((n) => ({ ...n, isRead: true }));
+      try {
+        localStorage.setItem('ttf_2026_notifications', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    api.markAllNotificationsRead().catch((err) => console.warn('Backend mark all read notice:', err));
     addToast({
       type: 'info',
       title: 'Notifications',
@@ -1358,6 +1701,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateJudge,
         deleteJudge,
         toggleJudgeStatus,
+        createSchool,
+        updateSchool,
+        deleteSchool,
+        createCategory,
+        updateCategory,
+        deleteCategory,
         updateUserProfile,
         changeUserPassword,
         refreshData,
@@ -1396,6 +1745,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         removeToast,
         markNotificationAsRead,
         markAllNotificationsRead,
+        addNotification: createRealNotification,
         triggerManagerScenario
       }}
     >

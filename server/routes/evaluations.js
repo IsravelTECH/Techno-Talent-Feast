@@ -2,6 +2,7 @@ import express from 'express';
 import Team from '../models/Team.js';
 import User from '../models/User.js';
 import { ScoringActivity } from '../models/ScoringActivity.js';
+import Notification from '../models/Notification.js';
 
 const router = express.Router();
 
@@ -101,6 +102,34 @@ router.post('/submit', async (req, res) => {
     });
     await activity.save();
 
+    // Log real notification for administration (guaranteed single record)
+    const teamIdentifier = team.teamId || team.participantId;
+    let newNotif = await Notification.findOne({
+      title: 'Score Submitted by Juror',
+      message: { $regex: teamIdentifier, $options: 'i' },
+      createdAt: { $gte: new Date(Date.now() - 10 * 60 * 1000) }
+    });
+
+    if (newNotif) {
+      newNotif.message = `Juror ${team.evaluatedByJudgeName} submitted official score: ${totalScore}/100 for Team ${teamIdentifier} (${team.name}).`;
+      newNotif.timestamp = timestamp;
+      newNotif.isRead = false;
+      await newNotif.save();
+    } else {
+      newNotif = new Notification({
+        id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        title: 'Score Submitted by Juror',
+        message: `Juror ${team.evaluatedByJudgeName} submitted official score: ${totalScore}/100 for Team ${teamIdentifier} (${team.name}).`,
+        timestamp: timestamp,
+        timeAgo: 'Just now',
+        type: 'score',
+        isRead: false,
+        actionLink: 'results',
+        recipientRole: 'admin'
+      });
+      await newNotif.save();
+    }
+
     // Update judge counts if judgeId provided
     if (judgeId) {
       await User.findOneAndUpdate(
@@ -116,7 +145,8 @@ router.post('/submit', async (req, res) => {
       success: true,
       message: `Marks submitted successfully for ${team.teamId} (${team.name}). Total Score: ${totalScore}/100`,
       team,
-      activity
+      activity,
+      notification: newNotif
     });
   } catch (error) {
     console.error('Error submitting evaluation:', error);

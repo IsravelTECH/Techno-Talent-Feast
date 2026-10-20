@@ -29,7 +29,9 @@ import {
   MapPin,
   RotateCcw,
   ChevronLeft,
-  GraduationCap
+  GraduationCap,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import {
   CATEGORY_CATALOG,
@@ -56,6 +58,7 @@ export const ParticipantsPage: React.FC = () => {
   const [selectedSchoolFilter, setSelectedSchoolFilter] = useState('ALL');
   const [selectedCompFilter, setSelectedCompFilter] = useState('ALL');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('ALL');
+  const [viewLayout, setViewLayout] = useState<'list' | 'grid'>('list');
   const [showImportModal, setShowImportModal] = useState(false);
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const pageSize = 10;
@@ -516,28 +519,59 @@ export const ParticipantsPage: React.FC = () => {
             </button>
           </div>
 
-          {hasActiveFilters && (
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedSchoolFilter('ALL');
-                setSelectedCompFilter('ALL');
-                setSelectedStatusFilter('ALL');
-                setCurrentPageNum(1);
-              }}
-              className="self-start sm:self-auto text-xs font-bold text-[#FD5E01] hover:text-[#e05300] flex items-center gap-1.5 cursor-pointer py-1"
-            >
-              <RotateCcw className="w-3 h-3" />
-              Reset All Filters
-            </button>
-          )}
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            {hasActiveFilters && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedSchoolFilter('ALL');
+                  setSelectedCompFilter('ALL');
+                  setSelectedStatusFilter('ALL');
+                  setCurrentPageNum(1);
+                }}
+                className="text-xs font-bold text-[#FD5E01] hover:text-[#e05300] flex items-center gap-1.5 cursor-pointer py-1"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Reset All Filters
+              </button>
+            )}
+
+            {/* Grid / List Toggle */}
+            <div className="flex items-center bg-[#F7FCFB] p-1 rounded-2xl border border-slate-200 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewLayout('grid')}
+                aria-label="Grid View"
+                className={`p-1.5 rounded-xl transition-all cursor-pointer ${
+                  viewLayout === 'grid'
+                    ? 'bg-white text-[#0B2545] shadow-xs border border-slate-200/80 font-black'
+                    : 'text-slate-400 hover:text-slate-700'
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewLayout('list')}
+                aria-label="List View"
+                className={`p-1.5 rounded-xl transition-all cursor-pointer ${
+                  viewLayout === 'list'
+                    ? 'bg-white text-[#0B2545] shadow-xs border border-slate-200/80 font-black'
+                    : 'text-slate-400 hover:text-slate-700'
+                }`}
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* SECTION 4: DATA VIEW (DESKTOP TABLE & MOBILE CARDS) */}
+      {/* SECTION 4: DATA VIEW (TOGGLEABLE TABLE & DOSSIER CARDS) */}
       <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
-        {/* VIEW 1: DESKTOP & TABLET DATA TABLE (hidden on screens < 768px) */}
-        <div className="hidden md:block overflow-x-auto">
+        {viewLayout === 'list' ? (
+          /* VIEW 1: DATA TABLE */
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[780px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider">
@@ -662,9 +696,9 @@ export const ParticipantsPage: React.FC = () => {
             </tbody>
           </table>
         </div>
-
-        {/* VIEW 2: MOBILE INTERACTIVE TEAM DOSSIER CARDS (visible on screens < 768px) */}
-        <div className="block md:hidden p-3.5 space-y-3.5">
+      ) : (
+          /* VIEW 2: TEAM DOSSIER CARDS (GRID VIEW) */
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {paginatedParticipants.length === 0 ? (
             <div className="py-12 text-center text-slate-400">
               <Users className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#03A695]" />
@@ -681,63 +715,65 @@ export const ParticipantsPage: React.FC = () => {
                 <div
                   key={p.id}
                   onClick={() => navigate('participant-detail', { partId: p.id })}
-                  className="bg-[#F7FCFB] rounded-2xl border border-slate-200/90 p-4 space-y-3 shadow-xs hover:border-teal-300 transition-all cursor-pointer"
+                  className="bg-[#F7FCFB] rounded-2xl border border-slate-200/90 p-4 flex flex-col justify-between shadow-xs hover:border-teal-300 transition-all cursor-pointer h-full group"
                 >
-                  {/* Card Header: Avatar, Team Name, ID & Status Badge */}
-                  <div className="flex items-start justify-between gap-2.5">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <UserAvatar name={p.name} size="sm" variant="color" />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-mono text-[10px] font-black bg-white text-[#03A695] px-1.5 py-0.5 rounded border border-teal-200 shrink-0">
-                            {p.teamId || p.participantId}
-                          </span>
-                          <span className="font-black text-slate-900 text-xs truncate">
-                            {p.teamName || p.name}
+                  <div className="space-y-3">
+                    {/* Card Header: Avatar, Team Name, ID & Status Badge */}
+                    <div className="flex items-start justify-between gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <UserAvatar name={p.name} size="sm" variant="color" />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-mono text-[10px] font-black bg-white text-[#03A695] px-1.5 py-0.5 rounded border border-teal-200 shrink-0">
+                              {p.teamId || p.participantId}
+                            </span>
+                            <span className="font-black text-slate-900 text-xs truncate group-hover:text-[#03A695] transition-colors">
+                              {p.teamName || p.name}
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-slate-500 font-medium block mt-0.5 truncate">
+                            Leader: <strong className="text-slate-800">{p.name}</strong>
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-500 font-medium block mt-0.5 truncate">
-                          Leader: <strong className="text-slate-800">{p.name}</strong>
+                      </div>
+
+                      {isSubmitted ? (
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                          {scoreVal}%
                         </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                          Pending
+                        </span>
+                      )}
+                    </div>
+
+                    {/* School & Grade Strip */}
+                    <div className="flex items-center justify-between text-[11px] text-slate-600 pt-2 border-t border-slate-200/70">
+                      <div className="flex items-center gap-1 truncate max-w-[65%]">
+                        <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="font-semibold truncate">{p.schoolName}</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-white text-[#03A695] border border-teal-200 shrink-0">
+                        Grade {p.grade || 1} • Cat {p.categoryNumber || 1}
+                      </span>
+                    </div>
+
+                    {/* Project Showcase Box */}
+                    <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-[10px] font-black text-amber-900 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-300 shrink-0">
+                          {projectCode}
+                        </span>
+                        <p className="font-bold text-slate-900 text-xs truncate">
+                          {p.projectTitle || 'Selected Project'}
+                        </p>
                       </div>
                     </div>
-
-                    {isSubmitted ? (
-                      <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
-                        {scoreVal}%
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
-                        Pending
-                      </span>
-                    )}
                   </div>
 
-                  {/* School & Grade Strip */}
-                  <div className="flex items-center justify-between text-[11px] text-slate-600 pt-2 border-t border-slate-200/70">
-                    <div className="flex items-center gap-1 truncate max-w-[65%]">
-                      <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="font-semibold truncate">{p.schoolName}</span>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-white text-[#03A695] border border-teal-200 shrink-0">
-                      Grade {p.grade || 1} • Cat {p.categoryNumber || 1}
-                    </span>
-                  </div>
-
-                  {/* Project Showcase Box */}
-                  <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 space-y-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono text-[10px] font-black text-amber-900 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-300 shrink-0">
-                        {projectCode}
-                      </span>
-                      <p className="font-bold text-slate-900 text-xs truncate">
-                        {p.projectTitle || 'Selected Project'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Mobile Action Buttons */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-slate-200/70">
+                  {/* Card Action Buttons */}
+                  <div className="flex items-center gap-2 pt-3 mt-3 border-t border-slate-200/70">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -764,6 +800,7 @@ export const ParticipantsPage: React.FC = () => {
             })
           )}
         </div>
+      )}
 
         {/* SECTION 5: ADAPTIVE RESPONSIVE PAGINATION */}
         <div className="p-4 bg-slate-50 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">

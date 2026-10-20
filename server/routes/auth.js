@@ -99,7 +99,7 @@ router.put('/profile/:id', async (req, res) => {
     if (phone !== undefined) updateFields.phone = phone.trim();
     if (role && ['admin', 'judge'].includes(role)) updateFields.role = role;
 
-    const updatedUser = await User.findOneAndUpdate(query, { $set: updateFields }, { new: true });
+    const updatedUser = await User.findOneAndUpdate(query, { $set: updateFields }, { returnDocument: 'after' });
     if (!updatedUser) {
       return res.status(404).json({ error: 'User not found.' });
     }

@@ -47,128 +47,82 @@ export interface RoleProfile {
 }
 
 export const UserRolesPage: React.FC = () => {
-  const { selectedEvent, competitions, navigate, loginAs, addToast } = useApp();
+  const { selectedEvent, competitions, judges, participants, currentUser, navigate, loginAs, addToast } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<'ALL' | 'admin' | 'judge'>('ALL');
   const [selectedUserForDetail, setSelectedUserForDetail] = useState<RoleProfile | null>(null);
 
-  const roleProfiles: RoleProfile[] = [
-    {
-      id: 'usr-01',
-      name: 'James Techno',
-      email: 'james@technoschool.in',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80',
-      role: 'admin',
-      roleTitle: 'Chief Convener & Grand Director (Administration)',
-      organization: 'TechnoSchool UAE Central Directorate',
-      assignedEvent: 'Techno Talent Feast 2026 (Grand Finale)',
-      assignedEventDate: '4 November 2026',
-      assignedVenue: 'EIBFS (Academic City, Dubai, UAE)',
-      assignedTracks: ['All 6 Categories (24 Projects)', '12 Finalists Quota Verification', 'Rubric Lock & Result Publishing'],
-      assignedHall: 'Central Command Console & Grand Auditorium',
-      assignedSlot: '08:30 AM - 06:00 PM (Full Day)',
-      quotaCount: 576,
-      completedCount: 530,
-      permissions: ['Full Event Administration', 'Publish Official Results', 'Configure 100-pt Rubrics', 'Assign Juror Panels', 'Audit Trail', 'Stage Progression'],
-      status: 'ACTIVE'
-    },
-    {
-      id: 'usr-02',
-      name: 'Dr. Priya Sharma',
-      email: 'priya.sharma@technoschool.in',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=160&q=80',
-      role: 'judge',
-      roleTitle: 'Senior Juror (Robotics & AI)',
-      organization: 'Dubai Tech Jurors Panel & Robotics Institute',
-      assignedEvent: 'Techno Talent Feast 2026 (Grand Finale)',
-      assignedEventDate: '4 November 2026',
-      assignedVenue: 'EIBFS (Academic City, Dubai, UAE)',
-      assignedTracks: ['Category 1: Robotics & Embedded Systems', 'Autonomous Search & Rescue', 'Autonomous Delivery'],
-      assignedHall: 'EIBFS Hall A — Robotics Arena Desk 4',
-      assignedSlot: '09:30 AM - 01:00 PM (Prelims) & 02:00 PM - 04:30 PM (Finals)',
-      quotaCount: 16,
-      completedCount: 14,
-      permissions: ['Grade 100-pt Rubric', 'Team Project Marks Entry (1-5 members)', 'Lock Evaluations', '7 Defense Questions Assessment'],
-      status: 'IN_SESSION'
-    },
-    {
-      id: 'usr-03',
-      name: 'Eng. Tariq Al Mansoori',
-      email: 'tariq.mansoori@technoschool.in',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=160&q=80',
-      role: 'judge',
-      roleTitle: 'Innovation & IoT Juror',
-      organization: 'UAE Society of Engineers',
-      assignedEvent: 'Techno Talent Feast 2026 (Grand Finale)',
-      assignedEventDate: '4 November 2026',
-      assignedVenue: 'EIBFS (Academic City, Dubai, UAE)',
-      assignedTracks: ['Category 6: Innovation Challenge', 'Smart Energy Management', 'Smart City Solution'],
-      assignedHall: 'EIBFS Hall F — Main Innovation Stage',
-      assignedSlot: '09:30 AM - 01:00 PM',
-      quotaCount: 16,
-      completedCount: 12,
-      permissions: ['Grade 100-pt Rubric', 'Hardware Inspection', 'Live Telemetry Verification'],
-      status: 'IN_SESSION'
-    },
-    {
-      id: 'usr-04',
-      name: 'Ms. Fatima Al Zahra',
-      email: 'fatima.zahra@technoschool.in',
-      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=160&q=80',
-      role: 'judge',
-      roleTitle: 'Digital Solutions Juror',
-      organization: 'Dubai Future Labs',
-      assignedEvent: 'Techno Talent Feast 2026 (Grand Finale)',
-      assignedEventDate: '4 November 2026',
-      assignedVenue: 'EIBFS (Academic City, Dubai, UAE)',
-      assignedTracks: ['Category 5: Digital Solutions Challenge (4 Projects)', 'AI Waste Sorting', 'Health Tracker'],
-      assignedHall: 'EIBFS Hall E — Digital Incubator',
-      assignedSlot: '10:00 AM - 02:00 PM',
-      quotaCount: 16,
-      completedCount: 15,
-      permissions: ['App Workflow Testing', 'Dataset Bias Verification', 'Score UI/UX & AI'],
-      status: 'ACTIVE'
-    },
-    {
-      id: 'usr-05',
-      name: 'Prof. Rajesh Khanna',
-      email: 'rajesh.khanna@technoschool.in',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80',
-      role: 'judge',
-      roleTitle: 'AI & Web Dev Juror',
-      organization: 'TechnoSchool Computing Directorate',
-      assignedEvent: 'Techno Talent Feast 2026 (Grand Finale)',
-      assignedEventDate: '4 November 2026',
-      assignedVenue: 'EIBFS (Academic City, Dubai, UAE)',
-      assignedTracks: ['Category 4: AI Challenge (4 Projects)', 'Will Do It Today', 'My Vote', 'Banking'],
-      assignedHall: 'EIBFS Hall D — AI & Web Hub',
-      assignedSlot: '10:30 AM - 01:30 PM',
-      quotaCount: 16,
-      completedCount: 14,
-      permissions: ['Code Review', 'Web Security Verification', 'Algorithm Complexity Evaluation'],
-      status: 'ACTIVE'
-    },
-    {
-      id: 'usr-06',
-      name: 'Dr. Sarah Jenkins',
-      email: 'sarah.j@technoschool.in',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=160&q=80',
-      role: 'judge',
-      roleTitle: 'STEM & Junior Robotics Juror',
-      organization: 'Middlesex University Dubai',
-      assignedEvent: 'Techno Talent Feast 2026 (Grand Finale)',
-      assignedEventDate: '4 November 2026',
-      assignedVenue: 'EIBFS (Academic City, Dubai, UAE)',
-      assignedTracks: ['Category 2: STEM Engineering (Grades 3-5)', 'Category 3: Creative Tech'],
-      assignedHall: 'EIBFS Hall B — Junior Robotics Hub',
-      assignedSlot: '09:00 AM - 01:00 PM',
-      quotaCount: 16,
-      completedCount: 16,
-      permissions: ['Grade 100-pt Rubric', 'Junior Defense Assessment', 'Teamwork Evaluation'],
-      status: 'COMPLETED'
-    }
-  ];
+  // Dynamically assemble profiles from live MongoDB Atlas context
+  const adminProfile: RoleProfile = {
+    id: currentUser?.role === 'admin' && currentUser?.id ? currentUser.id : 'usr-admin-01',
+    name: currentUser?.role === 'admin' && currentUser?.name ? currentUser.name : 'James Techno (Admin)',
+    email: currentUser?.role === 'admin' && currentUser?.email ? currentUser.email : 'james@technoschool.in',
+    avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80',
+    role: 'admin',
+    roleTitle: 'Chief Convener & Grand Director (Administration)',
+    organization: 'TechnoSchool UAE Central Directorate',
+    assignedEvent: selectedEvent?.name || 'Techno Talent Feast 2026 (Grand Finale)',
+    assignedEventDate: selectedEvent?.date || '4 November 2026',
+    assignedVenue: selectedEvent?.venue || 'EIBFS (Academic City, Dubai, UAE)',
+    assignedTracks: ['All 6 Categories (24 Projects)', '12 Finalists Quota Verification', 'Rubric Lock & Result Publishing'],
+    assignedHall: 'Central Command Console & Grand Auditorium',
+    assignedSlot: '08:30 AM - 06:00 PM (Full Day)',
+    quotaCount: 576,
+    completedCount: participants ? participants.filter((p) => p.status === 'SUBMITTED').length : 530,
+    permissions: [
+      'Full Event Administration',
+      'Publish Official Results',
+      'Configure 100-pt Rubrics',
+      'Assign Juror Panels',
+      'Audit Trail',
+      'Stage Progression'
+    ],
+    status: 'ACTIVE'
+  };
+
+  const dynamicJudgeProfiles: RoleProfile[] = (judges && judges.length > 0)
+    ? judges.map((judge, idx) => {
+        const judgeEvals = (participants || []).filter(
+          (p) => p.evaluatedByJudgeId === judge.id || p.evaluatedByJudgeId === judge.judgeId
+        );
+        const lockedCount = judgeEvals.filter((p) => p.status === 'SUBMITTED').length;
+        const totalQuota = judge.assignedCount || judgeEvals.length || 16;
+        const isComplete = lockedCount >= totalQuota && totalQuota > 0;
+        const isInSession = lockedCount > 0 && !isComplete;
+
+        return {
+          id: judge.id || judge.judgeId || `usr-judge-${idx + 1}`,
+          name: judge.name,
+          email: judge.email,
+          avatar: judge.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=160&q=80',
+          role: 'judge' as const,
+          roleTitle: judge.title || `${judge.specialization || 'Technical'} Juror`,
+          organization: judge.organization || 'Dubai Tech Jurors Panel',
+          assignedEvent: selectedEvent?.name || 'Techno Talent Feast 2026 (Grand Finale)',
+          assignedEventDate: selectedEvent?.date || '4 November 2026',
+          assignedVenue: selectedEvent?.venue || 'EIBFS (Academic City, Dubai, UAE)',
+          assignedTracks: (judge.assignedCategoryNames && judge.assignedCategoryNames.length > 0)
+            ? judge.assignedCategoryNames
+            : (judge.assignedCategories && judge.assignedCategories.length > 0
+              ? judge.assignedCategories.map((c) => `Category ${c}`)
+              : ['All Assigned Tracks']),
+          assignedHall: judge.assignedHall || 'EIBFS Arena Desk',
+          assignedSlot: judge.assignedSlot || '09:30 AM - 04:30 PM',
+          quotaCount: totalQuota,
+          completedCount: lockedCount || judge.completedCount || 0,
+          permissions: [
+            'Grade 100-pt Rubric',
+            'Team Project Marks Entry (1-5 members)',
+            'Lock Evaluations',
+            '7 Defense Questions Assessment'
+          ],
+          status: isComplete ? 'COMPLETED' : (isInSession ? 'IN_SESSION' : 'ACTIVE')
+        };
+      })
+    : [];
+
+  const roleProfiles: RoleProfile[] = [adminProfile, ...dynamicJudgeProfiles];
 
   const filteredUsers = roleProfiles.filter((u) => {
     const matchesSearch =
@@ -269,9 +223,9 @@ export const UserRolesPage: React.FC = () => {
         {/* Role Tabs */}
         <div className="flex items-center gap-2">
           {[
-            { id: 'ALL', label: 'All Roles (6 Profiles)' },
-            { id: 'admin', label: 'Administration' },
-            { id: 'judge', label: 'Judges / Jurors' }
+            { id: 'ALL', label: `All Roles (${roleProfiles.length} Profiles)` },
+            { id: 'admin', label: `Administration (${roleProfiles.filter(r => r.role === 'admin').length})` },
+            { id: 'judge', label: `Judges / Jurors (${roleProfiles.filter(r => r.role === 'judge').length})` }
           ].map((tab) => (
             <button
               key={tab.id}

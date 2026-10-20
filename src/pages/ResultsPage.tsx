@@ -13,7 +13,9 @@ import {
   ExternalLink,
   ShieldCheck,
   ChevronRight,
-  Users
+  Users,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import {
   calculateCategorySchoolStandings,
@@ -28,6 +30,7 @@ export const ResultsPage: React.FC = () => {
   
   // View mode: 'STUDENTS' or 'SCHOOLS'
   const [viewMode, setViewMode] = useState<'STUDENTS' | 'SCHOOLS'>('STUDENTS');
+  const [viewLayout, setViewLayout] = useState<'grid' | 'list'>('grid');
 
   // Select box 1: Competitions & Tracks (for Student & Duo Winners)
   const [selectedComp, setSelectedComp] = useState<string>('ALL');
@@ -79,7 +82,17 @@ export const ResultsPage: React.FC = () => {
       const catNum = getCategoryNumber(p);
       const catPeers = evaluatedParticipants
         .filter((peer) => getCategoryNumber(peer) === catNum)
-        .sort((a, b) => Number(b.finalScore || 0) - Number(a.finalScore || 0));
+        .sort((a, b) => {
+          const scoreDiff = Number(b.finalScore || 0) - Number(a.finalScore || 0);
+          if (scoreDiff !== 0) return scoreDiff;
+          const bTech = Number(b.criterionScores?.['crit-tech'] || 0);
+          const aTech = Number(a.criterionScores?.['crit-tech'] || 0);
+          if (bTech !== aTech) return bTech - aTech;
+          const bInnov = Number(b.criterionScores?.['crit-innov'] || 0);
+          const aInnov = Number(a.criterionScores?.['crit-innov'] || 0);
+          if (bInnov !== aInnov) return bInnov - aInnov;
+          return 0;
+        });
 
       const rank = catPeers.findIndex((peer) => peer.id === p.id) + 1;
       const trophy = getStudentTrophy(catNum, rank);
@@ -189,6 +202,34 @@ export const ResultsPage: React.FC = () => {
             <option value="cat-6">Titan of Innovation – Best School</option>
             <option value="OVERALL">Titans of Technology – Champion Overall</option>
           </select>
+
+          {/* Grid/List View Toggle */}
+          <div className="flex items-center bg-[#F7FCFB] p-1 rounded-2xl border border-slate-200 shrink-0">
+            <button
+              type="button"
+              onClick={() => setViewLayout('grid')}
+              aria-label="Grid View"
+              className={`p-1.5 rounded-xl transition-all cursor-pointer ${
+                viewLayout === 'grid'
+                  ? 'bg-white text-[#0B2545] shadow-xs border border-slate-200/80 font-black'
+                  : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewLayout('list')}
+              aria-label="List View"
+              className={`p-1.5 rounded-xl transition-all cursor-pointer ${
+                viewLayout === 'list'
+                  ? 'bg-white text-[#0B2545] shadow-xs border border-slate-200/80 font-black'
+                  : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -211,7 +252,7 @@ export const ResultsPage: React.FC = () => {
                   </div>
 
                   <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight break-words">
-                    Titans of Technology – Champion School Overall Trophy 1
+                    Titans of Technology – Champion School Overall Trophy
                   </h2>
 
                   <div className="flex items-center gap-2 text-sm font-bold text-slate-700 pt-1">
@@ -284,12 +325,12 @@ export const ResultsPage: React.FC = () => {
                             Category {catNum}
                           </span>
                           <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                            🏆 Best School Award 1
+                            🏆 Best School Award
                           </span>
                         </div>
 
                         <h3 className="text-sm font-black text-slate-900 line-clamp-1">
-                          {track.titlePrefix} – Best School Best School Award 1
+                          {track.titlePrefix} – Best School Award
                         </h3>
                         <p className="text-[11px] text-slate-500 mb-3 truncate">
                           {track.name}
@@ -328,7 +369,7 @@ export const ResultsPage: React.FC = () => {
         </div>
       )}
 
-      {/* VIEW 2: STUDENTS VIEW (SHOWS ONLY THE CATEGORY STUDENT & DUO PODIUM WINNERS) */}
+      {/* VIEW 2: STUDENTS VIEW (SHOWS THE CATEGORY STUDENT & DUO PODIUM WINNERS AND FINALISTS) */}
       {viewMode === 'STUDENTS' && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -338,7 +379,7 @@ export const ResultsPage: React.FC = () => {
                 Category Student & Duo Podium Winners (Qty 2 per Award)
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Champion (First Prize 2), 1st Runner-Up (Second Prize 2), and 2nd Runner-Up (Third Prize 2)
+                Champion (First Prize, Qty: 2), 1st Runner-Up (Second Prize, Qty: 2), and 2nd Runner-Up (Third Prize, Qty: 2)
               </p>
             </div>
 
@@ -347,35 +388,188 @@ export const ResultsPage: React.FC = () => {
             </span>
           </div>
 
-          {/* Winners Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Winners View: List or Grid */}
+          {viewLayout === 'list' ? (
+            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[760px]">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-[#F7FCFB] text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <th className="py-3.5 px-5 w-20 text-center">Rank</th>
+                      <th className="py-3.5 px-4">Award & Trophy</th>
+                      <th className="py-3.5 px-4">Student / Team Leader</th>
+                      <th className="py-3.5 px-4">School & Track</th>
+                      <th className="py-3.5 px-4 text-center">Juror</th>
+                      <th className="py-3.5 px-4 text-center">Score</th>
+                      <th className="py-3.5 pr-5 text-right">Scorecard</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs font-medium">
+                    {filteredResults.map((p) => {
+                      const isRank1 = p.computedRank === 1;
+                      const isRank2 = p.computedRank === 2;
+                      const isRank3 = p.computedRank === 3;
+                      const isPodium = p.computedRank <= 3;
+
+                      const trophyTitle = isRank1
+                        ? (p.trophy?.title || 'Category Champion')
+                        : isRank2
+                        ? (p.trophy?.title || '1st Runner-Up')
+                        : isRank3
+                        ? (p.trophy?.title || '2nd Runner-Up')
+                        : `Finalist — Rank #${p.computedRank}`;
+
+                      const prizeType = isRank1
+                        ? 'First Prize (Qty: 2)'
+                        : isRank2
+                        ? 'Second Prize (Qty: 2)'
+                        : isRank3
+                        ? 'Third Prize (Qty: 2)'
+                        : 'Certificate of Merit';
+
+                      return (
+                        <tr
+                          key={p.id}
+                          onClick={() => navigate('participant-detail', { partId: p.id })}
+                          className="hover:bg-teal-50/40 transition-colors cursor-pointer group"
+                        >
+                          <td className="py-3.5 px-5 text-center">
+                            <span
+                              className={`inline-flex items-center justify-center w-8 h-8 rounded-xl font-black text-xs ${
+                                isRank1
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                  : isRank2
+                                  ? 'bg-slate-200 text-slate-800 border border-slate-300'
+                                  : isRank3
+                                  ? 'bg-orange-100 text-orange-900 border border-orange-300'
+                                  : 'bg-slate-100 text-slate-600 font-bold'
+                              }`}
+                            >
+                              #{p.computedRank}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="flex flex-col">
+                              <span
+                                className={`inline-flex items-center gap-1 font-extrabold text-xs ${
+                                  isRank1
+                                    ? 'text-amber-900'
+                                    : isRank2
+                                    ? 'text-slate-800'
+                                    : isRank3
+                                    ? 'text-orange-900'
+                                    : 'text-slate-700'
+                                }`}
+                              >
+                                {isPodium ? `🏆 ${trophyTitle}` : `🎖️ ${trophyTitle}`}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                                {prizeType}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-2.5">
+                              <UserAvatar name={p.name} size="sm" variant="color" />
+                              <div className="min-w-0">
+                                <span className="font-extrabold text-slate-900 group-hover:text-[#03A695] transition-colors block truncate">
+                                  {p.name}
+                                </span>
+                                <span className="font-mono text-[10px] text-slate-400 block">
+                                  {p.teamId || p.participantId}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="flex flex-col min-w-0 max-w-[200px]">
+                              <span className="font-bold text-slate-800 truncate">
+                                {p.schoolName}
+                              </span>
+                              <span className="text-[11px] text-slate-400 truncate mt-0.5">
+                                {p.competitionName}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <span className="text-[11px] text-slate-600 font-medium">
+                              {p.evaluatedByJudgeName || 'Verified Juror'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <span className="font-black text-[#03A695] text-sm">
+                              {p.finalScore}
+                            </span>
+                            <span className="text-[9px] text-slate-400 font-bold block">
+                              / 100 PTS
+                            </span>
+                          </td>
+                          <td className="py-3.5 pr-5 text-right">
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-orange-50 text-[#FD5E01] group-hover:bg-[#FD5E01] group-hover:text-white text-xs font-bold transition-all shadow-xs"
+                            >
+                              <span>Scorecard</span>
+                              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            /* Winners Cards Grid */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredResults.map((p) => {
               const isRank1 = p.computedRank === 1;
               const isRank2 = p.computedRank === 2;
-              const trophyTitle = p.trophy?.title || (isRank1 ? 'Category Champion' : isRank2 ? '1st Runner-Up' : '2nd Runner-Up');
-              const prizeType = p.trophy?.prizeType || (isRank1 ? 'First Prize' : isRank2 ? 'Second Prize' : 'Third Prize');
+              const isRank3 = p.computedRank === 3;
+              const isPodium = p.computedRank <= 3;
+
+              const trophyTitle = isRank1
+                ? (p.trophy?.title || 'Category Champion')
+                : isRank2
+                ? (p.trophy?.title || '1st Runner-Up')
+                : isRank3
+                ? (p.trophy?.title || '2nd Runner-Up')
+                : `Finalist — Rank #${p.computedRank}`;
+
+              const prizeType = isRank1
+                ? 'First Prize (Qty: 2)'
+                : isRank2
+                ? 'Second Prize (Qty: 2)'
+                : isRank3
+                ? 'Third Prize (Qty: 2)'
+                : 'Certificate of Merit';
 
               return (
                 <div
                   key={p.id}
-                  className="bg-white rounded-3xl border border-slate-200/80 shadow-card hover:shadow-card-hover hover:border-teal-300 transition-all p-6 flex flex-col justify-between"
+                  className={`bg-white rounded-3xl border shadow-card hover:shadow-card-hover transition-all p-6 flex flex-col justify-between ${
+                    isPodium ? 'border-slate-200/80 hover:border-teal-300' : 'border-slate-200/50 opacity-90'
+                  }`}
                 >
                   <div>
                     {/* Official Trophy Badge */}
-                    <div className="mb-3">
+                    <div className="mb-3 flex items-center flex-wrap gap-2">
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
                           isRank1
                             ? 'bg-amber-50 text-amber-900 border-amber-300'
                             : isRank2
                             ? 'bg-slate-100 text-slate-800 border-slate-300'
-                            : 'bg-orange-50 text-orange-900 border-orange-300'
+                            : isRank3
+                            ? 'bg-orange-50 text-orange-900 border-orange-300'
+                            : 'bg-slate-50 text-slate-600 border-slate-200'
                         }`}
                       >
-                        🏆 {trophyTitle}
+                        {isPodium ? `🏆 ${trophyTitle}` : `🎖️ ${trophyTitle}`}
                       </span>
-                      <span className="ml-2 text-[10px] font-bold text-slate-500">
-                        ({prizeType} 2)
+                      <span className="text-[10px] font-bold text-slate-500">
+                        {prizeType}
                       </span>
                     </div>
 
@@ -439,8 +633,9 @@ export const ResultsPage: React.FC = () => {
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
+    )}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import express from 'express';
 import Team from '../models/Team.js';
 import School from '../models/School.js';
 import User from '../models/User.js';
+import Category from '../models/Category.js';
 import { ScoringActivity } from '../models/ScoringActivity.js';
 
 const router = express.Router();
@@ -14,6 +15,7 @@ router.get('/stats', async (req, res) => {
     const pendingEvaluations = await Team.countDocuments({ status: { $ne: 'SUBMITTED' } });
     const totalSchools = await School.countDocuments();
     const totalJudges = await User.countDocuments({ role: 'judge' });
+    const totalCategories = await Category.countDocuments();
 
     // Calculate overall average score of submitted teams
     const submittedTeams = await Team.find({ status: { $in: ['SUBMITTED', 'EVALUATED'] } });
@@ -42,6 +44,7 @@ router.get('/stats', async (req, res) => {
         scoringProgress: totalTeams > 0 ? Math.round((completedEvaluations / totalTeams) * 100) : 0,
         totalSchools,
         totalJudges,
+        totalCategories: totalCategories || 6,
         averageScore
       },
       topTeams,

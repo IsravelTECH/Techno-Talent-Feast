@@ -113,18 +113,26 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const data = req.body;
-    if (!data.teamId || !data.name || !data.schoolName) {
+    const teamIdentifier = (data.teamId || data.id || data.participantId || '').trim().toUpperCase();
+    const teamName = (data.name || data.teamName || '').trim();
+
+    if (!teamIdentifier || !teamName || !data.schoolName) {
       return res.status(400).json({ error: 'teamId, name, and schoolName are required.' });
     }
 
-    const existing = await Team.findOne({ teamId: data.teamId.toUpperCase() });
+    const existing = await Team.findOne({ teamId: teamIdentifier });
     if (existing) {
       return res.status(400).json({ error: 'A team with this Team ID already exists.' });
     }
 
     const newTeam = new Team({
       ...data,
-      teamId: data.teamId.toUpperCase()
+      id: data.id || teamIdentifier,
+      name: teamName,
+      teamName: data.teamName || teamName,
+      teamId: teamIdentifier,
+      projectTitle: data.projectTitle || data.project?.title || 'Assigned Championship Project',
+      status: ['PENDING', 'IN_PROGRESS', 'SUBMITTED', 'EVALUATED'].includes(data.status) ? data.status : 'PENDING'
     });
 
     await newTeam.save();
@@ -144,7 +152,7 @@ router.put('/:id', async (req, res) => {
     const updated = await Team.findOneAndUpdate(
       query,
       { $set: req.body },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updated) {
@@ -152,6 +160,23 @@ router.put('/:id', async (req, res) => {
     }
 
     res.json({ success: true, team: updated });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/teams/:id - remove team
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = mongoose.Types.ObjectId.isValid(id)
+      ? { $or: [{ id }, { teamId: id }, { _id: id }] }
+      : { $or: [{ id }, { teamId: id }] };
+    const deleted = await Team.findOneAndDelete(query);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Team not found.' });
+    }
+    res.json({ success: true, message: 'Team removed successfully.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

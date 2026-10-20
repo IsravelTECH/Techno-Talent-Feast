@@ -65,9 +65,49 @@ export const LiveLeaderboardPage: React.FC = () => {
     setActiveTab('SCHOOLS');
   };
 
+  // Dynamic leaderboard items synthesized from evaluated participants to ensure 100% live synchronization
+  const effectiveLeaderboard = useMemo(() => {
+    const evaluated = (participants || []).filter(
+      (p) => p.status === 'SUBMITTED' || (p.finalScore && Number(p.finalScore) > 0)
+    );
+    if (evaluated.length === 0) return leaderboard || [];
+
+    const sorted = [...evaluated].sort((a, b) => {
+      const diff = Number(b.finalScore || 0) - Number(a.finalScore || 0);
+      if (diff !== 0) return diff;
+      const bTech = Number(b.criterionScores?.['crit-tech'] || 0);
+      const aTech = Number(a.criterionScores?.['crit-tech'] || 0);
+      return bTech - aTech;
+    });
+
+    return sorted.map((p, idx) => ({
+      rank: idx + 1,
+      participantId: p.id,
+      participantCode: p.teamId || p.participantId || `TTF26-${idx + 1}`,
+      participantName: p.name,
+      photo: p.photo,
+      schoolName: p.schoolName,
+      competitionName: p.competitionName,
+      categoryNumber: p.categoryNumber,
+      categoryName: p.categoryName || p.competitionName,
+      projectTitle: p.projectTitle,
+      teamName: p.teamName,
+      teamMembers: p.teamMembers,
+      isGroupProject: p.isGroupProject,
+      teamSize: p.teamSize,
+      grade: p.grade,
+      score: p.finalScore || 0,
+      maxScore: 100,
+      percentage: Math.round((Number(p.finalScore || 0) / 100) * 100),
+      status: 'EVALUATED' as const,
+      award: idx === 0 ? 'Rank 1 Gold' : idx === 1 ? 'Rank 2 Silver' : idx === 2 ? 'Rank 3 Bronze' : 'Finalist',
+      recentChange: 'same' as const
+    }));
+  }, [participants, leaderboard]);
+
   // Filtered leaderboard for participants
   const filteredLeaderboard = useMemo(() => {
-    return (leaderboard || []).filter((item) => {
+    return effectiveLeaderboard.filter((item) => {
       if (!item) return false;
       const q = (searchQuery || '').toLowerCase();
       const matchesSearch =
@@ -79,7 +119,7 @@ export const LiveLeaderboardPage: React.FC = () => {
         selectedCompFilter === 'ALL' || (item.competitionName || '').includes(selectedCompFilter);
       return matchesSearch && matchesComp;
     });
-  }, [leaderboard, searchQuery, selectedCompFilter]);
+  }, [effectiveLeaderboard, searchQuery, selectedCompFilter]);
 
   const top3 = filteredLeaderboard.slice(0, 3);
   const remaining = filteredLeaderboard.slice(3);
@@ -411,7 +451,7 @@ export const LiveLeaderboardPage: React.FC = () => {
                         <td className="py-4 pr-6 text-right">
                           {isChampion ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400 text-amber-950 text-[10px] font-black uppercase">
-                              🏆 Overall Champion Trophy 1
+                              🏆 Overall Champion Trophy
                             </span>
                           ) : school.trophiesWon.length > 0 ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200 text-[10px] font-bold">

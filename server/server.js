@@ -10,6 +10,7 @@ import judgeRoutes from './routes/judges.js';
 import schoolRoutes from './routes/schools.js';
 import categoryRoutes from './routes/categories.js';
 import dashboardRoutes from './routes/dashboard.js';
+import notificationRoutes from './routes/notifications.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/judges', judgeRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({

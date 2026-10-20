@@ -1,14 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserAvatar } from '../common/UserAvatar';
+import { formatRelativeTime } from '../../utils/time';
 import {
   Bell,
   ChevronDown,
   Menu,
   LogOut,
-  User,
-  ShieldCheck,
-  KeyRound
+  User
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -24,17 +23,23 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
     markNotificationAsRead,
     markAllNotificationsRead,
     navigate,
-    loginAs,
     logout
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [, setTick] = useState(0);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  // Refresh relative timestamps every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => setTick((t) => t + 1), 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -83,37 +88,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
           </div>
         </div>
 
-        {/* Right: Role Switcher Pill + Notifications + Profile */}
-        <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
-          {/* Quick Role Switcher for Management Review */}
-          <div className="flex items-center bg-slate-100 p-0.5 sm:p-1 rounded-2xl border border-slate-200/80">
-            <button
-              onClick={() => loginAs('admin')}
-              className={`px-2 sm:px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
-                currentRole === 'admin'
-                  ? 'bg-[#03A695] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-              title="Switch to Admin Console"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-              <span className="hidden sm:inline">Admin</span>
-              <span className="sm:hidden text-[11px] font-extrabold">Admin</span>
-            </button>
-            <button
-              onClick={() => loginAs('judge')}
-              className={`px-2 sm:px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
-                currentRole === 'judge'
-                  ? 'bg-[#FD5E01] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-              title="Switch to Judge Portal"
-            >
-              <KeyRound className="w-3.5 h-3.5 shrink-0" />
-              <span className="hidden sm:inline">Judge</span>
-              <span className="sm:hidden text-[11px] font-extrabold">Judge</span>
-            </button>
-          </div>
+        {/* Right: Notifications + Profile */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 lg:gap-3 shrink-0">
 
           {/* Notifications Center */}
           <div className="relative" ref={notifRef}>
@@ -183,8 +159,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
                           <p className="text-xs text-slate-600 mt-1 leading-relaxed line-clamp-2">
                             {notif.message}
                           </p>
-                          <span className="text-[10px] text-slate-400 mt-1 block">
-                            {notif.timestamp}
+                          <span className="text-[10px] font-medium text-slate-400 mt-1 block">
+                            {formatRelativeTime(notif.createdAt || notif.timestamp)}
                           </span>
                         </div>
                       </div>

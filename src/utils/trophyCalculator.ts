@@ -212,7 +212,17 @@ export function calculateOverallSchoolStandings(participants: any[]): OverallSch
   [1, 2, 3, 4, 5, 6].forEach((catNum) => {
     const catParticipants = evaluated
       .filter((p) => getCategoryNumber(p) === catNum)
-      .sort((a, b) => Number(b.finalScore || 0) - Number(a.finalScore || 0));
+      .sort((a, b) => {
+        const scoreDiff = Number(b.finalScore || 0) - Number(a.finalScore || 0);
+        if (scoreDiff !== 0) return scoreDiff;
+        const bTech = Number(b.criterionScores?.['crit-tech'] || 0);
+        const aTech = Number(a.criterionScores?.['crit-tech'] || 0);
+        if (bTech !== aTech) return bTech - aTech;
+        const bInnov = Number(b.criterionScores?.['crit-innov'] || 0);
+        const aInnov = Number(a.criterionScores?.['crit-innov'] || 0);
+        if (bInnov !== aInnov) return bInnov - aInnov;
+        return 0;
+      });
 
     catParticipants.forEach((p, idx) => {
       const school = p.schoolName || 'Independent Participant';

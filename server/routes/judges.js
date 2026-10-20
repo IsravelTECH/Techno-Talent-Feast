@@ -84,7 +84,7 @@ router.put('/:id', async (req, res) => {
     const updated = await User.findOneAndUpdate(
       query,
       { $set: req.body },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updated) {

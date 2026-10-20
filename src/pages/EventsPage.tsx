@@ -14,13 +14,16 @@ import {
   CheckCircle2,
   ExternalLink,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 
 export const EventsPage: React.FC = () => {
   const { selectedEvent, navigate, addToast } = useApp();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewLayout, setViewLayout] = useState<'grid' | 'list'>('grid');
 
   const eventsList = [
     {
@@ -87,6 +90,33 @@ export const EventsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2.5">
+          <div className="flex items-center bg-[#F7FCFB] p-1 rounded-2xl border border-slate-200 shrink-0">
+            <button
+              type="button"
+              onClick={() => setViewLayout('grid')}
+              aria-label="Grid View"
+              className={`p-1.5 rounded-xl transition-all cursor-pointer ${
+                viewLayout === 'grid'
+                  ? 'bg-white text-[#0B2545] shadow-xs border border-slate-200/80 font-black'
+                  : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewLayout('list')}
+              aria-label="List View"
+              className={`p-1.5 rounded-xl transition-all cursor-pointer ${
+                viewLayout === 'list'
+                  ? 'bg-white text-[#0B2545] shadow-xs border border-slate-200/80 font-black'
+                  : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+
           <Button
             variant="orange"
             size="sm"
@@ -98,8 +128,100 @@ export const EventsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Events Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Events View: List or Grid */}
+      {viewLayout === 'list' ? (
+        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[760px]">
+              <thead>
+                <tr className="border-b border-slate-100 bg-[#F7FCFB] text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <th className="py-3.5 px-5">Event & Edition</th>
+                  <th className="py-3.5 px-4">Date & Location</th>
+                  <th className="py-3.5 px-4 text-center">Students</th>
+                  <th className="py-3.5 px-4 text-center">Schools</th>
+                  <th className="py-3.5 px-4 text-center">Arenas</th>
+                  <th className="py-3.5 px-4 text-center">Status</th>
+                  <th className="py-3.5 pr-5 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs font-medium">
+                {eventsList.map((evt) => (
+                  <tr
+                    key={evt.id}
+                    onClick={() => navigate('event-detail')}
+                    className="hover:bg-teal-50/40 transition-colors cursor-pointer group"
+                  >
+                    <td className="py-3.5 px-5">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={evt.bannerImage}
+                          alt={evt.name}
+                          className="w-12 h-10 rounded-xl object-cover shrink-0 border border-slate-200"
+                        />
+                        <div className="min-w-0">
+                          <span className="font-extrabold text-slate-900 group-hover:text-[#03A695] transition-colors block text-sm">
+                            {evt.name}
+                          </span>
+                          <span className="text-[11px] text-slate-400 font-semibold block">
+                            {evt.edition} • "{evt.theme}"
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-slate-800 font-semibold flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-[#03A695] shrink-0" />
+                          {evt.date}
+                        </span>
+                        <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                          <MapPin className="w-2.5 h-2.5 text-[#FD5E01] shrink-0" />
+                          {evt.venue}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-center font-bold text-slate-800">
+                      {evt.totalParticipants}
+                    </td>
+                    <td className="py-3.5 px-4 text-center font-bold text-[#03A695]">
+                      {evt.totalSchools}
+                    </td>
+                    <td className="py-3.5 px-4 text-center font-bold text-[#FD5E01]">
+                      {evt.totalCompetitions}
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <Badge
+                        variant={
+                          evt.status === 'LIVE'
+                            ? 'live'
+                            : evt.status === 'UPCOMING'
+                            ? 'warning'
+                            : 'neutral'
+                        }
+                        dot={evt.status === 'LIVE'}
+                        size="sm"
+                      >
+                        {evt.status}
+                      </Badge>
+                    </td>
+                    <td className="py-3.5 pr-5 text-right">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-teal-50 text-[#03A695] group-hover:bg-[#03A695] group-hover:text-white text-xs font-bold transition-all shadow-xs"
+                      >
+                        <span>{evt.status === 'LIVE' ? 'Dashboard' : 'Specs'}</span>
+                        <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        /* Events Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {eventsList.map((evt) => (
           <div
             key={evt.id}
@@ -190,6 +312,7 @@ export const EventsPage: React.FC = () => {
           </div>
         ))}
       </div>
+    )}
 
       {/* Create Event Modal */}
       <Modal

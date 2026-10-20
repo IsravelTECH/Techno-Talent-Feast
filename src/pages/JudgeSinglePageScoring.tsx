@@ -37,7 +37,6 @@ export const JudgeSinglePageScoring: React.FC = () => {
     participants,
     lookupTeamById,
     submitTeamEvaluation,
-    loginAs,
     logout
   } = useApp();
 
@@ -266,15 +265,6 @@ export const JudgeSinglePageScoring: React.FC = () => {
                 • Juror
               </span>
             </div>
-
-            {/* Switch to Admin Mode */}
-            <button
-              onClick={() => loginAs('admin')}
-              className="text-[11px] sm:text-xs font-semibold text-[#03A695] hover:text-[#008C7E] bg-[#F7FCFB] hover:bg-[#E6F7F5] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-[#D8EBE7] hover:border-teal-300 transition-colors cursor-pointer"
-              title="Switch to Administration to review reflected marks"
-            >
-              Switch to Admin
-            </button>
 
             {/* Logout Action */}
             <button

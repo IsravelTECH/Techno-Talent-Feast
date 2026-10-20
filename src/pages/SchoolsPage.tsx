@@ -21,7 +21,10 @@ import {
   Crown,
   RotateCcw,
   GraduationCap,
-  Layers
+  Layers,
+  Plus,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { Participant } from '../types';
 import {
@@ -30,14 +33,52 @@ import {
 } from '../utils/trophyCalculator';
 
 export const SchoolsPage: React.FC = () => {
-  const { schools, participants, competitions, navigate } = useApp();
+  const { schools, participants, competitions, navigate, createSchool, addToast } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTrophy, setSelectedTrophy] = useState<string>('ALL');
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
+  const [viewLayout, setViewLayout] = useState<'grid' | 'list'>('grid');
 
   // In-modal filter states
   const [modalSearch, setModalSearch] = useState('');
   const [modalCategoryFilter, setModalCategoryFilter] = useState<number | 'ALL'>('ALL');
+
+  // Add School Modal state
+  const [isAddSchoolOpen, setIsAddSchoolOpen] = useState(false);
+  const [newSchoolName, setNewSchoolName] = useState('');
+  const [newSchoolCity, setNewSchoolCity] = useState('Dubai');
+  const [newSchoolPrincipal, setNewSchoolPrincipal] = useState('');
+  const [newSchoolCoordinator, setNewSchoolCoordinator] = useState('');
+  const [newSchoolEmail, setNewSchoolEmail] = useState('');
+  const [newSchoolPhone, setNewSchoolPhone] = useState('');
+  const [isCreatingSchool, setIsCreatingSchool] = useState(false);
+
+  const handleAddSchoolSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSchoolName.trim()) {
+      addToast('Please enter school name.', 'error');
+      return;
+    }
+    setIsCreatingSchool(true);
+    const res = await createSchool({
+      name: newSchoolName.trim(),
+      city: newSchoolCity.trim() || 'Dubai',
+      country: 'UAE',
+      principalName: newSchoolPrincipal.trim(),
+      coordinatorName: newSchoolCoordinator.trim(),
+      email: newSchoolEmail.trim(),
+      contactNumber: newSchoolPhone.trim()
+    });
+    setIsCreatingSchool(false);
+    if (res.success) {
+      setIsAddSchoolOpen(false);
+      setNewSchoolName('');
+      setNewSchoolPrincipal('');
+      setNewSchoolCoordinator('');
+      setNewSchoolEmail('');
+      setNewSchoolPhone('');
+    }
+  };
 
   // Dynamic trophy calculations based on live participant data
   const overallSchoolStandings = useMemo(() => {
@@ -300,6 +341,44 @@ export const SchoolsPage: React.FC = () => {
                 </button>
               )}
             </div>
+
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<Plus className="w-3.5 h-3.5" />}
+              onClick={() => setIsAddSchoolOpen(true)}
+              className="shrink-0 text-xs shadow-xs"
+            >
+              + Add School
+            </Button>
+
+            {/* Grid / List View Toggle */}
+            <div className="flex items-center bg-[#F7FCFB] p-1 rounded-2xl border border-slate-200 shrink-0 self-end sm:self-auto">
+              <button
+                onClick={() => setViewLayout('grid')}
+                className={`p-1.5 sm:p-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+                  viewLayout === 'grid'
+                    ? 'bg-white text-[#0B2545] shadow-xs border border-slate-200/80 font-black'
+                    : 'text-slate-400 hover:text-slate-700'
+                }`}
+                title="Grid View"
+                aria-label="Grid View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewLayout('list')}
+                className={`p-1.5 sm:p-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+                  viewLayout === 'list'
+                    ? 'bg-white text-[#0B2545] shadow-xs border border-slate-200/80 font-black'
+                    : 'text-slate-400 hover:text-slate-700'
+                }`}
+                title="List View"
+                aria-label="List View"
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -511,6 +590,119 @@ export const SchoolsPage: React.FC = () => {
             >
               Reset Filters
             </button>
+          </div>
+        ) : viewLayout === 'list' ? (
+          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[700px]">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-[#F7FCFB] text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    <th className="py-3 px-4 w-14 text-center">Rank</th>
+                    <th className="py-3 px-4">School & Location</th>
+                    <th className="py-3 px-4 text-center">Students</th>
+                    <th className="py-3 px-4 text-center">Teams</th>
+                    <th className="py-3 px-4 text-center">Avg Score</th>
+                    <th className="py-3 px-4">Awards & Medals</th>
+                    <th className="py-3 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {secondarySchools.map((school) => {
+                    const rank = school.computedRank;
+                    return (
+                      <tr
+                        key={school.id}
+                        onClick={() => {
+                          setSelectedSchoolId(school.id);
+                          setModalSearch('');
+                          setModalCategoryFilter('ALL');
+                        }}
+                        className="hover:bg-teal-50/40 transition-colors cursor-pointer group"
+                      >
+                        <td className="py-3.5 px-4 text-center">
+                          <span className={`inline-flex items-center justify-center w-7 h-7 rounded-xl font-black text-xs ${
+                            rank === 1
+                              ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                              : rank === 2
+                              ? 'bg-slate-200 text-slate-800 border border-slate-300'
+                              : rank === 3
+                              ? 'bg-orange-100 text-orange-900 border border-orange-300'
+                              : 'bg-slate-100 text-slate-600 font-bold'
+                          }`}>
+                            #{rank}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex flex-col">
+                            <span className="font-extrabold text-slate-900 group-hover:text-[#03A695] transition-colors">
+                              {school.name}
+                            </span>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="font-mono text-[9px] font-bold text-slate-400 bg-slate-100 px-1 rounded border border-slate-200">
+                                {school.code}
+                              </span>
+                              <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                                <MapPin className="w-2.5 h-2.5 text-[#FD5E01]" />
+                                {school.city}, {school.state || 'UAE'}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-bold text-slate-700">
+                          {school.totalStudents}
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-bold text-slate-700">
+                          {school.totalTeams}
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-black text-[#03A695]">
+                          {school.averageScore}%
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {school.trophiesWon && school.trophiesWon.length > 0 && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 font-bold text-[10px]">
+                                <Trophy className="w-3 h-3 text-amber-600 fill-current" />
+                                {school.trophiesWon[0]}
+                                {school.trophiesWon.length > 1 && ` +${school.trophiesWon.length - 1}`}
+                              </span>
+                            )}
+                            <div className="flex items-center gap-1 text-[10px] font-bold">
+                              {school.goldMedals > 0 && (
+                                <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                                  🥇 {school.goldMedals}
+                                </span>
+                              )}
+                              {school.silverMedals > 0 && (
+                                <span className="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                                  🥈 {school.silverMedals}
+                                </span>
+                              )}
+                              {school.bronzeMedals > 0 && (
+                                <span className="text-orange-800 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">
+                                  🥉 {school.bronzeMedals}
+                                </span>
+                              )}
+                              {school.goldMedals === 0 && school.silverMedals === 0 && school.bronzeMedals === 0 && (
+                                <span className="text-slate-400 font-normal text-[11px]">—</span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-teal-50 text-[#03A695] group-hover:bg-[#03A695] group-hover:text-white text-xs font-bold transition-all shadow-xs"
+                          >
+                            <span>Roster</span>
+                            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -1081,6 +1273,136 @@ export const SchoolsPage: React.FC = () => {
           </div>
         </Modal>
       )}
+
+      {/* Add School Modal */}
+      <Modal
+        isOpen={isAddSchoolOpen}
+        onClose={() => setIsAddSchoolOpen(false)}
+        title="Enroll Educational Institution"
+        subtitle="Register a new school for Techno Talent Feast 2026 Dubai Grand Finale"
+      >
+        <form onSubmit={handleAddSchoolSubmit} className="space-y-4 text-xs">
+          <div>
+            <label className="block font-bold text-slate-700 uppercase mb-1">
+              School Name *
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Dubai College of Arts & Technology"
+              value={newSchoolName}
+              onChange={(e) => setNewSchoolName(e.target.value)}
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold text-slate-700 uppercase mb-1">
+                City
+              </label>
+              <input
+                type="text"
+                placeholder="Dubai"
+                value={newSchoolCity}
+                onChange={(e) => setNewSchoolCity(e.target.value)}
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
+              />
+            </div>
+            <div>
+              <label className="block font-bold text-slate-700 uppercase mb-1">
+                Country
+              </label>
+              <input
+                type="text"
+                value="UAE"
+                disabled
+                className="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl font-medium text-slate-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold text-slate-700 uppercase mb-1">
+                Principal Name
+              </label>
+              <input
+                type="text"
+                placeholder="Principal full name"
+                value={newSchoolPrincipal}
+                onChange={(e) => setNewSchoolPrincipal(e.target.value)}
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
+              />
+            </div>
+            <div>
+              <label className="block font-bold text-slate-700 uppercase mb-1">
+                Coordinator Name
+              </label>
+              <input
+                type="text"
+                placeholder="Competition coordinator"
+                value={newSchoolCoordinator}
+                onChange={(e) => setNewSchoolCoordinator(e.target.value)}
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold text-slate-700 uppercase mb-1">
+                Official Email
+              </label>
+              <input
+                type="email"
+                placeholder="contact@school.edu"
+                value={newSchoolEmail}
+                onChange={(e) => setNewSchoolEmail(e.target.value)}
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
+              />
+            </div>
+            <div>
+              <label className="block font-bold text-slate-700 uppercase mb-1">
+                Contact Phone
+              </label>
+              <input
+                type="text"
+                placeholder="+971 4 123 4567"
+                value={newSchoolPhone}
+                onChange={(e) => setNewSchoolPhone(e.target.value)}
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#03A695]"
+              />
+            </div>
+          </div>
+
+          <div className="p-3 bg-teal-50/70 border border-teal-200/60 rounded-xl text-[11px] text-[#007A6E]">
+            <p className="font-bold">Automated 12-Finalist Quota Allocation:</p>
+            <p className="mt-0.5 text-slate-600">
+              New institutions will automatically receive standard 2-finalist quotas across all 6 championship categories (Max 12 Finalists).
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddSchoolOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              disabled={isCreatingSchool}
+            >
+              {isCreatingSchool ? 'Enrolling...' : 'Enroll School'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

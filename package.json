@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:all": "concurrently \"node server/server.js\" \"vite\"",
-    "server": "node server/server.js",
+    "dev:all": "concurrently \"node --watch server/server.js\" \"vite\"",
+    "server": "node --watch server/server.js",
     "seed": "node server/seed.js",
     "start": "node server/server.js",
     "build": "node ./node_modules/vite/bin/vite.js build",
