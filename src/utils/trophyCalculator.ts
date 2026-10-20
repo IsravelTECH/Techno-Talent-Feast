@@ -288,3 +288,90 @@ export function calculateOverallSchoolStandings(participants: any[]): OverallSch
 
   return overallStandings;
 }
+
+export interface PodiumTiedGroup {
+  key: string;
+  categoryNumber: number;
+  categoryName: string;
+  score: number;
+  podiumRankAffected: 'Champion (Rank 1)' | '1st Runner-Up (Rank 2)' | '2nd Runner-Up (Rank 3)';
+  rankIndex: 1 | 2 | 3;
+  teams: any[];
+}
+
+/**
+ * Detects score ties strictly affecting the Top 3 Podium Ranks
+ * (Champion, 1st Runner-Up, 2nd Runner-Up) within each category.
+ * Lower-rank ties (4th, 5th, etc.) are strictly ignored.
+ */
+export function getPodiumTiedGroups(participants: any[]): PodiumTiedGroup[] {
+  const safeList = Array.isArray(participants) ? participants : [];
+  const evaluated = safeList.filter(
+    (p) => p && (p.status === 'SUBMITTED' || p.isScoreLocked || (typeof p.finalScore === 'number' && p.finalScore > 0))
+  );
+
+  const categories = [1, 2, 3, 4, 5, 6];
+  const podiumTiedGroups: PodiumTiedGroup[] = [];
+
+  categories.forEach((catNum) => {
+    // 1. Get all evaluated participants in this category and sort descending by finalScore
+    const catParticipants = evaluated
+      .filter((p) => getCategoryNumber(p) === catNum)
+      .sort((a, b) => Number(b.finalScore || 0) - Number(a.finalScore || 0));
+
+    if (catParticipants.length < 2) return;
+
+    // 2. Identify score distribution: group participants by exact score
+    const scoreMap = new Map<number, any[]>();
+    catParticipants.forEach((p) => {
+      const score = Number(p.finalScore || 0);
+      const list = scoreMap.get(score) || [];
+      list.push(p);
+      scoreMap.set(score, list);
+    });
+
+    // 3. Walk through sorted scores and check if any tie impacts top 3 positions
+    let currentRankIndex = 1; // 1-based rank (1 = Champion, 2 = 1st Runner-Up, 3 = 2nd Runner-Up)
+
+    for (const [score, teamsWithScore] of scoreMap.entries()) {
+      // If we've already exceeded podium positions (Rank 4 or lower), stop checking
+      if (currentRankIndex > 3) break;
+
+      // If 2 or more teams share this score, it's a tie
+      if (teamsWithScore.length >= 2) {
+        let label: 'Champion (Rank 1)' | '1st Runner-Up (Rank 2)' | '2nd Runner-Up (Rank 3)';
+        let rankNum: 1 | 2 | 3;
+
+        if (currentRankIndex === 1) {
+          label = 'Champion (Rank 1)';
+          rankNum = 1;
+        } else if (currentRankIndex === 2) {
+          label = '1st Runner-Up (Rank 2)';
+          rankNum = 2;
+        } else {
+          label = '2nd Runner-Up (Rank 3)';
+          rankNum = 3;
+        }
+
+        const categoryName = teamsWithScore[0].categoryName || CATEGORY_TRACK_INFO[catNum]?.name || `Category ${catNum}`;
+
+        podiumTiedGroups.push({
+          key: `${catNum}_${score}`,
+          categoryNumber: catNum,
+          categoryName,
+          score,
+          podiumRankAffected: label,
+          rankIndex: rankNum,
+          teams: teamsWithScore
+        });
+      }
+
+      // Advance rank index by the number of teams with this score
+      currentRankIndex += teamsWithScore.length;
+    }
+  });
+
+  // Sort by rankIndex ascending (Champion ties first, then 1st Runner-Up, then 2nd Runner-Up), then category
+  return podiumTiedGroups.sort((a, b) => a.rankIndex - b.rankIndex || a.categoryNumber - b.categoryNumber);
+}
+

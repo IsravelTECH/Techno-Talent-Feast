@@ -18,14 +18,7 @@ import {
 } from 'lucide-react';
 import { Modal } from '../components/common/Modal';
 import { getNormalizedTeamMembers } from '../utils/studentUtils';
-
-interface TiedGroup {
-  key: string;
-  categoryNumber: number;
-  categoryName: string;
-  score: number;
-  teams: Participant[];
-}
+import { getPodiumTiedGroups, PodiumTiedGroup } from '../utils/trophyCalculator';
 
 export const TieBreaksPage: React.FC = () => {
   const { participants, judges, sendTieBreakAlert, navigate } = useApp();
@@ -37,39 +30,9 @@ export const TieBreaksPage: React.FC = () => {
   const [customMessage, setCustomMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
 
-  // Group submitted participants by category and score to detect ties
+  // Group submitted participants strictly affecting Top 3 Podium Ranks (Champion, 1st Runner-Up, 2nd Runner-Up)
   const tiedGroups = useMemo(() => {
-    const map = new Map<string, Participant[]>();
-
-    participants.forEach((p) => {
-      const isSubmitted = p.status === 'SUBMITTED' || p.isScoreLocked;
-      const score = p.finalScore;
-      if (isSubmitted && typeof score === 'number' && score > 0) {
-        const catKey = `${p.categoryNumber || 1}_${score}`;
-        const existing = map.get(catKey) || [];
-        existing.push(p);
-        map.set(catKey, existing);
-      }
-    });
-
-    const groups: TiedGroup[] = [];
-    map.forEach((teams, key) => {
-      if (teams.length >= 2) {
-        const [catStr, scoreStr] = key.split('_');
-        const catNum = Number(catStr);
-        const score = Number(scoreStr);
-        const categoryName = teams[0].categoryName || `Category ${catNum}`;
-        groups.push({
-          key,
-          categoryNumber: catNum,
-          categoryName,
-          score,
-          teams
-        });
-      }
-    });
-
-    return groups.sort((a, b) => b.score - a.score || a.categoryNumber - b.categoryNumber);
+    return getPodiumTiedGroups(participants);
   }, [participants]);
 
   // Overall metrics
@@ -93,15 +56,15 @@ export const TieBreaksPage: React.FC = () => {
         });
         return matchingTeams.length > 0 ? { ...g, teams: matchingTeams } : null;
       })
-      .filter((g): g is TiedGroup => g !== null);
+      .filter((g): g is PodiumTiedGroup => g !== null);
   }, [tiedGroups, selectedCategoryFilter, searchQuery]);
 
-  const handleOpenAlertModal = (team: Participant, group: TiedGroup) => {
+  const handleOpenAlertModal = (team: Participant, group: PodiumTiedGroup) => {
     setSelectedTeamForAlert(team);
     const initialJudgeId = team.evaluatedByJudgeId || team.assignedJudgeId || 'JDG-01';
     setSelectedJudgeId(initialJudgeId);
     setCustomMessage(
-      `Tie detected in ${group.categoryName} at score ${group.score}/100. Two or more teams have identical marks. Please click "Request Mark Edit" on your scoring desk to re-evaluate criteria and break the tie.`
+      `Podium Tie detected in ${group.categoryName} (${group.podiumRankAffected}) at score ${group.score}/100. Teams are competing for official tournament podium awards. Please click "Request Mark Edit" on your scoring desk to re-evaluate criteria and break the tie.`
     );
   };
 
@@ -293,6 +256,15 @@ export const TieBreaksPage: React.FC = () => {
                   <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
                     {group.categoryName}
                   </h3>
+                  <span className={`text-xs font-black px-2.5 py-0.5 rounded-full shadow-xs ${
+                    group.rankIndex === 1
+                      ? 'bg-amber-500 text-white'
+                      : group.rankIndex === 2
+                      ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white border border-slate-400'
+                      : 'bg-amber-700 text-amber-50'
+                  }`}>
+                    {group.rankIndex === 1 ? '🥇 Champion Tie (Rank 1)' : group.rankIndex === 2 ? '🥈 1st Runner-Up Tie (Rank 2)' : '🥉 2nd Runner-Up Tie (Rank 3)'}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2">

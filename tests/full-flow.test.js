@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { getNormalizedTeamMembers, formatTeamStudentNames } from '../src/utils/studentUtils.ts';
-import { calculateOverallSchoolStandings, calculateCategorySchoolStandings } from '../src/utils/trophyCalculator.ts';
+import { calculateOverallSchoolStandings, calculateCategorySchoolStandings, getPodiumTiedGroups } from '../src/utils/trophyCalculator.ts';
 
 // Helper matching JudgeSinglePageScoring.tsx juror normalization logic
 function areJudgeIdsMatching(id1, id2) {
@@ -323,5 +323,88 @@ test('Suite 5: Live Backend API Health & Schema Checks', async (t) => {
     assert.equal(err, undefined);
     assert.equal(team.tieBreakNotice.targetJudgeId, 'JDG-01');
     assert.equal(team.tieBreakNotice.targetJudgeName, 'Official Competition Judge');
+  });
+});
+
+// -------------------------------------------------------------
+// TEST SUITE 6: Podium-Only Tie Detection Engine (Champion, 1st & 2nd Runner-Up)
+// -------------------------------------------------------------
+test('Suite 6: Podium-Only Tie Detection Engine (getPodiumTiedGroups)', async (t) => {
+  await t.test('6.1 Detects Rank 1 tie as Champion (Rank 1)', () => {
+    const participants = [
+      { id: 't1', teamId: 'T1', categoryNumber: 1, finalScore: 98, status: 'SUBMITTED', categoryName: 'Junior AI' },
+      { id: 't2', teamId: 'T2', categoryNumber: 1, finalScore: 98, status: 'SUBMITTED', categoryName: 'Junior AI' },
+      { id: 't3', teamId: 'T3', categoryNumber: 1, finalScore: 90, status: 'SUBMITTED', categoryName: 'Junior AI' },
+      { id: 't4', teamId: 'T4', categoryNumber: 1, finalScore: 85, status: 'SUBMITTED', categoryName: 'Junior AI' },
+    ];
+    const ties = getPodiumTiedGroups(participants);
+    assert.equal(ties.length, 1);
+    assert.equal(ties[0].podiumRankAffected, 'Champion (Rank 1)');
+    assert.equal(ties[0].rankIndex, 1);
+    assert.equal(ties[0].score, 98);
+    assert.equal(ties[0].teams.length, 2);
+  });
+
+  await t.test('6.2 Detects Rank 2 tie as 1st Runner-Up (Rank 2)', () => {
+    const participants = [
+      { id: 't1', teamId: 'T1', categoryNumber: 2, finalScore: 99, status: 'SUBMITTED', categoryName: 'Robotics' },
+      { id: 't2', teamId: 'T2', categoryNumber: 2, finalScore: 94, status: 'SUBMITTED', categoryName: 'Robotics' },
+      { id: 't3', teamId: 'T3', categoryNumber: 2, finalScore: 94, status: 'SUBMITTED', categoryName: 'Robotics' },
+      { id: 't4', teamId: 'T4', categoryNumber: 2, finalScore: 88, status: 'SUBMITTED', categoryName: 'Robotics' },
+    ];
+    const ties = getPodiumTiedGroups(participants);
+    assert.equal(ties.length, 1);
+    assert.equal(ties[0].podiumRankAffected, '1st Runner-Up (Rank 2)');
+    assert.equal(ties[0].rankIndex, 2);
+    assert.equal(ties[0].score, 94);
+    assert.equal(ties[0].teams.length, 2);
+  });
+
+  await t.test('6.3 Detects Rank 3 tie as 2nd Runner-Up (Rank 3)', () => {
+    const participants = [
+      { id: 't1', teamId: 'T1', categoryNumber: 3, finalScore: 99, status: 'SUBMITTED', categoryName: 'IoT' },
+      { id: 't2', teamId: 'T2', categoryNumber: 3, finalScore: 95, status: 'SUBMITTED', categoryName: 'IoT' },
+      { id: 't3', teamId: 'T3', categoryNumber: 3, finalScore: 90, status: 'SUBMITTED', categoryName: 'IoT' },
+      { id: 't4', teamId: 'T4', categoryNumber: 3, finalScore: 90, status: 'SUBMITTED', categoryName: 'IoT' },
+      { id: 't5', teamId: 'T5', categoryNumber: 3, finalScore: 82, status: 'SUBMITTED', categoryName: 'IoT' },
+    ];
+    const ties = getPodiumTiedGroups(participants);
+    assert.equal(ties.length, 1);
+    assert.equal(ties[0].podiumRankAffected, '2nd Runner-Up (Rank 3)');
+    assert.equal(ties[0].rankIndex, 3);
+    assert.equal(ties[0].score, 90);
+    assert.equal(ties[0].teams.length, 2);
+  });
+
+  await t.test('6.4 Strictly IGNORES Rank 4+ ties (lower rank ties do not trigger alert)', () => {
+    const participants = [
+      { id: 't1', teamId: 'T1', categoryNumber: 4, finalScore: 100, status: 'SUBMITTED', categoryName: 'Game Dev' }, // Rank 1 (Champion)
+      { id: 't2', teamId: 'T2', categoryNumber: 4, finalScore: 96, status: 'SUBMITTED', categoryName: 'Game Dev' },  // Rank 2 (1st Runner-Up)
+      { id: 't3', teamId: 'T3', categoryNumber: 4, finalScore: 92, status: 'SUBMITTED', categoryName: 'Game Dev' },  // Rank 3 (2nd Runner-Up)
+      { id: 't4', teamId: 'T4', categoryNumber: 4, finalScore: 85, status: 'SUBMITTED', categoryName: 'Game Dev' },  // Rank 4 (Tied)
+      { id: 't5', teamId: 'T5', categoryNumber: 4, finalScore: 85, status: 'SUBMITTED', categoryName: 'Game Dev' },  // Rank 4 (Tied)
+      { id: 't6', teamId: 'T6', categoryNumber: 4, finalScore: 80, status: 'SUBMITTED', categoryName: 'Game Dev' },  // Rank 6 (Tied)
+      { id: 't7', teamId: 'T7', categoryNumber: 4, finalScore: 80, status: 'SUBMITTED', categoryName: 'Game Dev' },  // Rank 6 (Tied)
+    ];
+    const ties = getPodiumTiedGroups(participants);
+    assert.equal(ties.length, 0, 'Ties for 4th and 6th place must be strictly ignored for podium purity');
+  });
+
+  await t.test('6.5 Three teams tied for Rank 1 occupy Ranks 1, 2, and 3; next score is Rank 4 and ignored', () => {
+    const participants = [
+      { id: 't1', teamId: 'T1', categoryNumber: 5, finalScore: 97, status: 'SUBMITTED', categoryName: 'Cybersecurity' },
+      { id: 't2', teamId: 'T2', categoryNumber: 5, finalScore: 97, status: 'SUBMITTED', categoryName: 'Cybersecurity' },
+      { id: 't3', teamId: 'T3', categoryNumber: 5, finalScore: 97, status: 'SUBMITTED', categoryName: 'Cybersecurity' },
+      // Rank 4 tie below:
+      { id: 't4', teamId: 'T4', categoryNumber: 5, finalScore: 89, status: 'SUBMITTED', categoryName: 'Cybersecurity' },
+      { id: 't5', teamId: 'T5', categoryNumber: 5, finalScore: 89, status: 'SUBMITTED', categoryName: 'Cybersecurity' },
+    ];
+    const ties = getPodiumTiedGroups(participants);
+    assert.equal(ties.length, 1);
+    assert.equal(ties[0].podiumRankAffected, 'Champion (Rank 1)');
+    assert.equal(ties[0].teams.length, 3);
+    // The tie at 89 is Rank 4, so it should not appear
+    const hasRank4Tie = ties.some(t => t.score === 89);
+    assert.equal(hasRank4Tie, false);
   });
 });
