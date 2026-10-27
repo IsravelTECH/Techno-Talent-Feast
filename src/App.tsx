@@ -27,7 +27,7 @@ import { ScoreRequestsPage } from './pages/ScoreRequestsPage';
 import { TieBreaksPage } from './pages/TieBreaksPage';
 
 export const App: React.FC = () => {
-  const { currentPage, currentRole } = useApp();
+  const { currentPage, currentRole, currentUser } = useApp();
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth >= 1024;
@@ -35,8 +35,8 @@ export const App: React.FC = () => {
     return true;
   });
 
-  // 1. Standalone Login Page
-  if (currentPage === 'login') {
+  // 1. Standalone Login Page (Default landing page for unauthenticated visitors)
+  if (!currentUser || currentPage === 'login') {
     return <LoginPage />;
   }
 

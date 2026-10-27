@@ -47,7 +47,7 @@ export interface ToastItem {
 }
 
 interface AppContextType {
-  currentUser: User;
+  currentUser: User | null;
   currentRole: UserRole;
   currentPage: string;
   selectedEvent: TTFEvent;
@@ -218,18 +218,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     'scoring', 'judge-completed', 'leaderboard', 'notifications', 'profile', 'login'
   ]);
 
-  // Helper to read initial page state on browser refresh or URL hash
+  // Helper to read initial page state on browser refresh or URL hash (Default to 'login' for unauthenticated visitors)
   const getInitialPage = (): string => {
     try {
+      const savedUser = localStorage.getItem('ttf_2026_current_user');
+      if (!savedUser) {
+        return 'login';
+      }
       const hash = window.location.hash.replace('#', '').trim();
-      if (hash && VALID_PAGES.has(hash)) return hash;
+      if (hash && VALID_PAGES.has(hash) && hash !== 'login') return hash;
       const savedPage = localStorage.getItem('ttf_2026_current_page');
-      if (savedPage && VALID_PAGES.has(savedPage)) return savedPage;
+      if (savedPage && VALID_PAGES.has(savedPage) && savedPage !== 'login') return savedPage;
+      const savedRole = localStorage.getItem('ttf_2026_current_role');
+      return savedRole === 'judge' ? 'judge-dashboard' : 'dashboard';
     } catch (e) {}
-    return 'dashboard';
+    return 'login';
   };
 
-  const [currentUser, setCurrentUser] = useState<User>(() => {
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
     try {
       const savedUser = localStorage.getItem('ttf_2026_current_user');
       if (savedUser) {
@@ -239,7 +245,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {}
-    return MOCK_USERS.admin;
+    return null;
   });
 
   const [currentRole, setCurrentRole] = useState<UserRole>(() => {
@@ -423,6 +429,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const onHashChange = () => {
       const hash = window.location.hash.replace('#', '').trim();
+      const hasSavedUser = Boolean(localStorage.getItem('ttf_2026_current_user'));
+      if (!hasSavedUser && hash !== 'login') {
+        setCurrentPage('login');
+        return;
+      }
       if (hash && VALID_PAGES.has(hash) && hash !== currentPage) {
         setCurrentPage(hash);
         try { localStorage.setItem('ttf_2026_current_page', hash); } catch (e) {}
@@ -460,6 +471,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const navigate = (page: string, params?: { compId?: string; partId?: string; schoolId?: string; projectNum?: number }) => {
+    const hasSavedUser = Boolean(currentUser || localStorage.getItem('ttf_2026_current_user'));
+    if (!hasSavedUser && page !== 'login') {
+      setCurrentPage('login');
+      try {
+        localStorage.setItem('ttf_2026_current_page', 'login');
+        window.location.hash = 'login';
+      } catch (e) {}
+      return;
+    }
+
     if (params?.compId) {
       setSelectedCompetitionId(params.compId);
       try { localStorage.setItem('ttf_2026_comp_id', params.compId); } catch (e) {}
@@ -525,6 +546,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
         setCurrentUser(adminUser as any);
         setCurrentRole('admin');
+        try {
+          localStorage.setItem('ttf_2026_current_user', JSON.stringify(adminUser));
+          localStorage.setItem('ttf_2026_current_role', 'admin');
+        } catch (e) {}
         navigate('dashboard');
         return { success: true };
       }
@@ -557,6 +582,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
           setCurrentUser(judgeUser as any);
           setCurrentRole('judge');
+          try {
+            localStorage.setItem('ttf_2026_current_user', JSON.stringify(judgeUser));
+            localStorage.setItem('ttf_2026_current_role', 'judge');
+          } catch (e) {}
           navigate('judge-dashboard');
           return { success: true };
         }
@@ -739,6 +768,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!res.success) {
         setCurrentRole('admin');
         setCurrentUser(MOCK_USERS.admin);
+        try {
+          localStorage.setItem('ttf_2026_current_user', JSON.stringify(MOCK_USERS.admin));
+          localStorage.setItem('ttf_2026_current_role', 'admin');
+        } catch (e) {}
         setCurrentPage('dashboard');
       }
     } else {
@@ -746,6 +779,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!res.success) {
         setCurrentRole('judge');
         setCurrentUser(MOCK_USERS.judge || MOCK_USERS.judgePriya);
+        try {
+          localStorage.setItem('ttf_2026_current_user', JSON.stringify(MOCK_USERS.judge || MOCK_USERS.judgePriya));
+          localStorage.setItem('ttf_2026_current_role', 'judge');
+        } catch (e) {}
         setCurrentPage('judge-dashboard');
       }
     }
@@ -758,6 +795,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('ttf_2026_current_role');
       window.location.hash = '';
     } catch (e) {}
+    setCurrentUser(null);
     setCurrentPage('login');
     addToast({
       type: 'info',
