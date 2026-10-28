@@ -39,60 +39,69 @@ export const LoginPage: React.FC = () => {
       </div>
 
       <div className="flex-1 flex items-center justify-center p-3 sm:p-6 lg:p-8">
-        <div className="max-w-5xl w-full bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-0 lg:min-h-[620px]">
+        <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl shadow-slate-900/10 border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-0">
           {/* Left Column: Brand Hero Showcase */}
-          <div className="lg:col-span-6 bg-gradient-to-br from-[#03A695] via-[#004899] to-[#0B2545] p-5 sm:p-8 lg:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="lg:col-span-6 bg-gradient-to-br from-[#03A695] via-[#004899] to-[#0B2545] p-6 sm:p-8 lg:p-10 text-white flex flex-col justify-between relative overflow-hidden">
             {/* Background Decorative Rings */}
             <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/5 blur-2xl pointer-events-none" />
             <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-[#FD5E01]/15 blur-2xl pointer-events-none" />
 
-            <div>
-              <div className="flex items-center justify-between">
-                <TechnoLogo variant="white" size="lg" />
-                <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-blue-100 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#FD5E01]" />
-                  Grand Edition
-                </span>
-              </div>
+            {/* Top Logo & Badge */}
+            <div className="flex items-center justify-between relative z-10">
+              <TechnoLogo variant="white" size="lg" />
+              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-blue-100 flex items-center gap-1.5 shadow-xs backdrop-blur-xs">
+                <span className="w-2 h-2 rounded-full bg-[#FD5E01] animate-pulse" />
+                Grand Edition
+              </span>
+            </div>
 
-              <div className="mt-6 sm:mt-10">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/10 text-orange-200 border border-white/15 text-xs font-bold tracking-wide uppercase mb-3 sm:mb-4">
-                  <Sparkles className="w-3.5 h-3.5 text-[#FD5E01]" />
-                  Powered by TechnoSchool
-                </div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
-                  TECHNO TALENT <span className="text-[#FD5E01]">FEST</span>
-                </h1>
-                <p className="text-blue-100 text-xs sm:text-sm mt-2 sm:mt-3 leading-relaxed">
-                  Manage competitions, evaluate student talent with dynamic rubrics, and track leaderboard rankings in real time.
-                </p>
+            {/* Middle Content Hero */}
+            <div className="my-auto py-6 relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/10 text-orange-200 border border-white/15 text-[11px] font-bold tracking-wide uppercase mb-3">
+                <Sparkles className="w-3.5 h-3.5 text-[#FD5E01]" />
+                Powered by TechnoSchool
               </div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+                TECHNO TALENT <span className="text-[#FD5E01]">FEST</span>
+              </h1>
+              <p className="text-blue-100 text-xs sm:text-sm mt-2 leading-relaxed">
+                Manage competitions, evaluate student talent with dynamic rubrics, and track leaderboard rankings in real time.
+              </p>
 
-              {/* Key Features List (hidden on small mobile screens to bring form into immediate view) */}
-              <div className="mt-6 sm:mt-8 space-y-2.5 sm:space-y-3 hidden sm:block">
+              {/* Key Features List */}
+              <div className="mt-5 space-y-2 hidden sm:block">
                 {[
                   'Live multi-criteria scoring with automatic 100-point calculation',
                   'Instant real-time leaderboard and administrator review',
                   'Strict 2-role architecture: Administration and Judges only',
                   'Instant live synchronization across all competition arenas'
                 ].map((feature, idx) => (
-                  <div key={idx} className="flex items-center gap-3 text-xs text-blue-100">
+                  <div key={idx} className="flex items-center gap-2.5 text-xs text-blue-100 bg-white/5 border border-white/10 rounded-xl px-3 py-2 backdrop-blur-xs">
                     <CheckCircle2 className="w-4 h-4 text-[#FD5E01] shrink-0" />
-                    <span>{feature}</span>
+                    <span className="leading-tight">{feature}</span>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Bottom Anchor */}
+            <div className="pt-4 border-t border-white/15 flex items-center justify-between text-[11px] text-blue-200 relative z-10">
+              <span className="flex items-center gap-1.5 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                Championship Portal
+              </span>
+              <span className="font-semibold text-white/80">Dubai, UAE • 2026</span>
+            </div>
           </div>
 
-          {/* Right Column: Login Card & Demo Quick Access */}
-          <div className="lg:col-span-6 p-5 sm:p-8 lg:p-12 flex flex-col justify-between bg-white">
-            <div>
+          {/* Right Column: Sign In Workspace */}
+          <div className="lg:col-span-6 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white">
+            <div className="w-full max-w-sm mx-auto">
               <div className="mb-6">
-                <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">
                   Account Sign In
                 </h2>
-                <p className="text-xs text-[#64748B] mt-1">
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
                   Enter your verified credentials to access your competition workspace
                 </p>
               </div>
@@ -115,7 +124,7 @@ export const LoginPage: React.FC = () => {
                       type="text"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695] transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695] transition-all"
                       placeholder="e.g. JDG-01 or admin@technoschool.in"
                       required
                     />
@@ -132,15 +141,15 @@ export const LoginPage: React.FC = () => {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695] transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695] transition-all"
                       placeholder="••••••••••••"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                <div className="flex items-center justify-between pt-0.5">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={rememberMe}
@@ -154,7 +163,7 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-4 bg-[#03A695] hover:bg-[#004899] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-teal-900/15 flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer disabled:opacity-60"
+                  className="w-full py-3 px-4 bg-[#03A695] hover:bg-[#008C7E] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-teal-900/15 flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer disabled:opacity-60"
                 >
                   {loading ? (
                     <>
@@ -169,15 +178,15 @@ export const LoginPage: React.FC = () => {
                   )}
                 </button>
               </form>
-            </div>
 
-            {/* Official Security Notice */}
-            <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-              <span className="flex items-center gap-1.5 font-medium">
-                <Lock className="w-3.5 h-3.5 text-[#03A695]" />
-                Encrypted Competition Session
-              </span>
-              <span className="font-semibold text-slate-500">TTF 2026</span>
+              {/* Official Security Notice */}
+              <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Lock className="w-3.5 h-3.5 text-[#03A695]" />
+                  Encrypted Competition Session
+                </span>
+                <span className="font-semibold text-slate-500">TTF 2026</span>
+              </div>
             </div>
           </div>
         </div>
