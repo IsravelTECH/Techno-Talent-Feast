@@ -220,6 +220,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     'scoring', 'judge-completed', 'leaderboard', 'notifications', 'profile', 'login'
   ]);
 
+  // Strict whitelist of pages that Judges are authorized to view
+  const JUDGE_ALLOWED_PAGES = new Set(['scoring', 'judge-dashboard', 'profile']);
+
   // Helper to read initial page state on browser refresh or URL hash (Default to 'login' for unauthenticated visitors)
   const getInitialPage = (): string => {
     try {
@@ -227,12 +230,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!savedUser) {
         return 'login';
       }
+      const savedRole = localStorage.getItem('ttf_2026_current_role');
       const hash = window.location.hash.replace('#', '').trim();
+
+      // If user is a Judge, strictly restrict to Judge-authorized routes
+      if (savedRole === 'judge') {
+        if (hash && JUDGE_ALLOWED_PAGES.has(hash)) {
+          return hash === 'judge-dashboard' ? 'scoring' : hash;
+        }
+        const savedPage = localStorage.getItem('ttf_2026_current_page');
+        if (savedPage && JUDGE_ALLOWED_PAGES.has(savedPage)) {
+          return savedPage === 'judge-dashboard' ? 'scoring' : savedPage;
+        }
+        return 'scoring';
+      }
+
       if (hash && VALID_PAGES.has(hash) && hash !== 'login') return hash;
       const savedPage = localStorage.getItem('ttf_2026_current_page');
       if (savedPage && VALID_PAGES.has(savedPage) && savedPage !== 'login') return savedPage;
-      const savedRole = localStorage.getItem('ttf_2026_current_role');
-      return savedRole === 'judge' ? 'judge-dashboard' : 'dashboard';
+      return savedRole === 'judge' ? 'scoring' : 'dashboard';
     } catch (e) {}
     return 'login';
   };
@@ -436,6 +452,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCurrentPage('login');
         return;
       }
+
+      // Strict Judge Route Guard: Intercept any attempt by Judges to access Admin routes
+      if (currentRole === 'judge') {
+        if (!JUDGE_ALLOWED_PAGES.has(hash)) {
+          setCurrentPage('scoring');
+          try {
+            localStorage.setItem('ttf_2026_current_page', 'scoring');
+            window.location.hash = 'scoring';
+          } catch (e) {}
+          return;
+        }
+      }
+
       if (hash && VALID_PAGES.has(hash) && hash !== currentPage) {
         setCurrentPage(hash);
         try { localStorage.setItem('ttf_2026_current_page', hash); } catch (e) {}
@@ -443,7 +472,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, [currentPage]);
+  }, [currentPage, currentRole]);
 
   const addToast = (toastOrMessage: any, toastType?: 'success' | 'info' | 'warning' | 'error') => {
     const id = 'toast-' + Math.random().toString(36).substring(2, 9);
@@ -483,6 +512,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
+    let targetPage = page;
+    // Strict RBAC: Force Judges back to scoring if they attempt to navigate to Admin pages
+    if (currentRole === 'judge' && !JUDGE_ALLOWED_PAGES.has(targetPage)) {
+      targetPage = 'scoring';
+    }
+
     if (params?.compId) {
       setSelectedCompetitionId(params.compId);
       try { localStorage.setItem('ttf_2026_comp_id', params.compId); } catch (e) {}
@@ -495,10 +530,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (params?.schoolId) setSelectedSchoolId(params.schoolId);
     if (params?.projectNum) setSelectedProjectNumber(params.projectNum);
 
-    setCurrentPage(page);
+    setCurrentPage(targetPage);
     try {
-      localStorage.setItem('ttf_2026_current_page', page);
-      window.location.hash = page;
+      localStorage.setItem('ttf_2026_current_page', targetPage);
+      window.location.hash = targetPage;
     } catch (e) {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

@@ -14,7 +14,8 @@ const SEED_NOTIFICATIONS = [
     timeAgo: '2m',
     type: 'score',
     isRead: false,
-    actionLink: 'results'
+    actionLink: 'results',
+    recipientRole: 'admin'
   },
   {
     id: 'notif-02',
@@ -24,7 +25,8 @@ const SEED_NOTIFICATIONS = [
     timeAgo: '15m',
     type: 'competition',
     isRead: false,
-    actionLink: 'participants'
+    actionLink: 'participants',
+    recipientRole: 'admin'
   },
   {
     id: 'notif-03',
@@ -34,7 +36,8 @@ const SEED_NOTIFICATIONS = [
     timeAgo: '30m',
     type: 'announcement',
     isRead: true,
-    actionLink: 'dashboard'
+    actionLink: 'scoring',
+    recipientRole: 'judge'
   }
 ];
 
@@ -75,6 +78,8 @@ router.get('/', async (req, res) => {
     if (count === 0) {
       await Notification.insertMany(SEED_NOTIFICATIONS);
     } else {
+      await Notification.updateOne({ id: 'notif-01' }, { $set: { recipientRole: 'admin', actionLink: 'results' } });
+      await Notification.updateOne({ id: 'notif-02' }, { $set: { recipientRole: 'admin', actionLink: 'participants' } });
       await cleanupDuplicateNotifications();
     }
 

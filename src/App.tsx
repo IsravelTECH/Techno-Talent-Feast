@@ -42,10 +42,18 @@ export const App: React.FC = () => {
 
   // 2. Main Workspace Layout with Sidebar + Header + Dynamic Page Content
   const renderCurrentPage = () => {
+    // Strict RBAC Enforcement: Judges can NEVER mount or view Admin components under any circumstances
+    if (currentRole === 'judge') {
+      if (currentPage === 'profile') {
+        return <ProfilePage />;
+      }
+      return <JudgeSinglePageScoring />;
+    }
+
     switch (currentPage) {
       // Administration Pages
       case 'dashboard':
-        return currentRole === 'judge' ? <JudgeSinglePageScoring /> : <AdminDashboardPage />;
+        return <AdminDashboardPage />;
       case 'events':
         return <EventsPage />;
       case 'event-detail':

@@ -59,6 +59,17 @@ const seedDatabase = async () => {
         status: 'ACTIVE'
       },
       {
+        id: 'usr-admin-02',
+        name: 'Techno Admin',
+        email: 'admin@technoschool.edu',
+        password: 'admin@1234',
+        role: 'admin',
+        title: 'Central System Administrator',
+        organization: 'TechnoSchool Central Directorate',
+        phone: '+971 50 123 4567',
+        status: 'ACTIVE'
+      },
+      {
         id: 'usr-judge-01',
         judgeId: 'JDG-01',
         name: 'Official Competition Judge',

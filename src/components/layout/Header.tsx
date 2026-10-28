@@ -36,26 +36,44 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
   const userNotifications = useMemo(() => {
     return notifications.filter((n) => {
       const role = (n.recipientRole || 'ALL').trim().toLowerCase();
-      if (role === 'all') return true;
 
       if (currentRole === 'admin') {
-        return role === 'admin';
+        return role === 'admin' || role === 'all';
       }
 
       if (currentRole === 'judge') {
-        if (role === 'judge') return true;
+        // Exclude notifications intended solely for administrators
+        if (role === 'admin') return false;
+
+        // Exclude notifications with links pointing to administrative pages
+        if (
+          n.actionLink &&
+          ['participants', 'schools', 'results', 'dashboard', 'roles', 'assignments', 'categories', 'projects'].includes(
+            n.actionLink
+          )
+        ) {
+          return false;
+        }
+
+        // Judge-specific match: by judgeId or userId
         const currentJudgeId = (currentUser?.judgeId || '').trim().toLowerCase();
         const currentUserId = (currentUser?.id || '').trim().toLowerCase();
-        if (role === currentJudgeId || role === currentUserId) return true;
+        if (currentJudgeId && role === currentJudgeId) return true;
+        if (currentUserId && role === currentUserId) return true;
+
         const digitsRole = role.replace(/\D/g, '');
         const digitsJudge = currentJudgeId.replace(/\D/g, '');
         if (digitsRole && digitsJudge && parseInt(digitsRole, 10) === parseInt(digitsJudge, 10)) {
           return true;
         }
+
+        // Broad judge broadcast
+        if (role === 'judge') return true;
+
         return false;
       }
 
-      return true;
+      return role === 'all';
     });
   }, [notifications, currentRole, currentUser]);
 
@@ -165,7 +183,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
                         onClick={() => {
                           markNotificationAsRead(notif.id);
                           if (notif.actionLink) {
-                            navigate(notif.actionLink);
+                            if (currentRole === 'judge') {
+                              const allowed = notif.actionLink === 'profile' ? 'profile' : 'scoring';
+                              navigate(allowed);
+                            } else {
+                              navigate(notif.actionLink);
+                            }
                             setShowNotifications(false);
                           }
                         }}
@@ -220,7 +243,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-1.5 z-50 animate-scale-up">
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-xs font-bold text-slate-900">{currentUser?.name || 'Administrator'}</p>
-                  <p className="text-[11px] text-slate-500 truncate">{currentUser?.email || 'admin@technoschool.in'}</p>
+                  <p className="text-[11px] text-slate-500 truncate">{currentUser?.email || ''}</p>
                   <div className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E6F7F5] text-[#03A695] text-[10px] font-bold">
                     <span>{currentUser?.organization || 'TechnoSchool Central Directorate'}</span>
                   </div>

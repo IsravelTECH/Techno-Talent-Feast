@@ -44,21 +44,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const userNotifications = React.useMemo(() => {
     return notifications.filter((n) => {
       const role = (n.recipientRole || 'ALL').trim().toLowerCase();
-      if (role === 'all') return true;
-      if (currentRole === 'admin') return role === 'admin';
+      if (currentRole === 'admin') return role === 'admin' || role === 'all';
       if (currentRole === 'judge') {
-        if (role === 'judge') return true;
+        if (role === 'admin') return false;
+        if (
+          n.actionLink &&
+          ['participants', 'schools', 'results', 'dashboard', 'roles', 'assignments', 'categories', 'projects'].includes(
+            n.actionLink
+          )
+        ) {
+          return false;
+        }
         const currentJudgeId = (currentUser?.judgeId || '').trim().toLowerCase();
         const currentUserId = (currentUser?.id || '').trim().toLowerCase();
-        if (role === currentJudgeId || role === currentUserId) return true;
+        if (currentJudgeId && role === currentJudgeId) return true;
+        if (currentUserId && role === currentUserId) return true;
         const digitsRole = role.replace(/\D/g, '');
         const digitsJudge = currentJudgeId.replace(/\D/g, '');
         if (digitsRole && digitsJudge && parseInt(digitsRole, 10) === parseInt(digitsJudge, 10)) {
           return true;
         }
+        if (role === 'judge') return true;
         return false;
       }
-      return true;
+      return role === 'all';
     });
   }, [notifications, currentRole, currentUser]);
 

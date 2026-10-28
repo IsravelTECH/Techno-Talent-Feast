@@ -130,7 +130,7 @@ export const LoginPage: React.FC = () => {
               <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
                 <div>
                   <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Username (Judge ID) or Email
+                    Username or Email
                   </label>
                   <div className="relative group">
                     <Mail className="w-4 h-4 text-slate-400 group-focus-within:text-[#03A695] absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none" />
@@ -139,7 +139,7 @@ export const LoginPage: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695] transition-all"
-                      placeholder="e.g. JDG-01 or admin@technoschool.in"
+                      placeholder="e.g. example@gmail.com or JDG-01"
                       autoComplete="username"
                       autoCapitalize="none"
                       autoCorrect="off"
