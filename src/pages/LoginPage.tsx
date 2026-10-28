@@ -3,8 +3,6 @@ import { useApp } from '../context/AppContext';
 import { TechnoLogo } from '../components/common/TechnoLogo';
 import { api } from '../services/api';
 import {
-  ShieldCheck,
-  UserCheck,
   ArrowRight,
   Lock,
   Mail,
@@ -16,8 +14,8 @@ import {
 
 export const LoginPage: React.FC = () => {
   const { loginWithCredentials } = useApp();
-  const [email, setEmail] = useState('isravel@gmail.com');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -59,18 +57,6 @@ export const LoginPage: React.FC = () => {
     setLoading(false);
     if (!res.success) {
       setError(res.error || 'Invalid credentials. Please verify your email and password.');
-    }
-  };
-
-  const handlePersonaClick = async (targetEmail: string, targetPass: string) => {
-    setEmail(targetEmail);
-    setPassword(targetPass);
-    setError(null);
-    setLoading(true);
-    const res = await loginWithCredentials(targetEmail, targetPass);
-    setLoading(false);
-    if (!res.success) {
-      setError(res.error || 'Could not authenticate persona.');
     }
   };
 
@@ -159,7 +145,7 @@ export const LoginPage: React.FC = () => {
                   Account Sign In
                 </h2>
                 <p className="text-xs text-[#64748B] mt-1">
-                  Enter your verified credentials or select quick-launch persona below
+                  Enter your verified credentials to access your competition workspace
                 </p>
               </div>
 
@@ -182,19 +168,16 @@ export const LoginPage: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 bg-[#F7FCFB] border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#03A695]/20 focus:border-[#03A695] transition-all"
-                      placeholder="e.g. JDG-12, JDG-01 or isravel@gmail.com"
+                      placeholder="e.g. JDG-01 or admin@technoschool.in"
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                      Password
-                    </label>
-                    <span className="text-[10px] text-slate-400 font-medium">Judge format: JDG-XX-firstname</span>
-                  </div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Password
+                  </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
@@ -240,56 +223,13 @@ export const LoginPage: React.FC = () => {
               </form>
             </div>
 
-            {/* Quick Demo Personas with MongoDB Atlas credentials */}
-            <div className="mt-8 pt-6 border-t border-slate-100">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  Verified Competition Personas
-                </span>
-                <span className="text-[11px] font-semibold text-[#FD5E01]">Atlas MongoDB Connected</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handlePersonaClick('isravel@gmail.com', '123456')}
-                  className="p-3 sm:p-3.5 rounded-2xl border-2 border-teal-200 bg-[#E6F7F5]/80 hover:bg-[#E6F7F5] text-left transition-all group cursor-pointer shadow-xs disabled:opacity-50"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#03A695] text-white flex items-center justify-center font-bold shrink-0">
-                      <ShieldCheck className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-xs font-black text-[#0B2545] group-hover:text-[#03A695] block truncate">
-                        ADMINISTRATION
-                      </span>
-                      <p className="text-[10px] text-slate-500 font-semibold truncate">isravel@gmail.com</p>
-                    </div>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handlePersonaClick('JDG-01', 'JDG-01-Priya')}
-                  className="p-3 sm:p-3.5 rounded-2xl border-2 border-orange-200 bg-[#FFF3EC]/90 hover:bg-[#FFF3EC] text-left transition-all group cursor-pointer shadow-xs disabled:opacity-50"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#FD5E01] text-white flex items-center justify-center font-bold shrink-0">
-                      <UserCheck className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-xs font-black text-amber-950 group-hover:text-[#FD5E01] block truncate">
-                        JUDGE ROLE
-                      </span>
-                      <p className="text-[10px] text-slate-500 font-semibold truncate font-mono">
-                        JDG-01 • JDG-01-Priya
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              </div>
+            {/* Official Security Notice */}
+            <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Lock className="w-3.5 h-3.5 text-[#03A695]" />
+                Encrypted Competition Session
+              </span>
+              <span className="font-semibold text-slate-500">TTF 2026</span>
             </div>
           </div>
         </div>
