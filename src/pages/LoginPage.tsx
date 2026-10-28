@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { TechnoLogo } from '../components/common/TechnoLogo';
-import { api } from '../services/api';
 import {
   ArrowRight,
   Lock,
@@ -19,35 +18,6 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [liveStats, setLiveStats] = useState<{
-    totalTeams: number;
-    totalSchools: number;
-    totalCategories: number;
-  }>({
-    totalTeams: 576,
-    totalSchools: 48,
-    totalCategories: 6
-  });
-
-  useEffect(() => {
-    let isMounted = true;
-    api.getDashboardStats()
-      .then((res) => {
-        if (isMounted && res && res.stats) {
-          setLiveStats({
-            totalTeams: res.stats.totalTeams || 576,
-            totalSchools: res.stats.totalSchools || 48,
-            totalCategories: (res.stats as any).totalCategories || 6
-          });
-        }
-      })
-      .catch((err) => {
-        console.warn('Dashboard stats ticker fallback:', err);
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,35 +74,13 @@ export const LoginPage: React.FC = () => {
                   'Live multi-criteria scoring with automatic 100-point calculation',
                   'Instant real-time leaderboard and administrator review',
                   'Strict 2-role architecture: Administration and Judges only',
-                  'Real-time persistence backed by MongoDB Atlas'
+                  'Instant live synchronization across all competition arenas'
                 ].map((feature, idx) => (
                   <div key={idx} className="flex items-center gap-3 text-xs text-blue-100">
                     <CheckCircle2 className="w-4 h-4 text-[#FD5E01] shrink-0" />
                     <span>{feature}</span>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* Bottom Stat Ticker */}
-            <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/15 grid grid-cols-3 gap-2 sm:gap-4 text-center">
-              <div>
-                <p className="text-xl sm:text-2xl font-black text-white">
-                  {liveStats.totalTeams.toLocaleString()}
-                </p>
-                <p className="text-[10px] sm:text-[11px] text-blue-200 font-medium mt-0.5">Enrolled Teams</p>
-              </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-black text-[#FD5E01]">
-                  {liveStats.totalSchools}
-                </p>
-                <p className="text-[10px] sm:text-[11px] text-blue-200 font-medium mt-0.5">Member Schools</p>
-              </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-black text-white">
-                  {liveStats.totalCategories}
-                </p>
-                <p className="text-[10px] sm:text-[11px] text-blue-200 font-medium mt-0.5">Competitions</p>
               </div>
             </div>
           </div>
