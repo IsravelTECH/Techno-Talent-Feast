@@ -145,6 +145,8 @@ interface AppContextType {
   // Authentication & Dynamic Atlas Actions
   loginWithCredentials: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   createJudge: (judgeData: any) => Promise<{ success: boolean; message?: string; error?: string }>;
+  bulkImportJudges: (judgesData: any[]) => Promise<{ success: boolean; count?: number; message?: string; error?: string; errors?: any[] }>;
+  bulkImportParticipants: (teamsData: any[]) => Promise<{ success: boolean; count?: number; message?: string; error?: string; errors?: any[] }>;
   updateJudge: (id: string, updates: any) => Promise<{ success: boolean; message?: string; error?: string }>;
   deleteJudge: (id: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   toggleJudgeStatus: (id: string, currentStatus: string) => Promise<{ success: boolean; message?: string; error?: string }>;
@@ -522,11 +524,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             message: `Welcome, ${u.name}. Full competition oversight active.`
           });
         } else {
-          navigate('judge-dashboard');
+          navigate('scoring');
           addToast({
             type: 'success',
             title: 'Logged in as Judge',
-            message: `Welcome ${u.name}. Single-page mark entry active.`
+            message: `Welcome ${u.name}. Live team evaluation active.`
           });
         }
         return { success: true };
@@ -613,6 +615,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addToast({
         type: 'error',
         title: 'Judge Creation Failed',
+        message: err.message || 'Error communicating with database.'
+      });
+      return { success: false, error: err.message };
+    }
+  };
+
+  const bulkImportJudges = async (judgesData: any[]) => {
+    try {
+      const res = await api.bulkCreateJudges(judgesData);
+      if (res.success && res.judges) {
+        setJudges((prev) => [...res.judges, ...prev]);
+        addToast({
+          type: 'success',
+          title: 'Judges Imported Successfully',
+          message: `Imported ${res.count} judge(s) into roster.`
+        });
+        return { success: true, count: res.count, message: res.message, errors: res.errors };
+      }
+      return { success: false, error: 'Could not import judges.' };
+    } catch (err: any) {
+      addToast({
+        type: 'error',
+        title: 'Judge Import Failed',
+        message: err.message || 'Error communicating with database.'
+      });
+      return { success: false, error: err.message };
+    }
+  };
+
+  const bulkImportParticipants = async (teamsData: any[]) => {
+    try {
+      const res = await api.bulkCreateTeams(teamsData);
+      if (res.success && res.teams) {
+        setParticipants((prev) => [...res.teams, ...prev]);
+        addToast({
+          type: 'success',
+          title: 'Participants Imported Successfully',
+          message: `Imported ${res.count} participant team(s).`
+        });
+        return { success: true, count: res.count, message: res.message, errors: res.errors };
+      }
+      return { success: false, error: 'Could not import participants.' };
+    } catch (err: any) {
+      addToast({
+        type: 'error',
+        title: 'Participant Import Failed',
         message: err.message || 'Error communicating with database.'
       });
       return { success: false, error: err.message };
@@ -783,7 +831,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           localStorage.setItem('ttf_2026_current_user', JSON.stringify(MOCK_USERS.judge || MOCK_USERS.judgePriya));
           localStorage.setItem('ttf_2026_current_role', 'judge');
         } catch (e) {}
-        setCurrentPage('judge-dashboard');
+        setCurrentPage('scoring');
       }
     }
   };
@@ -2000,6 +2048,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginAs,
         loginWithCredentials,
         createJudge,
+        bulkImportJudges,
+        bulkImportParticipants,
         updateJudge,
         deleteJudge,
         toggleJudgeStatus,

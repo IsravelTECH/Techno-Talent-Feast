@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
 import { UserAvatar } from '../components/common/UserAvatar';
+import { parseCSV, downloadCSV } from '../utils/csvUtils';
 import {
   Users,
   Search,
@@ -31,7 +32,11 @@ import {
   ChevronLeft,
   GraduationCap,
   LayoutGrid,
-  List
+  List,
+  FileSpreadsheet,
+  CheckCircle,
+  XCircle,
+  Loader2
 } from 'lucide-react';
 import {
   CATEGORY_CATALOG,
@@ -51,7 +56,9 @@ export const ParticipantsPage: React.FC = () => {
     refreshData,
     isLoadingData,
     registerTeamWithProject,
-    updateParticipantProject
+    updateParticipantProject,
+    addToast,
+    bulkImportParticipants
   } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,6 +69,12 @@ export const ParticipantsPage: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const pageSize = 10;
+
+  // Import State
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [parsedParticipants, setParsedParticipants] = useState<any[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Modals for project selection and team registration
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -183,7 +196,11 @@ export const ParticipantsPage: React.FC = () => {
   // Real Dynamic CSV Exporter
   const handleExportCSV = () => {
     if (filteredParticipants.length === 0) {
-      alert('No participant records to export.');
+      addToast({
+        type: 'info',
+        title: 'No Records',
+        message: 'No participant records match current filter to export.'
+      });
       return;
     }
 
@@ -202,28 +219,133 @@ export const ParticipantsPage: React.FC = () => {
     ];
 
     const rows = filteredParticipants.map((p) => [
-      `"${p.teamId || ''}"`,
-      `"${p.participantId || ''}"`,
-      `"${(p.teamName || p.name || '').replace(/"/g, '""')}"`,
-      `"${(p.name || '').replace(/"/g, '""')}"`,
-      `"${(p.schoolName || '').replace(/"/g, '""')}"`,
+      p.teamId || '',
+      p.participantId || '',
+      p.teamName || p.name || '',
+      p.name || '',
+      p.schoolName || '',
       p.grade || 8,
-      `"${(p.competitionName || p.categoryName || 'Innovation Challenge').replace(/"/g, '""')}"`,
-      `"P${p.categoryNumber || 1}-0${p.projectNumber || 1}"`,
-      `"${(p.projectTitle || '').replace(/"/g, '""')}"`,
+      p.competitionName || p.categoryName || 'Innovation Challenge',
+      `P${p.categoryNumber || 1}-0${p.projectNumber || 1}`,
+      p.projectTitle || '',
       p.status || 'PENDING',
       p.finalScore || p.percentage || 0
     ]);
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    downloadCSV(
+      `TTF2026_Participants_${new Date().toISOString().slice(0, 10)}.csv`,
+      headers,
+      rows
+    );
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `TTF2026_Participants_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    addToast({
+      type: 'success',
+      title: 'Export Complete',
+      message: `Exported ${filteredParticipants.length} participant record(s) to CSV.`
+    });
+  };
+
+  // Download Sample CSV Template for Participants
+  const handleDownloadSampleTemplate = () => {
+    const headers = [
+      'Team ID',
+      'Team Name',
+      'Student Leader',
+      'School Name',
+      'Grade',
+      'Competition Track',
+      'Project Title'
+    ];
+    const sampleRows = [
+      ['TM-901', 'AI Explorers', 'Fatima Al-Mansoor', 'Techno Dubai Academy', 8, 'Robotics & AI', 'Autonomous Sorting Robot'],
+      ['TM-902', 'Solar Pioneers', 'Zayd Ibrahim', 'Dubai International School', 7, 'Clean Tech & Sustainability', 'Solar Powered Hydroponics'],
+      ['TM-903', 'Code Crafters', 'Rohan Mehta', 'Cambridge High School', 9, 'Coding & Software', 'Smart Campus Attendance System']
+    ];
+    downloadCSV('Participants_Roster_Template.csv', headers, sampleRows);
+  };
+
+  // Handle CSV File Selection & Parse for Participants
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportFile(file);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = (event.target?.result as string) || '';
+      const { headers, rows } = parseCSV(text);
+
+      if (rows.length === 0) {
+        addToast({
+          type: 'error',
+          title: 'Empty File',
+          message: 'The uploaded CSV file contains no data rows.'
+        });
+        setParsedParticipants([]);
+        return;
+      }
+
+      // Map headers flexibly
+      const normalized = rows.map((r, idx) => {
+        const teamId = (r['Team ID'] || r['teamId'] || r['Participant ID'] || `TM-IMP-${idx + 1}`).trim().toUpperCase();
+        const teamName = (r['Team / Entry Name'] || r['Team Name'] || r['teamName'] || r['Student Leader'] || r['name'] || '').trim();
+        const studentLeader = (r['Student Leader'] || r['name'] || teamName).trim();
+        const schoolName = (r['School Name'] || r['School'] || r['schoolName'] || '').trim();
+        const grade = Number(r['Grade'] || r['grade']) || 8;
+        const competitionName = (r['Competition Track'] || r['Category'] || r['competitionName'] || r['categoryName'] || 'Innovation Challenge').trim();
+        const projectTitle = (r['Project Title'] || r['projectTitle'] || 'Assigned Championship Project').trim();
+        const status = (r['Evaluation Status'] || r['Status'] || r['status'] || 'PENDING').trim().toUpperCase();
+
+        const isValid = !!teamId && !!teamName && !!schoolName;
+        let errorMsg = '';
+        if (!teamId) errorMsg = 'Missing Team ID';
+        else if (!teamName) errorMsg = 'Missing Team Name';
+        else if (!schoolName) errorMsg = 'Missing School Name';
+
+        return {
+          rowNum: idx + 1,
+          teamId,
+          name: studentLeader || teamName,
+          teamName,
+          schoolName,
+          grade,
+          categoryName: competitionName,
+          competitionName,
+          projectTitle,
+          status,
+          isValid,
+          errorMsg
+        };
+      });
+
+      setParsedParticipants(normalized);
+    };
+
+    reader.readAsText(file);
+  };
+
+  // Submit Bulk Import for Participants
+  const handleConfirmImport = async () => {
+    const validRows = parsedParticipants.filter((p) => p.isValid);
+    if (validRows.length === 0) {
+      addToast({
+        type: 'error',
+        title: 'No Valid Records',
+        message: 'No valid participant rows detected to import.'
+      });
+      return;
+    }
+
+    setIsImporting(true);
+    const res = await bulkImportParticipants(validRows);
+    setIsImporting(false);
+
+    if (res.success) {
+      setShowImportModal(false);
+      setParsedParticipants([]);
+      setImportFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const hasActiveFilters = searchQuery || selectedSchoolFilter !== 'ALL' || selectedCompFilter !== 'ALL' || selectedStatusFilter !== 'ALL';
@@ -1126,41 +1248,138 @@ export const ParticipantsPage: React.FC = () => {
       {/* MODAL 3: CSV IMPORT MODAL */}
       <Modal
         isOpen={showImportModal}
-        onClose={() => setShowImportModal(false)}
-        title="Bulk Import Participants"
-        subtitle="Upload Excel (.xlsx) or CSV roster file"
+        onClose={() => {
+          if (!isImporting) {
+            setShowImportModal(false);
+            setParsedParticipants([]);
+            setImportFile(null);
+          }
+        }}
+        title="Bulk Import Participants & Teams"
+        subtitle="Upload CSV file with registered teams, grades, and championship tracks"
       >
         <div className="space-y-4 text-xs">
-          <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center bg-slate-50/50 hover:bg-[#E6F7F5]/30 transition-colors">
-            <Upload className="w-8 h-8 text-[#03A695] mx-auto mb-2" />
-            <p className="font-bold text-slate-800">
-              Drag and drop student roster spreadsheet here
-            </p>
-            <p className="text-slate-400 mt-1 text-[11px]">
-              Supports .csv, .xlsx formatted with Team Name, School, Grade, Category, Project
-            </p>
-            <Button variant="primary" size="sm" className="mt-4">
-              Browse Local Files
-            </Button>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
+          {/* Template Download Banner */}
+          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center gap-2">
+              <FileSpreadsheet className="w-5 h-5 text-[#03A695]" />
+              <div>
+                <p className="font-bold text-slate-800">Need the standard CSV format?</p>
+                <p className="text-[11px] text-slate-500">Download the pre-configured spreadsheet template</p>
+              </div>
+            </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowImportModal(false)}
+              icon={<Download className="w-3.5 h-3.5" />}
+              onClick={handleDownloadSampleTemplate}
+            >
+              Template
+            </Button>
+          </div>
+
+          {/* Hidden File Input & Upload Dropzone */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".csv"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="border-2 border-dashed border-slate-300 hover:border-[#03A695] rounded-2xl p-6 text-center bg-slate-50/50 hover:bg-[#E6F7F5]/30 transition-colors cursor-pointer"
+          >
+            <Upload className="w-8 h-8 text-[#03A695] mx-auto mb-2" />
+            <p className="font-bold text-slate-800">
+              {importFile ? importFile.name : 'Click to browse or drop CSV participants file'}
+            </p>
+            <p className="text-slate-400 mt-1 text-[11px]">
+              {importFile
+                ? `${(importFile.size / 1024).toFixed(1)} KB • Click to replace file`
+                : 'Supports .csv with Team ID, Team Name, School Name, Grade, Track, Project'}
+            </p>
+          </div>
+
+          {/* Preview of Parsed Rows */}
+          {parsedParticipants.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-700">
+                  Preview ({parsedParticipants.filter((p) => p.isValid).length} valid of {parsedParticipants.length} rows)
+                </span>
+                <span className="text-[11px] text-slate-500">
+                  Ready to be registered into championship roster
+                </span>
+              </div>
+
+              <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100">
+                {parsedParticipants.map((p, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-2.5 flex items-center justify-between gap-2 text-xs ${
+                      p.isValid ? 'bg-white' : 'bg-red-50/70'
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                        {p.isValid ? (
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        ) : (
+                          <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                        )}
+                        <span className="truncate">{p.teamName}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-mono">
+                          {p.teamId}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                        {p.schoolName} • Grade {p.grade} • {p.competitionName}
+                      </p>
+                    </div>
+
+                    {!p.isValid && (
+                      <span className="text-[10px] font-bold text-red-600 px-2 py-0.5 rounded bg-red-100 shrink-0">
+                        {p.errorMsg}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Footer Actions */}
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isImporting}
+              onClick={() => {
+                setShowImportModal(false);
+                setParsedParticipants([]);
+                setImportFile(null);
+              }}
             >
               Cancel
             </Button>
             <Button
+              type="button"
               variant="orange"
               size="sm"
-              onClick={() => {
-                setShowImportModal(false);
-                alert('Roster import processed.');
-              }}
+              disabled={isImporting || parsedParticipants.filter((p) => p.isValid).length === 0}
+              onClick={handleConfirmImport}
             >
-              Confirm Import
+              {isImporting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                  Importing...
+                </>
+              ) : (
+                `Confirm Import (${parsedParticipants.filter((p) => p.isValid).length})`
+              )}
             </Button>
           </div>
         </div>

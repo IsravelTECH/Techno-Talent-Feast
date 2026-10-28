@@ -40,17 +40,12 @@ export const App: React.FC = () => {
     return <LoginPage />;
   }
 
-  // 2. Standalone Single-Page Judge Portal (Only Admin and Judge: strictly 1 page for Judge)
-  if (currentRole === 'judge') {
-    return <JudgeSinglePageScoring />;
-  }
-
-  // 3. Main Administration Workspace with Sidebar + Header + Page Layout
+  // 2. Main Workspace Layout with Sidebar + Header + Dynamic Page Content
   const renderCurrentPage = () => {
     switch (currentPage) {
       // Administration Pages
       case 'dashboard':
-        return <AdminDashboardPage />;
+        return currentRole === 'judge' ? <JudgeSinglePageScoring /> : <AdminDashboardPage />;
       case 'events':
         return <EventsPage />;
       case 'event-detail':
@@ -94,17 +89,15 @@ export const App: React.FC = () => {
       case 'score-review':
       case 'announcements':
       case 'activity-log':
-        return <AdminDashboardPage />;
+        return currentRole === 'judge' ? <JudgeSinglePageScoring /> : <AdminDashboardPage />;
 
-      // Judge Pages
-      case 'judge-dashboard':
-        return <JudgeDashboardPage />;
-      case 'judge-assignments':
-        return <JudgeAssignmentsPage />;
+      // Judge Navigation Pages
       case 'scoring':
-        return <ScoringPanelPage />;
+      case 'judge-dashboard':
+        return <JudgeSinglePageScoring />;
+      case 'judge-assignments':
       case 'judge-completed':
-        return <JudgeCompletedPage />;
+        return currentRole === 'judge' ? <JudgeSinglePageScoring /> : <JudgeCompletedPage />;
       case 'leaderboard':
         return <LiveLeaderboardPage />;
       case 'notifications':
@@ -113,7 +106,7 @@ export const App: React.FC = () => {
         return <ProfilePage />;
 
       default:
-        return <AdminDashboardPage />;
+        return currentRole === 'judge' ? <JudgeSinglePageScoring /> : <AdminDashboardPage />;
     }
   };
 

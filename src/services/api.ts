@@ -146,6 +146,13 @@ class ApiService {
     });
   }
 
+  async bulkCreateTeams(teams: any[]) {
+    return this.request<{ success: boolean; count: number; teams: any[]; errors?: any[] }>('/teams/bulk', {
+      method: 'POST',
+      body: JSON.stringify({ teams })
+    });
+  }
+
   // Judges (Admin feature)
   async getJudges() {
     return this.request<{ success: boolean; count: number; judges: any[] }>('/judges');
@@ -155,6 +162,13 @@ class ApiService {
     return this.request<{ success: boolean; message: string; judge: any }>('/judges', {
       method: 'POST',
       body: JSON.stringify(payload)
+    });
+  }
+
+  async bulkCreateJudges(judges: any[]) {
+    return this.request<{ success: boolean; count: number; judges: any[]; errors?: any[] }>('/judges/bulk', {
+      method: 'POST',
+      body: JSON.stringify({ judges })
     });
   }
 

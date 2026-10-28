@@ -96,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
 
           {/* Techno Talent Fest 2026 Branding */}
           <div
-            onClick={() => navigate(currentRole === 'judge' ? 'judge-dashboard' : 'dashboard')}
+            onClick={() => navigate(currentRole === 'judge' ? 'scoring' : 'dashboard')}
             className="cursor-pointer flex items-center gap-2 select-none min-w-0"
           >
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#03A695] to-[#0B2545] flex items-center justify-center text-white font-extrabold text-xs shadow-md shadow-teal-500/15 shrink-0">

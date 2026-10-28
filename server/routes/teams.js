@@ -109,6 +109,64 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// POST /api/teams/bulk - bulk import teams/participants
+router.post('/bulk', async (req, res) => {
+  try {
+    const { teams } = req.body;
+    if (!Array.isArray(teams) || teams.length === 0) {
+      return res.status(400).json({ error: 'Array of teams is required.' });
+    }
+
+    const createdTeams = [];
+    const errors = [];
+
+    for (let i = 0; i < teams.length; i++) {
+      const data = teams[i];
+      const teamIdentifier = (data.teamId || data.id || data.participantId || '').trim().toUpperCase();
+      const teamName = (data.name || data.teamName || '').trim();
+      const schoolName = (data.schoolName || '').trim();
+
+      if (!teamIdentifier || !teamName || !schoolName) {
+        errors.push({ row: i + 1, error: 'teamId, name, and schoolName are required.' });
+        continue;
+      }
+
+      const existing = await Team.findOne({ teamId: teamIdentifier });
+      if (existing) {
+        errors.push({ row: i + 1, teamId: teamIdentifier, error: `Team ID "${teamIdentifier}" already exists.` });
+        continue;
+      }
+
+      const newTeam = new Team({
+        ...data,
+        id: data.id || teamIdentifier,
+        name: teamName,
+        teamName: data.teamName || teamName,
+        teamId: teamIdentifier,
+        schoolName,
+        categoryName: data.categoryName || data.competitionName || 'Innovation Challenge',
+        categoryNumber: data.categoryNumber || 1,
+        projectTitle: data.projectTitle || data.project?.title || 'Assigned Championship Project',
+        status: ['PENDING', 'IN_PROGRESS', 'SUBMITTED', 'EVALUATED'].includes(data.status) ? data.status : 'PENDING'
+      });
+
+      await newTeam.save();
+      createdTeams.push(newTeam);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Successfully imported ${createdTeams.length} participants/teams.`,
+      count: createdTeams.length,
+      teams: createdTeams,
+      errors
+    });
+  } catch (error) {
+    console.error('Error bulk importing teams:', error);
+    res.status(500).json({ error: 'Server error while bulk importing teams.' });
+  }
+});
+
 // POST /api/teams - register new team
 router.post('/', async (req, res) => {
   try {

@@ -49,6 +49,71 @@ router.get('/', async (req, res) => {
   }
 });
 
+// POST /api/judges/bulk - bulk import judges
+router.post('/bulk', async (req, res) => {
+  try {
+    const { judges } = req.body;
+    if (!Array.isArray(judges) || judges.length === 0) {
+      return res.status(400).json({ error: 'Array of judges is required.' });
+    }
+
+    const createdJudges = [];
+    const errors = [];
+
+    // Current judge count to generate sequential IDs
+    let currentCount = await User.countDocuments({ role: 'judge' });
+
+    for (let i = 0; i < judges.length; i++) {
+      const j = judges[i];
+      const name = (j.name || j.judgeName || '').trim();
+      const email = (j.email || '').trim().toLowerCase();
+
+      if (!name || !email) {
+        errors.push({ row: i + 1, error: 'Name and email are required.' });
+        continue;
+      }
+
+      const existing = await User.findOne({ email });
+      if (existing) {
+        errors.push({ row: i + 1, email, error: `Email "${email}" already registered.` });
+        continue;
+      }
+
+      currentCount++;
+      const judgeId = j.judgeId && j.judgeId.trim() ? j.judgeId.trim().toUpperCase() : `JDG-${String(currentCount).padStart(2, '0')}`;
+      const id = `jdg-${Date.now()}-${i}`;
+      const generatedPass = generateJudgePassword(judgeId, name);
+      const finalPassword = j.password && j.password.trim() !== '123456' ? j.password.trim() : generatedPass;
+
+      const newJudge = new User({
+        id,
+        judgeId,
+        name,
+        email,
+        password: finalPassword,
+        role: 'judge',
+        status: j.status || 'ACTIVE',
+        organization: j.organization || j.institution || '',
+        specialization: j.specialization || ''
+      });
+
+      await newJudge.save();
+      createdJudges.push(newJudge);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Successfully imported ${createdJudges.length} judges.`,
+      count: createdJudges.length,
+      judges: createdJudges,
+      errors
+    });
+  } catch (error) {
+    console.error('Error bulk importing judges:', error);
+    res.status(500).json({ error: 'Server error while bulk importing judges.' });
+  }
+});
+
 // POST /api/judges - create new judge (Admin capability)
 router.post('/', async (req, res) => {
   try {

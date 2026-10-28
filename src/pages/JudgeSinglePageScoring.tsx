@@ -387,66 +387,22 @@ export const JudgeSinglePageScoring: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7FCFB] flex flex-col font-sans text-[#0B2545] antialiased selection:bg-[#03A695] selection:text-white">
-      {/* A. Compact Header */}
-      <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-40 shadow-xs">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3">
-          {/* Logo & Event Identity */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#03A695] to-[#0B2545] flex items-center justify-center text-white font-extrabold text-xs sm:text-sm shadow-xs shrink-0 select-none">
-              <span className="text-[#FD5E01]">T</span>T
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-xs sm:text-sm font-extrabold text-[#0B2545] tracking-tight truncate leading-tight">
-                Techno Talent Fest 2026
-              </h1>
-              <p className="text-[10px] sm:text-[11px] font-semibold text-[#5B6B7C] tracking-normal leading-none mt-0.5">
-                Judge Scoring Portal
-              </p>
-            </div>
-          </div>
-
-          {/* Authenticated Judge Info & Navigation Controls */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Judge Identity Badge */}
-            <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-[#E6F7F5] border border-teal-200 text-xs">
-              <UserAvatar name={currentUser?.name || 'Official Juror'} size="xs" />
-              <span className="font-bold text-[#0B2545] max-w-[100px] sm:max-w-none truncate text-[11px] sm:text-xs">
-                {currentUser?.name || 'Official Juror'}
-              </span>
-              <span className="hidden sm:inline-block text-[10px] font-semibold text-[#03A695] uppercase">
-                • Juror
-              </span>
-            </div>
-
-            {/* Logout Action */}
-            <button
-              onClick={logout}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-              title="Log Out"
-              aria-label="Log Out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Single Page Content */}
-      <main className="flex-1 py-6 sm:py-8 px-4 sm:px-6 max-w-3xl w-full mx-auto space-y-6">
-        {/* B. Page Introduction */}
-        <div className="text-center space-y-1 sm:space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#E6F7F5] border border-teal-200 text-[#03A695] text-[11px] font-bold uppercase tracking-wider">
+    <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+      {/* Page Header Banner */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/80 shadow-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#E6F7F5] border border-teal-200 text-[#03A695] text-[11px] font-bold uppercase tracking-wider mb-2">
             <Award className="w-3.5 h-3.5" />
-            Grand Finale Evaluation
+            Grand Finale Evaluation Desk
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B2545] tracking-tight">
-            Team Evaluation
-          </h2>
-          <p className="text-xs sm:text-sm text-[#5B6B7C] max-w-md mx-auto">
-            Enter a team ID, evaluate the project, and submit the score.
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#0B2545] tracking-tight">
+            Team Scoring & Evaluation
+          </h1>
+          <p className="text-xs sm:text-sm text-[#5B6B7C] mt-1">
+            Look up a finalist team ID, evaluate multi-criteria rubrics, and record final scores directly into Atlas.
           </p>
         </div>
+      </div>
 
         {/* Tie Alert Quick Notification for Juror */}
         {tieAlertTeams.length > 0 && (
@@ -1055,7 +1011,6 @@ export const JudgeSinglePageScoring: React.FC = () => {
             </div>
           </form>
         )}
-      </main>
 
       {/* Edit Request Modal Dialog */}
       {isRequestModalOpen && activeTeam && (
@@ -1150,11 +1105,6 @@ export const JudgeSinglePageScoring: React.FC = () => {
           </form>
         </Modal>
       )}
-
-      {/* Clean Minimal Footer */}
-      <footer className="py-4 text-center text-[11px] text-[#64748B] border-t border-[#E2E8F0] bg-white">
-        TECHNO TALENT FEST 2026 • Official Juror Scoring System
-      </footer>
     </div>
   );
 };

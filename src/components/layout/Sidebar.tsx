@@ -112,12 +112,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { id: 'profile', label: 'My Profile', icon: User }
   ];
 
-  // SIMPLIFIED JUDGE ROLE NAVIGATION (Team Scoring Desk Focus)
+  // DEDICATED JUDGE NAVIGATION MENU (Score page & Profile page that's it)
   const judgeNavItems: NavItem[] = [
-    { id: 'judge-dashboard', label: 'Judge Dashboard', icon: LayoutDashboard },
-    { id: 'scoring', label: 'Team Scoring Desk', icon: FileCheck2, highlight: true, live: true },
-    { id: 'judge-completed', label: 'Submission Status', icon: Award },
-    { id: 'profile', label: 'Juror Profile', icon: User }
+    { id: 'scoring', label: 'Score Page', icon: FileCheck2, highlight: true },
+    { id: 'profile', label: 'Profile Page', icon: User }
   ];
 
   const navItems: NavItem[] = currentRole === 'judge' ? judgeNavItems : adminNavItems;
@@ -145,7 +143,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <div
               onClick={() => {
-                navigate(currentRole === 'judge' ? 'judge-dashboard' : 'dashboard');
+                navigate(currentRole === 'judge' ? 'scoring' : 'dashboard');
                 if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                   onClose();
                 }
