@@ -159,7 +159,7 @@ export const SchoolsPage: React.FC = () => {
       return {
         ...school,
         teams: schoolTeams,
-        totalStudents: totalStudents > 0 ? totalStudents : (school.totalParticipants || 12),
+        totalStudents,
         totalTeams,
         participatingGrades,
         gradeDistribution,

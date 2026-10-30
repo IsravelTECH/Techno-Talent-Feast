@@ -97,7 +97,7 @@ export const App: React.FC = () => {
       case 'score-review':
       case 'announcements':
       case 'activity-log':
-        return currentRole === 'judge' ? <JudgeSinglePageScoring /> : <AdminDashboardPage />;
+        return <AdminDashboardPage />;
 
       // Judge Navigation Pages
       case 'scoring':
@@ -105,7 +105,7 @@ export const App: React.FC = () => {
         return <JudgeSinglePageScoring />;
       case 'judge-assignments':
       case 'judge-completed':
-        return currentRole === 'judge' ? <JudgeSinglePageScoring /> : <JudgeCompletedPage />;
+        return <JudgeCompletedPage />;
       case 'leaderboard':
         return <LiveLeaderboardPage />;
       case 'notifications':
@@ -114,7 +114,7 @@ export const App: React.FC = () => {
         return <ProfilePage />;
 
       default:
-        return currentRole === 'judge' ? <JudgeSinglePageScoring /> : <AdminDashboardPage />;
+        return <AdminDashboardPage />;
     }
   };
 

@@ -253,7 +253,7 @@ export const AdminDashboardPage: React.FC = () => {
       return {
         ...school,
         totalParticipants: schoolTeams.length || school.totalParticipants,
-        totalStudentsCount: schoolTeams.reduce((acc, t) => acc + (t.teamSize || 2), 0) || 12,
+        totalStudentsCount: schoolTeams.reduce((acc, t) => acc + (t.teamSize || 2), 0),
         averageScore: dynamicAvg,
         goldMedals: goldMedals || school.goldMedals || 0,
         silverMedals: silverMedals || school.silverMedals || 0,

@@ -299,29 +299,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('ttf_2026_participants');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0 && parsed.every((p) => p && typeof p === 'object')) {
+        if (Array.isArray(parsed) && parsed.every((p) => p && typeof p === 'object')) {
           return parsed;
         }
       }
     } catch (e) {}
-    return INITIAL_PARTICIPANTS;
+    return [];
   });
-  const [schools, setSchools] = useState<School[]>(MOCK_SCHOOLS);
+  const [schools, setSchools] = useState<School[]>(() => {
+    try {
+      const saved = localStorage.getItem('ttf_2026_schools');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.every((s) => s && typeof s === 'object')) {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return [];
+  });
   const [competitions, setCompetitions] = useState<Competition[]>(MOCK_COMPETITIONS);
   const [rubrics, setRubrics] = useState<Record<string, Rubric>>(MOCK_RUBRICS);
   const [judges, setJudges] = useState<Judge[]>([]);
-  const [assignments, setAssignments] = useState<JudgeAssignment[]>(MOCK_ASSIGNMENTS);
+  const [assignments, setAssignments] = useState<JudgeAssignment[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>(() => {
     try {
       const saved = localStorage.getItem('ttf_2026_leaderboard');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           return parsed;
         }
       }
     } catch (e) {}
-    return INITIAL_LEADERBOARD;
+    return [];
   });
   const [scoringActivities, setScoringActivities] = useState<ScoringActivity[]>(() => {
     try {
@@ -333,19 +344,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {}
-    return INITIAL_SCORING_ACTIVITIES;
+    return [];
   });
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
     try {
       const saved = localStorage.getItem('ttf_2026_notifications');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0 && parsed.every((n) => n && typeof n === 'object')) {
+        if (Array.isArray(parsed) && parsed.every((n) => n && typeof n === 'object')) {
           return deduplicateNotifications(parsed);
         }
       }
     } catch (e) {}
-    return INITIAL_NOTIFICATIONS;
+    return [];
   });
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(INITIAL_ANNOUNCEMENTS);
   const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>(MOCK_AUDIT_LOGS);
@@ -398,11 +409,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         api.getNotifications()
       ]);
 
-      if (teamsRes.status === 'fulfilled' && teamsRes.value.teams?.length > 0) {
-        setParticipants(teamsRes.value.teams);
+      if (teamsRes.status === 'fulfilled') {
+        const fetchedTeams = teamsRes.value.teams || [];
+        setParticipants(fetchedTeams);
+        try {
+          localStorage.setItem('ttf_2026_participants', JSON.stringify(fetchedTeams));
+        } catch (e) {}
       }
-      if (schoolsRes.status === 'fulfilled' && schoolsRes.value.schools?.length > 0) {
-        setSchools(schoolsRes.value.schools);
+      if (schoolsRes.status === 'fulfilled') {
+        const fetchedSchools = schoolsRes.value.schools || [];
+        setSchools(fetchedSchools);
+        try {
+          localStorage.setItem('ttf_2026_schools', JSON.stringify(fetchedSchools));
+        } catch (e) {}
       }
       if (catRes.status === 'fulfilled' && catRes.value.categories?.length > 0) {
         setCompetitions(catRes.value.categories);
@@ -412,23 +431,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (statsRes.status === 'fulfilled' && statsRes.value?.stats) {
         setDashboardStats(statsRes.value.stats);
-        if (statsRes.value.recentActivities?.length > 0) {
-          setScoringActivities(statsRes.value.recentActivities);
-        }
+        setScoringActivities(statsRes.value.recentActivities || []);
+        try {
+          localStorage.setItem('ttf_2026_activities', JSON.stringify(statsRes.value.recentActivities || []));
+        } catch (e) {}
       }
-      if (notifsRes.status === 'fulfilled' && Array.isArray(notifsRes.value.notifications) && notifsRes.value.notifications.length > 0) {
-        setNotifications((prev) => {
-          const readMap = new Map(prev.map((n) => [n.id, n.isRead]));
-          const remoteList = notifsRes.value.notifications.map((n: any) => ({
-            ...n,
-            isRead: readMap.has(n.id) ? (readMap.get(n.id) ?? n.isRead) : n.isRead
-          }));
-          const merged = deduplicateNotifications([...remoteList, ...prev]);
-          try {
-            localStorage.setItem('ttf_2026_notifications', JSON.stringify(merged));
-          } catch (e) {}
-          return merged;
-        });
+      if (notifsRes.status === 'fulfilled') {
+        const remoteList = Array.isArray(notifsRes.value.notifications)
+          ? notifsRes.value.notifications.map((n: any) => ({
+              ...n,
+              isRead: Boolean(n.isRead)
+            }))
+          : [];
+        setNotifications(remoteList);
+        try {
+          localStorage.setItem('ttf_2026_notifications', JSON.stringify(remoteList));
+        } catch (e) {}
       }
     } catch (e) {
       console.warn('Backend data sync notice:', e);

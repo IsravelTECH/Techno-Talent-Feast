@@ -74,14 +74,7 @@ async function cleanupDuplicateNotifications() {
 // GET /api/notifications - Fetch all notifications sorted by newest first
 router.get('/', async (req, res) => {
   try {
-    let count = await Notification.countDocuments();
-    if (count === 0) {
-      await Notification.insertMany(SEED_NOTIFICATIONS);
-    } else {
-      await Notification.updateOne({ id: 'notif-01' }, { $set: { recipientRole: 'admin', actionLink: 'results' } });
-      await Notification.updateOne({ id: 'notif-02' }, { $set: { recipientRole: 'admin', actionLink: 'participants' } });
-      await cleanupDuplicateNotifications();
-    }
+    await cleanupDuplicateNotifications();
 
     const notifications = await Notification.find().sort({ createdAt: -1 });
     res.json({

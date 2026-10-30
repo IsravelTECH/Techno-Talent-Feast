@@ -147,7 +147,7 @@ class ApiService {
   }
 
   async bulkCreateTeams(teams: any[]) {
-    return this.request<{ success: boolean; count: number; teams: any[]; errors?: any[] }>('/teams/bulk', {
+    return this.request<{ success: boolean; count: number; teams: any[]; errors?: any[]; message?: string }>('/teams/bulk', {
       method: 'POST',
       body: JSON.stringify({ teams })
     });
@@ -166,7 +166,7 @@ class ApiService {
   }
 
   async bulkCreateJudges(judges: any[]) {
-    return this.request<{ success: boolean; count: number; judges: any[]; errors?: any[] }>('/judges/bulk', {
+    return this.request<{ success: boolean; count: number; judges: any[]; errors?: any[]; message?: string }>('/judges/bulk', {
       method: 'POST',
       body: JSON.stringify({ judges })
     });
